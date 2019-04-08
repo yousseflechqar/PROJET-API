@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Appenders>
+		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<!-- <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" /> -->
+			<PatternLayout pattern="%msg%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+	
+ 	   	<Root level="all">
+      		<AppenderRef ref="CONSOLE"/>
+    	</Root>
+
+
+
+		
+		<logger name="org.springframework"  level="OFF" >
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		
+		<logger name="org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver"  level="ALL"   additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		
+		<logger name="org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver"  level="ALL"   additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		
+
+		<logger name="org.hibernate"  level="OFF"   additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		
+
+		<logger name="org.hibernate.SQL"  level="OFF"  additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		<logger name="org.hibernate.type"  level="OFF"  additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+
+		<logger name="org.hibernate.type.descriptor.sql.BasicBinder"  level="OFF"  additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		
+
+		
+		<logger name="com.mysema.query.jpa.impl.JPAQuery"  level="OFF"   additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		
+		<logger name="org.springframework.beans.factory.support.DefaultListableBeanFactory"  level="OFF"   additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		
+
+
+
+	</Loggers>
+</Configuration>
