@@ -4,6 +4,8 @@ package entities;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -36,7 +38,7 @@ public class User implements java.io.Serializable {
 	private String nom;
 	private String prenom;
 	private String telephone;
-	private Byte actif;
+	private boolean active;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "last_connexion")
@@ -50,6 +52,9 @@ public class User implements java.io.Serializable {
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
 	private Set<ProjetUser> projetUsers = new HashSet<ProjetUser>(0);
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval=true)
+	private Set<UserRole> userRoles = new HashSet<UserRole>(0);
 
 	
 	
@@ -58,10 +63,6 @@ public class User implements java.io.Serializable {
 	public User(Integer id) {
 		this.id = id;
 	}
-
-
-
-
 
 
 	public Integer getId() {
@@ -136,15 +137,14 @@ public class User implements java.io.Serializable {
 	}
 
 
-	public Byte getActif() {
-		return this.actif;
+
+
+	public boolean isActive() {
+		return active;
 	}
-
-	public void setActif(Byte actif) {
-		this.actif = actif;
+	public void setActive(boolean active) {
+		this.active = active;
 	}
-
-
 	public Date getLastConnexion() {
 		return this.lastConnexion;
 	}
@@ -168,6 +168,12 @@ public class User implements java.io.Serializable {
 
 	public void setProjetUsers(Set<ProjetUser> projetUsers) {
 		this.projetUsers = projetUsers;
+	}
+	public Set<UserRole> getUserRoles() {
+		return userRoles;
+	}
+	public void setUserRoles(Set<UserRole> userRoles) {
+		this.userRoles = userRoles;
 	}
 
 }

@@ -35,12 +35,13 @@ import entities.Secteur;
 @Service
 public class ProjetService {
 	
+	@PersistenceContext
+	private EntityManager entityManager;
 	@Autowired
 	private ProjetDao projetDao;
 	@Autowired
 	private GenericDao<Projet, Integer> genericProjetDao;
-	@PersistenceContext
-	private EntityManager entityManager;
+
 	
 	
 	@Transactional(rollbackOn = Exception.class)
