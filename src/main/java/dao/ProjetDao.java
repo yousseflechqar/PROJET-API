@@ -55,7 +55,7 @@ public class ProjetDao {
 	
 	@SuppressWarnings("unchecked")
 	public List<SimpleDto> getSecteurs(){
-		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Secteur c ")
+		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Secteur c")
 				.getResultList() ;
 	}
 	@SuppressWarnings("unchecked")

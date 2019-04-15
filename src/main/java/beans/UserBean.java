@@ -5,7 +5,7 @@ import java.util.List;
 
 public class UserBean {
 	
-	public Integer idUser;
+	public Integer id;
 	public String login;
 	public String password;
 	public String nom;
@@ -16,15 +16,15 @@ public class UserBean {
 	public UserBean() {}
 	
 	// for the dto user list
-	public UserBean(Integer idUser, String nom, String prenom) {
-		this.idUser = idUser;
+	public UserBean(Integer id, String nom, String prenom) {
+		this.id = id;
 		this.nom = nom;
 		this.prenom = prenom;
 	}
 	
 	// for save user
-	public UserBean(Integer idUser, String login, String password, String nom, String prenom, boolean active) {
-		this.idUser = idUser;
+	public UserBean(Integer id, String login, String password, String nom, String prenom, boolean active) {
+		this.id = id;
 		this.login = login;
 		this.password = password;
 		this.nom = nom;

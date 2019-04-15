@@ -35,7 +35,7 @@ public class UserService {
 	@Transactional(rollbackOn = Exception.class)
 	public Integer saveUser(UserBean bean) {
 
-		User user = bean.idUser != null ? gUserDao.read(bean.idUser, User.class) : new User();
+		User user = bean.id != null ? userDao.getUserForEdit(bean.id) : new User();
 		
 		user.setLogin(bean.login);
 		user.setPassword(bean.password);
@@ -44,16 +44,17 @@ public class UserService {
 		user.setActive(bean.active);
 		user.setDateCreation(new Date());
 		
+		if(bean.id == null) {
+			gUserDao.create(user);
+		} else {
+			user.getUserRoles().clear();
+		}
 		
-		user.getUserRoles().clear();
+		entityManager.flush();
+		
 		bean.roles.forEach( role -> {
 			user.getUserRoles().add(new UserRole(user, new Role(role)));
 		});
-		
-		
-		if(bean.idUser == null) {
-			gUserDao.create(user);
-		} 
 		
 		return user.getId();
 	}

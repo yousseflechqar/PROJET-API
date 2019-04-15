@@ -25,6 +25,8 @@ public class UserRole {
 	@JoinColumn(name = "role")
 	private Role role;
 
+	public UserRole() {}
+	
 	public UserRole(User user, Role role) {
 		super();
 		this.user = user;
