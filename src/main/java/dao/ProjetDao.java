@@ -31,8 +31,10 @@ public class ProjetDao {
 		try {
 			return (Projet) entityManager.createQuery(""
 					+ "SELECT p FROM Projet p "
-						+ "LEFT JOIN FETCH p.maitreOuvrage "
-						+ "LEFT JOIN FETCH p.maitreOuvrageDelegue "
+						+ "LEFT JOIN FETCH p.projetMaitreOuvrage pmo "
+							+ "LEFT JOIN FETCH pmo.maitreOuvrage "
+						+ "LEFT JOIN FETCH p.projetMaitreOuvrageDelegue pmo_"
+							+ "LEFT JOIN FETCH pmo_.maitreOuvrage "
 						+ "LEFT JOIN FETCH p.localisations loc "
 						+ "LEFT JOIN FETCH p.projetPartenaires pp "
 							+ "LEFT JOIN FETCH pp.partenaire "
@@ -60,18 +62,12 @@ public class ProjetDao {
 	}
 	@SuppressWarnings("unchecked")
 	public List<SimpleDto> getAcheteursByName(String q){
-		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM MaitreOuvrage c WHERE c.nom LIKE :q")
+		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Acheteur c WHERE c.nom LIKE :q")
 				.setParameter("q", "%" + q + "%")
 				.getResultList() ;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public List<SimpleDto> getPartnersByName(String q) {
-		return entityManager.createQuery("SELECT new dto.SimpleDto(id, nom) FROM Partenaire WHERE nom LIKE :q")
-				.setParameter("q", "%" + q + "%")
-				.getResultList() ;
-	}
-	
+
 	
 	@SuppressWarnings("unchecked")
 	public List<LocalisationBean> getCommunesWithFractions(){
@@ -84,6 +80,16 @@ public class ProjetDao {
 				
 				.getResultList() ;
 		
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<SimpleDto> getFinancements(Integer acheteur) {
+		return entityManager.createQuery("SELECT new dto.SimpleDto(sf.id, sf.label) "
+					+ "FROM AcheteurSrcFinancement ach_sf "
+						+ "JOIN ach_sf.srcFinancement sf "
+						+ "WHERE ach_sf.acheteur.id = :maitreOuvrage")
+				.setParameter("maitreOuvrage", acheteur)
+				.getResultList() ;
 	}
 
 }

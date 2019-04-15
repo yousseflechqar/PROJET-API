@@ -87,14 +87,15 @@ public class ProjetRest {
 		return projetDao.getAcheteursByName(request.getParameter("q"));
 	}
 	
-	@GetMapping(value = "/partners")
-	public List<SimpleDto> getPartnersByName(HttpServletRequest request) {
-		return projetDao.getPartnersByName(request.getParameter("q"));
-	}
 	
 	@GetMapping(value = "/localisations")
 	public Collection<TreeDto> getCommunesWithFractions() {
 		return projetService.getCommunesWithFractions();
+	}
+	
+	@GetMapping(value = "/financements/{maitreOuvrage}")
+	public List<SimpleDto> getFinancements(@PathVariable Integer maitreOuvrage) {
+		return projetDao.getFinancements(maitreOuvrage);
 	}
 }
 

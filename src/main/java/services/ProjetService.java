@@ -23,14 +23,15 @@ import dto.PartnerDto;
 import dto.ProjetEditDto;
 import dto.SimpleDto;
 import dto.TreeDto;
+import entities.Acheteur;
 import entities.Commune;
 import entities.Fraction;
 import entities.Localisation;
-import entities.MaitreOuvrage;
-import entities.Partenaire;
 import entities.Projet;
+import entities.ProjetMaitreOuvrage;
 import entities.ProjetPartenaire;
 import entities.Secteur;
+import entities.SrcFinancement;
 
 @Service
 public class ProjetService {
@@ -51,10 +52,9 @@ public class ProjetService {
 		
 		projet.setIntitule(bean.intitule);
 		projet.setMontant(bean.montant);
-
+		projet.setConvention(bean.isConvention);
 		
 		///////// Localisations
-		
 		projet.getLocalisations().clear();
 		bean.localisations.forEach( loc -> {
 			
@@ -70,48 +70,34 @@ public class ProjetService {
 		
 		
 		///////// Partenaires
-		
-//		entityManager.detach(projet.getProjetPartenaires());
 		projet.getProjetPartenaires().clear();
 		if(bean.isConvention) {
 			bean.partners.forEach( p -> {
 				String[] t = p.split("\\:");
-				
-//				if(  projet.getProjetPartenaires().stream().anyMatch(pp -> pp.getPartenaire().getId().equals(Integer.parseInt(t[0]))) )
+
 				projet.getProjetPartenaires().add(
 						new ProjetPartenaire(
-								projet, 
-								new Partenaire(Integer.parseInt(t[0])), 
-								Double.parseDouble(t[1])
+									projet, 
+									new Acheteur(Integer.parseInt(t[0])), 
+									Double.parseDouble(t[1]),
+									t[2] != null ? new SrcFinancement(Integer.parseInt(t[2])) : null
 								)
 						);
 			});
 		}
 		
-		
 		///////// Maitre ouvrage
-		
-		projet.setMaitreOuvrage(new MaitreOuvrage(bean.maitreOuvrage));
-		projet.setMaitreOuvrageDelegue(bean.isMaitreOuvrageDel ? new MaitreOuvrage(bean.maitreOuvrageDel) : null);
-
-		
-		
+		projet.setProjetMaitreOuvrage(new ProjetMaitreOuvrage(new Acheteur(bean.maitreOuvrage), projet, false));
+		projet.setProjetMaitreOuvrageDelegue(bean.isMaitreOuvrageDel ? new ProjetMaitreOuvrage(new Acheteur(bean.maitreOuvrageDel), projet, true) : null);
 		///
-		
 		projet.setSecteur(new Secteur(bean.secteur));
-		
 		projet.setDateSaisie(new Date());
 		
 		if(bean.idProjet == null) {
 			genericProjetDao.create(projet);
-		} else {
-//			genericProjetDao.update(projet);
 		}
-		
-		
-		
+
 		return projet.getId();
-		
 	}
 	
 	
@@ -121,10 +107,10 @@ public class ProjetService {
 		
 		ProjetEditDto dto = new ProjetEditDto(
 			projet.getIntitule(), projet.getMontant(), projet.getProjetPartenaires().size() > 0 ? true:false, 
-			new SimpleDto(projet.getMaitreOuvrage().getId(), projet.getMaitreOuvrage().getNom()) , 
-			projet.getMaitreOuvrageDelegue() != null ? true:false,
-			projet.getMaitreOuvrageDelegue() != null ? 
-					new SimpleDto(projet.getMaitreOuvrageDelegue().getId(), projet.getMaitreOuvrageDelegue().getNom()) : null,
+			new SimpleDto(projet.getProjetMaitreOuvrage().getMaitreOuvrage().getId(), projet.getProjetMaitreOuvrage().getMaitreOuvrage().getNom()) , 
+			projet.getProjetMaitreOuvrageDelegue() != null ? true:false,
+			projet.getProjetMaitreOuvrageDelegue() != null ? 
+					new SimpleDto(projet.getProjetMaitreOuvrageDelegue().getMaitreOuvrage().getId(), projet.getProjetMaitreOuvrageDelegue().getMaitreOuvrage().getNom()) : null,
 			projet.getSecteur().getId()		
 		);
 		

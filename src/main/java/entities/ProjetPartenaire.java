@@ -23,7 +23,11 @@ public class ProjetPartenaire implements java.io.Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "partenaire")
-	private Partenaire partenaire;
+	private Acheteur partenaire;
+	
+	@ManyToOne
+	@JoinColumn(name = "src_financement")
+	private SrcFinancement srcFinancement;
 	
 	private double financement;
 	
@@ -31,17 +35,23 @@ public class ProjetPartenaire implements java.io.Serializable {
 	
 	public ProjetPartenaire() {}
 
-	public ProjetPartenaire(Projet projet, Partenaire partenaire, double financement) {
+	public ProjetPartenaire(Projet projet, Acheteur partenaire, double financement) {
 		this.projet = projet;
 		this.partenaire = partenaire;
 		this.financement = financement;
 	}
+	public ProjetPartenaire(Projet projet, Acheteur partenaire, double financement, SrcFinancement srcFinancement) {
+		this.projet = projet;
+		this.partenaire = partenaire;
+		this.financement = financement;
+		this.srcFinancement = srcFinancement;
+	}
 
-	public Partenaire getPartenaire() {
+	public Acheteur getPartenaire() {
 		return partenaire;
 	}
 
-	public void setPartenaire(Partenaire partenaire) {
+	public void setPartenaire(Acheteur partenaire) {
 		this.partenaire = partenaire;
 	}
 
@@ -51,6 +61,30 @@ public class ProjetPartenaire implements java.io.Serializable {
 
 	public void setFinancement(double financement) {
 		this.financement = financement;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public Projet getProjet() {
+		return projet;
+	}
+
+	public void setProjet(Projet projet) {
+		this.projet = projet;
+	}
+
+	public SrcFinancement getSrcFinancement() {
+		return srcFinancement;
+	}
+
+	public void setSrcFinancement(SrcFinancement srcFinancement) {
+		this.srcFinancement = srcFinancement;
 	}
 	
 	

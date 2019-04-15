@@ -34,24 +34,24 @@ public class Projet implements java.io.Serializable {
 	
 	private String intitule;
 	private Double montant;
+	private boolean convention;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "secteur")
 	private Secteur secteur;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "maitre_ouvrage")
-	private MaitreOuvrage maitreOuvrage;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "maitre_ouvrage_delegue")
-	private MaitreOuvrage maitreOuvrageDelegue;
+
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "date_saisie")
 	private Date dateSaisie;
 	
 	// MAPPED BY
+	@OneToOne(fetch = FetchType.LAZY, mappedBy = "projet")
+	private ProjetMaitreOuvrage projetMaitreOuvrage;
+	@OneToOne(fetch = FetchType.LAZY, mappedBy = "projet")
+	private ProjetMaitreOuvrage projetMaitreOuvrageDelegue;
+	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
 	private Set<Localisation> localisations = new HashSet<Localisation>(0);
 	
@@ -66,7 +66,6 @@ public class Projet implements java.io.Serializable {
 	public Projet(Integer id) {
 		this.id = id;
 	}
-	
 
 	public Integer getId() {
 		return id;
@@ -100,22 +99,6 @@ public class Projet implements java.io.Serializable {
 		this.secteur = secteur;
 	}
 
-	public MaitreOuvrage getMaitreOuvrage() {
-		return maitreOuvrage;
-	}
-
-	public void setMaitreOuvrage(MaitreOuvrage maitreOuvrage) {
-		this.maitreOuvrage = maitreOuvrage;
-	}
-
-	public MaitreOuvrage getMaitreOuvrageDelegue() {
-		return maitreOuvrageDelegue;
-	}
-
-	public void setMaitreOuvrageDelegue(MaitreOuvrage maitreOuvrageDelegue) {
-		this.maitreOuvrageDelegue = maitreOuvrageDelegue;
-	}
-
 	public Date getDateSaisie() {
 		return dateSaisie;
 	}
@@ -123,6 +106,7 @@ public class Projet implements java.io.Serializable {
 	public void setDateSaisie(Date dateSaisie) {
 		this.dateSaisie = dateSaisie;
 	}
+
 
 	public Set<Localisation> getLocalisations() {
 		return localisations;
@@ -147,6 +131,31 @@ public class Projet implements java.io.Serializable {
 	public void setProjetUsers(Set<ProjetUser> projetUsers) {
 		this.projetUsers = projetUsers;
 	}
+
+	public ProjetMaitreOuvrage getProjetMaitreOuvrage() {
+		return projetMaitreOuvrage;
+	}
+
+	public void setProjetMaitreOuvrage(ProjetMaitreOuvrage projetMaitreOuvrage) {
+		this.projetMaitreOuvrage = projetMaitreOuvrage;
+	}
+
+	public ProjetMaitreOuvrage getProjetMaitreOuvrageDelegue() {
+		return projetMaitreOuvrageDelegue;
+	}
+
+	public void setProjetMaitreOuvrageDelegue(ProjetMaitreOuvrage projetMaitreOuvrageDelegue) {
+		this.projetMaitreOuvrageDelegue = projetMaitreOuvrageDelegue;
+	}
+
+	public boolean isConvention() {
+		return convention;
+	}
+
+	public void setConvention(boolean convention) {
+		this.convention = convention;
+	}
+
 
 
 
