@@ -20,15 +20,15 @@ public class ProjetMaitreOuvrage implements java.io.Serializable {
 	@GeneratedValue(strategy = IDENTITY)
 	private Integer id;
 	
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "maitre_ouvrage")
 	private Acheteur maitreOuvrage;
 	
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "projet")
 	private Projet projet;
 	
-	@OneToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "src_financement")
 	private SrcFinancement srcFinancement;
 	

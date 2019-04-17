@@ -47,10 +47,14 @@ public class Projet implements java.io.Serializable {
 	private Date dateSaisie;
 	
 	// MAPPED BY
-	@OneToOne(fetch = FetchType.LAZY, mappedBy = "projet")
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "projet_maitre_ouvrage")
 	private ProjetMaitreOuvrage projetMaitreOuvrage;
-	@OneToOne(fetch = FetchType.LAZY, mappedBy = "projet")
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "projet_maitre_ouvrage_delegue")
 	private ProjetMaitreOuvrage projetMaitreOuvrageDelegue;
+//	@OneToMany(fetch = FetchType.LAZY, mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
+//	private Set<ProjetMaitreOuvrage> projetMaitreOuvrages = new HashSet<ProjetMaitreOuvrage>(0);
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
 	private Set<Localisation> localisations = new HashSet<Localisation>(0);
@@ -155,6 +159,14 @@ public class Projet implements java.io.Serializable {
 	public void setConvention(boolean convention) {
 		this.convention = convention;
 	}
+
+//	public Set<ProjetMaitreOuvrage> getProjetMaitreOuvrages() {
+//		return projetMaitreOuvrages;
+//	}
+//
+//	public void setProjetMaitreOuvrages(Set<ProjetMaitreOuvrage> projetMaitreOuvrages) {
+//		this.projetMaitreOuvrages = projetMaitreOuvrages;
+//	}
 
 
 

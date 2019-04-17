@@ -1,1 +1,10 @@
 check hibernate query in user rest save user !!
+
+@MapsId ??
+
+doInJPA(entityManager -> { ??
+
+revoir le cas de la table projet et maitre ouvrage ??
+i had to make it not null projet_maitre_ouvrage -> problem avec les one to one !!!
+
+int vs Integer ?? it cause me nullPointerException

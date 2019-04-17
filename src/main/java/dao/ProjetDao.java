@@ -33,7 +33,7 @@ public class ProjetDao {
 					+ "SELECT p FROM Projet p "
 						+ "LEFT JOIN FETCH p.projetMaitreOuvrage pmo "
 							+ "LEFT JOIN FETCH pmo.maitreOuvrage "
-						+ "LEFT JOIN FETCH p.projetMaitreOuvrageDelegue pmo_"
+						+ "LEFT JOIN FETCH p.projetMaitreOuvrageDelegue pmo_ "
 							+ "LEFT JOIN FETCH pmo_.maitreOuvrage "
 						+ "LEFT JOIN FETCH p.localisations loc "
 						+ "LEFT JOIN FETCH p.projetPartenaires pp "

@@ -15,7 +15,7 @@ public class ProjetBean {
 	public List<String> partners;
 	
 	public Integer secteur;
-	public Integer maitreOuvrage;
+	public String maitreOuvrage;
 	public Boolean isMaitreOuvrageDel = false;
 	public Integer maitreOuvrageDel;
 
