@@ -25,6 +25,7 @@ import javax.persistence.TemporalType;
 
 
 @Entity
+@Table(name = "projet")
 public class Projet implements java.io.Serializable {
 
 	

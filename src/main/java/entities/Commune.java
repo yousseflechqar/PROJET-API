@@ -10,10 +10,12 @@ import java.util.Set;
 
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 
 
 @Entity
+@Table(name = "commune")
 public class Commune implements java.io.Serializable {
 
 	@Id

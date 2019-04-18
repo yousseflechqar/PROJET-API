@@ -13,6 +13,7 @@ import javax.persistence.Table;
 
 
 @Entity
+@Table(name = "localisation")
 public class Localisation implements java.io.Serializable {
 
 	

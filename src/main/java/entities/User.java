@@ -21,6 +21,7 @@ import javax.persistence.TemporalType;
 
 
 @Entity
+@Table(name = "user")
 public class User implements java.io.Serializable {
 
 	@Id

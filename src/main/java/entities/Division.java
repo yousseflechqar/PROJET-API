@@ -14,6 +14,7 @@ import javax.persistence.Table;
 
 
 @Entity
+@Table(name = "division")
 public class Division implements java.io.Serializable {
 
 	
