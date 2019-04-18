@@ -29,6 +29,7 @@ import dao.GenericDao;
 import dao.ProjetDao;
 import dto.ProjetDto;
 import dto.ProjetEditDto;
+import dto.SelectGrpDto;
 import dto.SimpleDto;
 import dto.TreeDto;
 import entities.Projet;
@@ -96,6 +97,16 @@ public class ProjetRest {
 	@GetMapping(value = "/financements/{maitreOuvrage}")
 	public List<SimpleDto> getFinancements(@PathVariable Integer maitreOuvrage) {
 		return projetDao.getFinancements(maitreOuvrage);
+	}
+	
+	@GetMapping(value = "/parent/programmes")
+	public List<SimpleDto> getParentProgrammes() {
+		return projetDao.getParentProgrammes();
+	}
+	
+	@GetMapping(value = "/programmes/{parent}")
+	public Collection<SelectGrpDto> getSubProgrammes(@PathVariable Integer parent) {
+		return projetService.getSubProgrammes(parent);
 	}
 }
 

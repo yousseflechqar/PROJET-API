@@ -9,10 +9,9 @@ import javax.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
 import beans.LocalisationBean;
-import beans.SimpleBean;
 import dto.ProjetDto;
-import dto.ProjetEditDto;
 import dto.SimpleDto;
+import entities.Programme;
 import entities.Projet;
 
 
@@ -90,6 +89,31 @@ public class ProjetDao {
 						+ "WHERE ach_sf.acheteur.id = :maitreOuvrage")
 				.setParameter("maitreOuvrage", acheteur)
 				.getResultList() ;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<SimpleDto> getProgrammes() {
+		return entityManager.createQuery("SELECT new dto.SimpleDto(p.id, p.label) FROM Programme p")
+				.getResultList() ;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<SimpleDto> getParentProgrammes() {
+		return entityManager.createQuery("SELECT new dto.SimpleDto(p.id, p.label) FROM Programme p WHERE p.parentProgramme IS NULL")
+				.getResultList() ;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Programme> getSubProgrammes(Integer parent) {
+	
+		return entityManager.createQuery(""
+				+ "SELECT p FROM Programme p "
+					+ "LEFT JOIN FETCH p.parentProgramme "
+				+ "WHERE p.parentProgramme.id = :parent"
+		)
+		.setParameter("parent", parent)
+		.getResultList();
+
 	}
 
 }

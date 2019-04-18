@@ -1,7 +1,9 @@
 package services;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,12 +23,14 @@ import dao.GenericDao;
 import dao.ProjetDao;
 import dto.PartnerDto;
 import dto.ProjetEditDto;
+import dto.SelectGrpDto;
 import dto.SimpleDto;
 import dto.TreeDto;
 import entities.Acheteur;
 import entities.Commune;
 import entities.Fraction;
 import entities.Localisation;
+import entities.Programme;
 import entities.Projet;
 import entities.ProjetMaitreOuvrage;
 import entities.ProjetPartenaire;
@@ -154,12 +158,29 @@ public class ProjetService {
 		Map<Integer, TreeDto> communetree = new LinkedHashMap<Integer, TreeDto>();
 		communes.forEach((com) -> {
             if (!communetree.containsKey(com.idCommune)){
-            	communetree.put(com.idCommune, new TreeDto(com.idCommune, com.commune));
+            	communetree.put(com.idCommune, new TreeDto(com.idCommune, com.commune, String.valueOf(com.idCommune)));
             }
-            communetree.get(com.idCommune).children.add(new TreeDto(com.idFraction, com.fraction));
+            communetree.get(com.idCommune).children.add(new TreeDto(com.idFraction, com.fraction, com.idCommune+"."+com.idFraction));
 		});
 		
 		return communetree.values();
+	}
+
+
+	public Collection<SelectGrpDto> getSubProgrammes(Integer parent) {
+		
+		List<Programme> subProgrammes = projetDao.getSubProgrammes(parent);
+		Map<Integer, SelectGrpDto> selectGrpMap = new LinkedHashMap<Integer, SelectGrpDto>();
+	
+		subProgrammes.forEach((sProg) -> {
+			if (!selectGrpMap.containsKey(sProg.getPhase())){
+				selectGrpMap.put(sProg.getPhase(), new SelectGrpDto("Phase " + 
+						String.join("", Collections.nCopies(sProg.getPhase(), "I"))));
+			}
+			selectGrpMap.get(sProg.getPhase()).options.add(new SimpleDto(sProg.getId(), sProg.getLabel()));
+		});
+		
+		return selectGrpMap.values();
 	}
 
 }

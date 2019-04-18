@@ -1,0 +1,2 @@
+mappedBy reference an unknown target entity property -> le nom f mappedBy khass ykon bhal name field w machi bhal nom de la table column
+spring not detected -> delete tomcat server w add it again
