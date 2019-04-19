@@ -18,19 +18,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import beans.LocalisationBean;
+import beans.ParentChildBean;
+import beans.ProgrammeBean;
 import beans.ProjetBean;
 import dao.GenericDao;
 import dao.ProjetDao;
 import dto.PartnerDto;
 import dto.ProjetEditDto;
 import dto.SelectGrpDto;
+import dto.SelectGrpsItemDto;
 import dto.SimpleDto;
 import dto.TreeDto;
+import dto.TreePathDto;
+import dto.TreeProgrammeDto;
 import entities.Acheteur;
 import entities.Commune;
 import entities.Fraction;
+import entities.IndhProgramme;
 import entities.Localisation;
-import entities.Programme;
 import entities.Projet;
 import entities.ProjetMaitreOuvrage;
 import entities.ProjetPartenaire;
@@ -151,36 +156,88 @@ public class ProjetService {
 		return dto;
 	} 
 	
-	public Collection<TreeDto> getCommunesWithFractions() {
+	public Collection<TreePathDto> getCommunesWithFractions() {
 		
 		List<LocalisationBean> communes = projetDao.getCommunesWithFractions();
 		
-		Map<Integer, TreeDto> communetree = new LinkedHashMap<Integer, TreeDto>();
+		Map<Integer, TreePathDto> communetree = new LinkedHashMap<Integer, TreePathDto>();
 		communes.forEach((com) -> {
             if (!communetree.containsKey(com.idCommune)){
-            	communetree.put(com.idCommune, new TreeDto(com.idCommune, com.commune, String.valueOf(com.idCommune)));
+            	communetree.put(com.idCommune, new TreePathDto(com.idCommune, com.commune, String.valueOf(com.idCommune)));
             }
-            communetree.get(com.idCommune).children.add(new TreeDto(com.idFraction, com.fraction, com.idCommune+"."+com.idFraction));
+            communetree.get(com.idCommune).children.add(new TreePathDto(com.idFraction, com.fraction, com.idCommune+"."+com.idFraction));
 		});
 		
 		return communetree.values();
 	}
 
 
-	public Collection<SelectGrpDto> getSubProgrammes(Integer parent) {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Collection<SelectGrpDto> getProgrammesWithPhases2() {
 		
-		List<Programme> subProgrammes = projetDao.getSubProgrammes(parent);
-		Map<Integer, SelectGrpDto> selectGrpMap = new LinkedHashMap<Integer, SelectGrpDto>();
+		List<ProgrammeBean> programmes = projetDao.getIndhProgrammes2();
+		Map<Integer, List<SimpleDto>> mapProgWithLeafs = new LinkedHashMap<Integer, List<SimpleDto>>();
+		Map<Integer, SelectGrpDto> selectGrpMapPhase = new LinkedHashMap<Integer, SelectGrpDto>();
 	
-		subProgrammes.forEach((sProg) -> {
-			if (!selectGrpMap.containsKey(sProg.getPhase())){
-				selectGrpMap.put(sProg.getPhase(), new SelectGrpDto("Phase " + 
-						String.join("", Collections.nCopies(sProg.getPhase(), "I"))));
-			}
-			selectGrpMap.get(sProg.getPhase()).options.add(new SimpleDto(sProg.getId(), sProg.getLabel()));
+		programmes.forEach((prog) -> {
+			
+			if(prog.idParent != null) {
+				if(!mapProgWithLeafs.containsKey(prog.idParent))
+					mapProgWithLeafs.put(prog.idParent, new ArrayList<SimpleDto>());
+				mapProgWithLeafs.get(prog.idParent).add(new SimpleDto(prog.id, prog.label));
+			} 
+
 		});
 		
-		return selectGrpMap.values();
+		
+		programmes.forEach((prog) -> {
+			
+			if( prog.idParent == null ) {
+				
+				if (!selectGrpMapPhase.containsKey(prog.phase)){
+					selectGrpMapPhase.put(prog.phase, new SelectGrpDto("Phase " + 
+							String.join("", Collections.nCopies(prog.phase, "I"))));
+				}
+				
+				if(!mapProgWithLeafs.containsKey(prog.id)) {
+					selectGrpMapPhase.get(prog.phase).addOption(new SimpleDto(prog.id, prog.label));
+				} else {
+					selectGrpMapPhase.get(prog.phase).addOption(new SelectGrpDto(prog.label, mapProgWithLeafs.get(prog.id)));
+				}
+				
+			}
+
+	
+			
+		});
+	
+
+		
+		return selectGrpMapPhase.values();
 	}
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Collection<SelectGrpDto> getParentProgrammesWithPhases() {
+		
+		List<ProgrammeBean> programmes = projetDao.getParentProgrammes();
+
+		Map<Integer, SelectGrpDto> selectGrpMapPhase = new LinkedHashMap<Integer, SelectGrpDto>();
+
+		programmes.forEach((prog) -> {
+
+			if (!selectGrpMapPhase.containsKey(prog.phase)){
+				selectGrpMapPhase.put(prog.phase, new SelectGrpDto("Phase " + 
+						String.join("", Collections.nCopies(prog.phase, "I"))));
+			}
+			
+			selectGrpMapPhase.get(prog.phase).options.add(new SimpleDto(prog.id, prog.label));
+
+		});
+		
+		
+		
+		return selectGrpMapPhase.values();
+	}
+
+	
 
 }

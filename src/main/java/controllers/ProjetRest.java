@@ -32,6 +32,7 @@ import dto.ProjetEditDto;
 import dto.SelectGrpDto;
 import dto.SimpleDto;
 import dto.TreeDto;
+import dto.TreePathDto;
 import entities.Projet;
 import services.ProjetService;
 
@@ -90,7 +91,7 @@ public class ProjetRest {
 	
 	
 	@GetMapping(value = "/localisations")
-	public Collection<TreeDto> getCommunesWithFractions() {
+	public Collection<TreePathDto> getCommunesWithFractions() {
 		return projetService.getCommunesWithFractions();
 	}
 	
@@ -100,13 +101,13 @@ public class ProjetRest {
 	}
 	
 	@GetMapping(value = "/parent/programmes")
-	public List<SimpleDto> getParentProgrammes() {
-		return projetDao.getParentProgrammes();
+	public Collection<SelectGrpDto> getParentProgrammesWithPhases() {
+		return projetService.getParentProgrammesWithPhases();
 	}
 	
-	@GetMapping(value = "/programmes/{parent}")
-	public Collection<SelectGrpDto> getSubProgrammes(@PathVariable Integer parent) {
-		return projetService.getSubProgrammes(parent);
+	@GetMapping(value = "/getProgrammesWithPhases")
+	public Collection<SelectGrpDto> getProgrammesWithPhases() {
+		return projetService.getProgrammesWithPhases2();
 	}
 }
 

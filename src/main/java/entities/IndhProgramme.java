@@ -16,8 +16,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "programme")
-public class Programme {
+@Table(name = "indh_programme")
+public class IndhProgramme {
 
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
@@ -28,10 +28,21 @@ public class Programme {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "parent")
-	private Programme parentProgramme;
+	private IndhProgramme parentProgramme;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "parentProgramme", cascade = CascadeType.ALL, orphanRemoval=true)
-	private Set<Programme> subProgrammes = new HashSet<Programme>(0);
+	private Set<IndhProgramme> subProgrammes = new HashSet<IndhProgramme>(0);
+
+	
+	
+	public IndhProgramme() {}
+	public IndhProgramme(Integer id, String label, Integer phase, Set<IndhProgramme> subProgrammes) {
+		super();
+		this.id = id;
+		this.label = label;
+		this.phase = phase;
+		this.subProgrammes = subProgrammes;
+	}
 
 	public Integer getId() {
 		return id;
@@ -49,19 +60,19 @@ public class Programme {
 		this.label = label;
 	}
 
-	public Programme getParentProgramme() {
+	public IndhProgramme getParentProgramme() {
 		return parentProgramme;
 	}
 
-	public void setParentProgramme(Programme parentProgramme) {
+	public void setParentProgramme(IndhProgramme parentProgramme) {
 		this.parentProgramme = parentProgramme;
 	}
 
-	public Set<Programme> getSubProgrammes() {
+	public Set<IndhProgramme> getSubProgrammes() {
 		return subProgrammes;
 	}
 
-	public void setSubProgrammes(Set<Programme> subProgrammes) {
+	public void setSubProgrammes(Set<IndhProgramme> subProgrammes) {
 		this.subProgrammes = subProgrammes;
 	}
 

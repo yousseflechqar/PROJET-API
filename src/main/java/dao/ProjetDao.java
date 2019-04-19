@@ -1,6 +1,7 @@
 package dao;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -9,9 +10,11 @@ import javax.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
 import beans.LocalisationBean;
+import beans.ParentChildBean;
+import beans.ProgrammeBean;
 import dto.ProjetDto;
 import dto.SimpleDto;
-import entities.Programme;
+import entities.IndhProgramme;
 import entities.Projet;
 
 
@@ -91,29 +94,36 @@ public class ProjetDao {
 				.getResultList() ;
 	}
 
-	@SuppressWarnings("unchecked")
-	public List<SimpleDto> getProgrammes() {
-		return entityManager.createQuery("SELECT new dto.SimpleDto(p.id, p.label) FROM Programme p")
-				.getResultList() ;
-	}
+//	@SuppressWarnings("unchecked")
+//	public List<SimpleDto> getProgrammes2() {
+//		return entityManager.createQuery("SELECT new dto.SimpleDto(p.id, p.label) FROM Programme p")
+//				.getResultList() ;
+//	}
 	
 	@SuppressWarnings("unchecked")
-	public List<SimpleDto> getParentProgrammes() {
-		return entityManager.createQuery("SELECT new dto.SimpleDto(p.id, p.label) FROM Programme p WHERE p.parentProgramme IS NULL")
-				.getResultList() ;
-	}
-
-	@SuppressWarnings("unchecked")
-	public List<Programme> getSubProgrammes(Integer parent) {
-	
+	public List<ProgrammeBean> getParentProgrammes() {
 		return entityManager.createQuery(""
-				+ "SELECT p FROM Programme p "
-					+ "LEFT JOIN FETCH p.parentProgramme "
-				+ "WHERE p.parentProgramme.id = :parent"
+				+ "SELECT new beans.ProgrammeBean(p.id, p.label, parent.id, parent.label, p.phase) FROM IndhProgramme p "
+					+ "LEFT JOIN p.parentProgramme parent "
+				+ "WHERE p.parentProgramme IS NULL"
 		)
-		.setParameter("parent", parent)
 		.getResultList();
+	}
 
+	@SuppressWarnings("unchecked")
+	public List<IndhProgramme> getIndhProgrammes() {
+		return entityManager.createQuery("SELECT p FROM IndhProgramme p").getResultList();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<ProgrammeBean> getIndhProgrammes2() {
+		
+		return entityManager.createQuery(""
+				+ "SELECT new beans.ProgrammeBean(p.id, p.label, parent.id, parent.label, p.phase) FROM IndhProgramme p "
+					+ "LEFT JOIN p.parentProgramme parent "
+		)
+		.getResultList();
+		
 	}
 
 }

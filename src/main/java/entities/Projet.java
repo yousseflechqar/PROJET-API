@@ -41,7 +41,8 @@ public class Projet implements java.io.Serializable {
 	@JoinColumn(name = "secteur")
 	private Secteur secteur;
 
-
+	@OneToOne(mappedBy = "projet")
+    private ProjetIndh indh;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "date_saisie")

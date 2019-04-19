@@ -1,2 +1,4 @@
 equals and hashcode ??
 reflexion
+
+generic type :::: a must
