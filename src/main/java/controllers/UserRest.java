@@ -53,9 +53,9 @@ public class UserRest {
 		gUserDao.delete(User.class, idUser);
 	}
 	
-	@GetMapping(value = "/roles")
-	public List<SimpleDto> getListRoles() {
-		return userDao.getListRoles();
+	@GetMapping(value = "/profiles")
+	public List<SimpleDto> getListProfiles() {
+		return userDao.getListProfiles();
 	}
 	
 	

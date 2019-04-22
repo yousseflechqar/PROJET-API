@@ -29,6 +29,16 @@ public class ProjetIndh {
 	@JoinColumn(name = "sous_programme")
 	private IndhProgramme subProgramme;
 
+	
+	
+	public ProjetIndh() {}
+	
+	public ProjetIndh(Projet projet, IndhProgramme programme) {
+		super();
+		this.projet = projet;
+		this.programme = programme;
+	}
+
 	public Integer getId() {
 		return id;
 	}

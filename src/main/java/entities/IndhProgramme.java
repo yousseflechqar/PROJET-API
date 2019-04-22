@@ -36,6 +36,11 @@ public class IndhProgramme {
 	
 	
 	public IndhProgramme() {}
+	public IndhProgramme(Integer id) {
+		super();
+		this.id = id;
+	}
+	
 	public IndhProgramme(Integer id, String label, Integer phase, Set<IndhProgramme> subProgrammes) {
 		super();
 		this.id = id;

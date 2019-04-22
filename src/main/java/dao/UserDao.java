@@ -32,7 +32,7 @@ public class UserDao {
 		try {
 			return (User) entityManager.createQuery(""
 					+ "SELECT u FROM User u "
-						+ "LEFT JOIN FETCH u.userRoles "
+//						+ "LEFT JOIN FETCH u.userRoles "
 					+ "WHERE u.id = :idUser"
 					)
 					.setParameter("idUser", idUser)
@@ -45,8 +45,14 @@ public class UserDao {
 
 
 	@SuppressWarnings("unchecked")
-	public List<SimpleDto> getListRoles() {
+	public List<SimpleDto> getListRoles2() {
 		return entityManager.createQuery("SELECT new dto.SimpleDto(r.id, r.label) FROM Role r")
+				.getResultList() ;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<SimpleDto> getListProfiles() {
+		return entityManager.createQuery("SELECT new dto.SimpleDto(r.id, r.label) FROM Profile r")
 				.getResultList() ;
 	}
 }

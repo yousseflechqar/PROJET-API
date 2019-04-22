@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -40,6 +41,10 @@ public class User implements java.io.Serializable {
 	private String prenom;
 	private String telephone;
 	private boolean active;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "profile")
+    private Profile profile;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "last_connexion")
@@ -175,6 +180,12 @@ public class User implements java.io.Serializable {
 	}
 	public void setUserRoles(Set<UserRole> userRoles) {
 		this.userRoles = userRoles;
+	}
+	public Profile getProfile() {
+		return profile;
+	}
+	public void setProfile(Profile profile) {
+		this.profile = profile;
 	}
 
 }

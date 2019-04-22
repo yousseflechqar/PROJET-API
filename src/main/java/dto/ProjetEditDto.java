@@ -9,11 +9,15 @@ public class ProjetEditDto {
 	public double montant;
 	
 	public boolean isConvention;
-	public boolean isMaitreOuvrageDel;
 	
+	public boolean isMaitreOuvrageDel;
 	public SimpleDto maitreOuvrage;
 	public Integer srcFinancement;
 	public SimpleDto maitreOuvrageDel;
+	
+	public boolean indh;
+	public boolean prdts;
+	public Integer indhProgramme;
 	
 	public List<PartnerDto> partners = new ArrayList<PartnerDto>(); 
 	public List<String> localisations = new ArrayList<String>(); 
@@ -23,7 +27,8 @@ public class ProjetEditDto {
 	public ProjetEditDto() {}
 	
 	public ProjetEditDto(String intitule, double montant, boolean isConvention,
-			SimpleDto maitreOuvrage, Integer srcFinancement, boolean isMaitreOuvrageDel, SimpleDto maitreOuvrageDel, Integer secteur) {
+			SimpleDto maitreOuvrage, Integer srcFinancement, boolean isMaitreOuvrageDel, SimpleDto maitreOuvrageDel, Integer secteur,
+			boolean indh, Integer indhProgramme, boolean prdts) {
 		super();
 		this.intitule = intitule;
 		this.montant = montant;
@@ -33,6 +38,9 @@ public class ProjetEditDto {
 		this.srcFinancement = srcFinancement;
 		this.maitreOuvrageDel = maitreOuvrageDel;
 		this.secteur = secteur;
+		this.indh = indh;
+		this.prdts = prdts;
+		this.indhProgramme = indhProgramme;
 	}
 	
 	

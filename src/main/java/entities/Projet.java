@@ -36,12 +36,13 @@ public class Projet implements java.io.Serializable {
 	private String intitule;
 	private Double montant;
 	private boolean convention;
+	private boolean prdts;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "secteur")
 	private Secteur secteur;
 
-	@OneToOne(mappedBy = "projet")
+	@OneToOne(mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
     private ProjetIndh indh;
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -160,6 +161,22 @@ public class Projet implements java.io.Serializable {
 
 	public void setConvention(boolean convention) {
 		this.convention = convention;
+	}
+
+	public ProjetIndh getIndh() {
+		return indh;
+	}
+
+	public void setIndh(ProjetIndh indh) {
+		this.indh = indh;
+	}
+
+	public boolean isPrdts() {
+		return prdts;
+	}
+
+	public void setPrdts(boolean prdts) {
+		this.prdts = prdts;
 	}
 
 //	public Set<ProjetMaitreOuvrage> getProjetMaitreOuvrages() {

@@ -10,7 +10,7 @@ public class UserBean {
 	public String password;
 	public String nom;
 	public String prenom;
-	public List<Integer> roles = new ArrayList<Integer>(); ;
+	public Integer profile;
 	public boolean active;
 	
 	public UserBean() {}
@@ -23,13 +23,14 @@ public class UserBean {
 	}
 	
 	// for save user
-	public UserBean(Integer id, String login, String password, String nom, String prenom, boolean active) {
+	public UserBean(Integer id, String login, String password, String nom, String prenom, boolean active, Integer profile) {
 		this.id = id;
 		this.login = login;
 		this.password = password;
 		this.nom = nom;
 		this.prenom = prenom;
 		this.active = active;
+		this.profile = profile;
 	}
 	
 	

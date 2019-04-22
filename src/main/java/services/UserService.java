@@ -15,6 +15,7 @@ import dao.UserDao;
 import dto.PartnerDto;
 import dto.ProjetEditDto;
 import dto.SimpleDto;
+import entities.Profile;
 import entities.Projet;
 import entities.Role;
 import entities.User;
@@ -44,6 +45,8 @@ public class UserService {
 		user.setActive(bean.active);
 		user.setDateCreation(new Date());
 		
+		user.setProfile(new Profile(bean.profile));
+		
 		if(bean.id == null) {
 			gUserDao.create(user);
 		} else {
@@ -52,9 +55,9 @@ public class UserService {
 		
 		entityManager.flush();
 		
-		bean.roles.forEach( role -> {
-			user.getUserRoles().add(new UserRole(user, new Role(role)));
-		});
+//		bean.roles.forEach( role -> {
+//			user.getUserRoles().add(new UserRole(user, new Role(role)));
+//		});
 		
 		return user.getId();
 	}
@@ -65,12 +68,12 @@ public class UserService {
 		User user = userDao.getUserForEdit(idUser);
 		
 		UserBean dto = new UserBean(
-				user.getId(), user.getLogin(), user.getPassword(), user.getNom(), user.getPrenom(), user.isActive()
+				user.getId(), user.getLogin(), user.getPassword(), user.getNom(), user.getPrenom(), user.isActive(), user.getProfile().getId()
 		);
 		
-		user.getUserRoles().forEach(ur -> {
-			dto.roles.add(ur.getRole().getId());
-		});
+//		user.getUserRoles().forEach(ur -> {
+//			dto.roles.add(ur.getRole().getId());
+//		});
 		
 		return dto;
 	} 
