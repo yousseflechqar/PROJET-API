@@ -62,9 +62,9 @@ public class ProjetRest {
 	}
 	
 	@GetMapping(value = "/projets")
-	public List<ProjetDto> getAllProjets() {
+	public Collection<ProjetDto> getAllProjets() {
 		
-		return projetDao.getListProjets();
+		return projetService.getListProjets();
 	}
 	
 	@DeleteMapping(value = "/projets/{idProjet}")

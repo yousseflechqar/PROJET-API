@@ -37,6 +37,7 @@ public class Projet implements java.io.Serializable {
 	private Double montant;
 	private boolean convention;
 	private boolean prdts;
+	private Integer taux;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "secteur")
@@ -177,6 +178,14 @@ public class Projet implements java.io.Serializable {
 
 	public void setPrdts(boolean prdts) {
 		this.prdts = prdts;
+	}
+
+	public Integer getTaux() {
+		return taux;
+	}
+
+	public void setTaux(Integer taux) {
+		this.taux = taux;
 	}
 
 //	public Set<ProjetMaitreOuvrage> getProjetMaitreOuvrages() {

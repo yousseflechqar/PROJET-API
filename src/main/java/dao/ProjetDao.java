@@ -53,7 +53,14 @@ public class ProjetDao {
 	@SuppressWarnings("unchecked")
 	public List<ProjetDto> getListProjets(){
 		
-		return entityManager.createQuery("SELECT new dto.ProjetDto(p.id, p.intitule) FROM Projet p")
+		return entityManager.createQuery("SELECT new dto.ProjetDto(p.id, p.intitule, p.taux, mo.nom, com.id, com.nom) "
+				+ "FROM Projet p "
+					+ "LEFT JOIN p.projetMaitreOuvrage pmo "
+					+ "LEFT JOIN pmo.maitreOuvrage mo "
+						+ "LEFT JOIN pmo.maitreOuvrage mo "
+					+ "LEFT JOIN p.localisations loc "
+						+ "LEFT JOIN loc.commune com "
+					+ "")
 				.getResultList();
 	}
 	

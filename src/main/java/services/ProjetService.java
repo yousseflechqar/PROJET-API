@@ -24,6 +24,7 @@ import beans.ProjetBean;
 import dao.GenericDao;
 import dao.ProjetDao;
 import dto.PartnerDto;
+import dto.ProjetDto;
 import dto.ProjetEditDto;
 import dto.SelectGrpDto;
 import dto.SelectGrpsItemDto;
@@ -251,6 +252,25 @@ public class ProjetService {
 		return selectGrpMapPhase.values();
 	}
 
+	
+	public Collection<ProjetDto> getListProjets(){
+		
+		List<ProjetDto> projets = projetDao.getListProjets();
+		
+		Map<Integer, ProjetDto> projetsMap = new LinkedHashMap<Integer, ProjetDto>();
+		
+		projets.forEach((proj) -> {
+
+			if (!projetsMap.containsKey(proj.id)){
+				projetsMap.put(proj.id, proj);
+			}
+			
+			projetsMap.get(proj.id).localisations.add(proj.communeLabel);
+
+		});
+		
+		return projetsMap.values();
+	}
 	
 
 }
