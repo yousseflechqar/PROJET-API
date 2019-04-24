@@ -21,6 +21,7 @@ import beans.LocalisationBean;
 import beans.ParentChildBean;
 import beans.ProgrammeBean;
 import beans.ProjetBean;
+import beans.ProjetSearchBean;
 import dao.GenericDao;
 import dao.ProjetDao;
 import dto.PartnerDto;
@@ -170,87 +171,7 @@ public class ProjetService {
 		return dto;
 	} 
 	
-	public Collection<TreePathDto> getCommunesWithFractions() {
-		
-		List<LocalisationBean> communes = projetDao.getCommunesWithFractions();
-		
-		Map<Integer, TreePathDto> communetree = new LinkedHashMap<Integer, TreePathDto>();
-		communes.forEach((com) -> {
-            if (!communetree.containsKey(com.idCommune)){
-            	communetree.put(com.idCommune, new TreePathDto(com.idCommune, com.commune, String.valueOf(com.idCommune)));
-            }
-            communetree.get(com.idCommune).children.add(new TreePathDto(com.idFraction, com.fraction, com.idCommune+"."+com.idFraction));
-		});
-		
-		return communetree.values();
-	}
 
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Collection<SelectGrpDto> getProgrammesWithPhases2() {
-		
-		List<ProgrammeBean> programmes = projetDao.getIndhProgrammes2();
-		Map<Integer, List<SimpleDto>> mapProgWithLeafs = new LinkedHashMap<Integer, List<SimpleDto>>();
-		Map<Integer, SelectGrpDto> selectGrpMapPhase = new LinkedHashMap<Integer, SelectGrpDto>();
-	
-		programmes.forEach((prog) -> {
-			
-			if(prog.idParent != null) {
-				if(!mapProgWithLeafs.containsKey(prog.idParent))
-					mapProgWithLeafs.put(prog.idParent, new ArrayList<SimpleDto>());
-				mapProgWithLeafs.get(prog.idParent).add(new SimpleDto(prog.id, prog.label));
-			} 
-
-		});
-		
-		
-		programmes.forEach((prog) -> {
-			
-			if( prog.idParent == null ) {
-				
-				if (!selectGrpMapPhase.containsKey(prog.phase)){
-					selectGrpMapPhase.put(prog.phase, new SelectGrpDto("Phase " + 
-							String.join("", Collections.nCopies(prog.phase, "I"))));
-				}
-				
-				if(!mapProgWithLeafs.containsKey(prog.id)) {
-					selectGrpMapPhase.get(prog.phase).addOption(new SimpleDto(prog.id, prog.label));
-				} else {
-					selectGrpMapPhase.get(prog.phase).addOption(new SelectGrpDto(prog.label, mapProgWithLeafs.get(prog.id)));
-				}
-				
-			}
-
-	
-			
-		});
-	
-
-		
-		return selectGrpMapPhase.values();
-	}
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Collection<SelectGrpDto> getParentProgrammesWithPhases() {
-		
-		List<ProgrammeBean> programmes = projetDao.getParentProgrammes();
-
-		Map<Integer, SelectGrpDto> selectGrpMapPhase = new LinkedHashMap<Integer, SelectGrpDto>();
-
-		programmes.forEach((prog) -> {
-
-			if (!selectGrpMapPhase.containsKey(prog.phase)){
-				selectGrpMapPhase.put(prog.phase, new SelectGrpDto("Phase " + 
-						String.join("", Collections.nCopies(prog.phase, "I"))));
-			}
-			
-			selectGrpMapPhase.get(prog.phase).options.add(new SimpleDto(prog.id, prog.label));
-
-		});
-		
-		
-		
-		return selectGrpMapPhase.values();
-	}
 
 	
 	public Collection<ProjetDto> getListProjets(){
@@ -270,6 +191,13 @@ public class ProjetService {
 		});
 		
 		return projetsMap.values();
+	}
+	
+	public Collection<ProjetDto> getListProjets2(ProjetSearchBean bean){
+		
+		List<ProjetDto> projets = projetDao.getListProjets2(bean);
+		
+		return projets;
 	}
 	
 

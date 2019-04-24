@@ -16,6 +16,7 @@ import javax.persistence.Table;
 @Table(name = "acheteur_financement")
 public class AcheteurSrcFinancement implements java.io.Serializable {
 
+	
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	private Integer id;

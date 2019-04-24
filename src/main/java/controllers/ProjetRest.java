@@ -24,9 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import beans.LocalisationBean;
 import beans.ProjetBean;
+import beans.ProjetSearchBean;
 import beans.SimpleBean;
 import dao.GenericDao;
 import dao.ProjetDao;
+import dao.SearchProjetDao;
 import dto.ProjetDto;
 import dto.ProjetEditDto;
 import dto.SelectGrpDto;
@@ -46,6 +48,8 @@ public class ProjetRest {
 	private ProjetDao projetDao;
 	@Autowired
 	private ProjetService projetService;
+	@Autowired
+	private SearchProjetDao searchProjetDao;
 
 	@PostMapping(value = "/projets")
 	public ProjetBean saveProjet(@RequestBody ProjetBean bean) {
@@ -67,6 +71,12 @@ public class ProjetRest {
 		return projetService.getListProjets();
 	}
 	
+	@GetMapping(value = "/projets2")
+	public Collection<ProjetDto> getListProjets2(ProjetSearchBean bean) {
+		
+		return searchProjetDao.getListProjets(bean);
+	}
+	
 	@DeleteMapping(value = "/projets/{idProjet}")
 	public void deleteProjet(@PathVariable Integer idProjet) {
 		
@@ -79,36 +89,7 @@ public class ProjetRest {
 		genericDao.deleteAll(Projet.class);
 	}
 	
-	@GetMapping(value = "/secteurs")
-	public List<SimpleDto> getSecteurs() {
-		return projetDao.getSecteurs();
-	}
-	
-	@GetMapping(value = "/acheteurs")
-	public List<SimpleDto> getAcheteurs(HttpServletRequest request) {
-		return projetDao.getAcheteursByName(request.getParameter("q"));
-	}
-	
-	
-	@GetMapping(value = "/localisations")
-	public Collection<TreePathDto> getCommunesWithFractions() {
-		return projetService.getCommunesWithFractions();
-	}
-	
-	@GetMapping(value = "/financements/{maitreOuvrage}")
-	public List<SimpleDto> getFinancements(@PathVariable Integer maitreOuvrage) {
-		return projetDao.getFinancements(maitreOuvrage);
-	}
-	
-	@GetMapping(value = "/parent/programmes")
-	public Collection<SelectGrpDto> getParentProgrammesWithPhases() {
-		return projetService.getParentProgrammesWithPhases();
-	}
-	
-	@GetMapping(value = "/getProgrammesWithPhases")
-	public Collection<SelectGrpDto> getProgrammesWithPhases() {
-		return projetService.getProgrammesWithPhases2();
-	}
+
 }
 
 

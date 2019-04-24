@@ -30,6 +30,7 @@ public class User implements java.io.Serializable {
 	private Integer id;
 	
 	
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "division")
 	private Division division;

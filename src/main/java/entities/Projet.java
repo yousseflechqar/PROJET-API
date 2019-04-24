@@ -50,13 +50,21 @@ public class Projet implements java.io.Serializable {
 	@Column(name = "date_saisie")
 	private Date dateSaisie;
 	
-	// MAPPED BY
+	
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "projet_maitre_ouvrage")
 	private ProjetMaitreOuvrage projetMaitreOuvrage;
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "projet_maitre_ouvrage_delegue")
 	private ProjetMaitreOuvrage projetMaitreOuvrageDelegue;
+	
+	
+	
+	//// MAPPED BY
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
+	private Set<Marches> marches = new HashSet<Marches>(0);
+
 //	@OneToMany(fetch = FetchType.LAZY, mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
 //	private Set<ProjetMaitreOuvrage> projetMaitreOuvrages = new HashSet<ProjetMaitreOuvrage>(0);
 	
