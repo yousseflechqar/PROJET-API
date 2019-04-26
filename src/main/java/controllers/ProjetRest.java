@@ -66,17 +66,12 @@ public class ProjetRest {
 	}
 	
 	@GetMapping(value = "/projets")
-	public Collection<ProjetDto> getAllProjets() {
+	public Collection<ProjetDto> getAllProjets(ProjetSearchBean bean) {
 		
-		return projetService.getListProjets();
+		return projetService.getListProjets(bean);
 	}
 	
-	@GetMapping(value = "/projets2")
-	public Collection<ProjetDto> getListProjets2(ProjetSearchBean bean) {
-		
-		return searchProjetDao.getListProjets(bean);
-	}
-	
+
 	@DeleteMapping(value = "/projets/{idProjet}")
 	public void deleteProjet(@PathVariable Integer idProjet) {
 		

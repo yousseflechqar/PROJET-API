@@ -52,13 +52,27 @@ public class DiversRest {
 	
 	@GetMapping(value = "/acheteurs")
 	public List<SimpleDto> getAcheteurs(HttpServletRequest request) {
-		return diversDao.getAcheteursByName(request.getParameter("q"));
+		
+		if(request.getParameter("q") != null)
+			return diversDao.getAcheteursByName(request.getParameter("q"));
+		
+		return diversDao.getAcheteurs();
 	}
 	
 	
 	@GetMapping(value = "/localisations")
 	public Collection<TreePathDto> getCommunesWithFractions() {
 		return diversService.getCommunesWithFractions();
+	}
+	
+	@GetMapping(value = "/communes")
+	public List<SimpleDto> getCommunes() {
+		return diversDao.getCommunes();
+	}
+	
+	@GetMapping(value = "/srcFinancements")
+	public List<SimpleDto> getSrcFinancements() {
+		return diversDao.getSrcFinancements();
 	}
 	
 	@GetMapping(value = "/financements/{maitreOuvrage}")

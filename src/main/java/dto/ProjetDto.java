@@ -5,6 +5,10 @@ import java.util.List;
 
 import com.querydsl.core.annotations.QueryProjection;
 
+
+
+
+
 public class ProjetDto {
 	
 	public Integer id;

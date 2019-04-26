@@ -4,18 +4,20 @@ public class ProjetSearchBean {
 	
 	public String intitule;
 	public Integer secteur;
-	public Integer maitreOuvrage;
+	public Integer acheteur;
 	public Integer commune;
+	public Integer acheteurType;
+	public Integer srcFinancement;
 	
 	
 	
 	
 	public ProjetSearchBean() {}
-	public ProjetSearchBean(String intitule, Integer secteur, Integer maitreOuvrage, Integer commune) {
+	public ProjetSearchBean(String intitule, Integer secteur, Integer acheteur, Integer commune) {
 		super();
 		this.intitule = intitule;
 		this.secteur = secteur;
-		this.maitreOuvrage = maitreOuvrage;
+		this.acheteur = acheteur;
 		this.commune = commune;
 	}
 	public String getIntitule() {
@@ -30,11 +32,11 @@ public class ProjetSearchBean {
 	public void setSecteur(Integer secteur) {
 		this.secteur = secteur;
 	}
-	public Integer getMaitreOuvrage() {
-		return maitreOuvrage;
+	public Integer getAcheteur() {
+		return acheteur;
 	}
-	public void setMaitreOuvrage(Integer maitreOuvrage) {
-		this.maitreOuvrage = maitreOuvrage;
+	public void setAcheteur(Integer acheteur) {
+		this.acheteur = acheteur;
 	}
 	public Integer getCommune() {
 		return commune;
@@ -42,6 +44,19 @@ public class ProjetSearchBean {
 	public void setCommune(Integer commune) {
 		this.commune = commune;
 	}
+	public Integer getAcheteurType() {
+		return acheteurType;
+	}
+	public void setAcheteurType(Integer acheteurType) {
+		this.acheteurType = acheteurType;
+	}
+	public Integer getSrcFinancement() {
+		return srcFinancement;
+	}
+	public void setSrcFinancement(Integer srcFinancement) {
+		this.srcFinancement = srcFinancement;
+	}
+
 	
 	
 	

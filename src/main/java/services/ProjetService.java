@@ -24,6 +24,7 @@ import beans.ProjetBean;
 import beans.ProjetSearchBean;
 import dao.GenericDao;
 import dao.ProjetDao;
+import dao.SearchProjetDao;
 import dto.PartnerDto;
 import dto.ProjetDto;
 import dto.ProjetEditDto;
@@ -52,6 +53,8 @@ public class ProjetService {
 	private EntityManager entityManager;
 	@Autowired
 	private ProjetDao projetDao;
+	@Autowired
+	private SearchProjetDao searchProjetDao;
 	@Autowired
 	private GenericDao<Projet, Integer> genericProjetDao;
 	@Autowired
@@ -174,9 +177,10 @@ public class ProjetService {
 
 
 	
-	public Collection<ProjetDto> getListProjets(){
+	public Collection<ProjetDto> getListProjets(ProjetSearchBean bean){
 		
-		List<ProjetDto> projets = projetDao.getListProjets();
+		List<ProjetDto> projets = searchProjetDao.getListProjets(bean);
+//		List<ProjetDto> projets = searchProjetDao.getListProjets(bean);
 		
 		Map<Integer, ProjetDto> projetsMap = new LinkedHashMap<Integer, ProjetDto>();
 		
@@ -193,12 +197,7 @@ public class ProjetService {
 		return projetsMap.values();
 	}
 	
-	public Collection<ProjetDto> getListProjets2(ProjetSearchBean bean){
-		
-		List<ProjetDto> projets = projetDao.getListProjets2(bean);
-		
-		return projets;
-	}
+
 	
 
 }

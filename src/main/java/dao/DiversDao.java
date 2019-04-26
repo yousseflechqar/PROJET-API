@@ -44,6 +44,16 @@ public class DiversDao {
 				.setParameter("q", "%" + q + "%")
 				.getResultList() ;
 	}
+	@SuppressWarnings("unchecked")
+	public List<SimpleDto> getAcheteurs(){
+		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Acheteur c")
+				.getResultList() ;
+	}
+	@SuppressWarnings("unchecked")
+	public List<SimpleDto> getSrcFinancements(){
+		return entityManager.createQuery("SELECT new dto.SimpleDto(s.id, s.label) FROM SrcFinancement s")
+				.getResultList() ;
+	}
 	
 
 	
@@ -58,6 +68,11 @@ public class DiversDao {
 				
 				.getResultList() ;
 		
+	}
+	@SuppressWarnings("unchecked")
+	public List<SimpleDto> getCommunes(){
+		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Commune c")
+				.getResultList() ;
 	}
 
 	@SuppressWarnings("unchecked")

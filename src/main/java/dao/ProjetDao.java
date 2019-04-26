@@ -44,7 +44,7 @@ public class ProjetDao {
 	public Projet getProjetForEdit(Integer idProjet){
 		
 		try {
-			return (Projet) entityManager.createQuery(""
+			return entityManager.createQuery(""
 					+ "SELECT p FROM Projet p "
 						+ "LEFT JOIN FETCH p.projetMaitreOuvrage pmo "
 							+ "LEFT JOIN FETCH pmo.maitreOuvrage "
@@ -54,7 +54,7 @@ public class ProjetDao {
 						+ "LEFT JOIN FETCH p.projetPartenaires pp "
 							+ "LEFT JOIN FETCH pp.partenaire "
 					+ "WHERE p.id = :idProjet"
-					)
+					, Projet.class)
 					.setParameter("idProjet", idProjet)
 					.getSingleResult();
 		}
@@ -63,86 +63,14 @@ public class ProjetDao {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public List<ProjetDto> getListProjets(){
-		
-		return entityManager.createQuery("SELECT new dto.ProjetDto(p.id, p.intitule, p.taux, mo.nom, com.id, com.nom) "
-				+ "FROM Projet p "
-					+ "LEFT JOIN p.projetMaitreOuvrage pmo "
-					+ "LEFT JOIN pmo.maitreOuvrage mo "
-						+ "LEFT JOIN pmo.maitreOuvrage mo "
-					+ "LEFT JOIN p.localisations loc "
-						+ "LEFT JOIN loc.commune com "
-					+ "")
-				.getResultList();
-	}
+
 	
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	public List<ProjetDto> getListProjets2(ProjetSearchBean bean){
-		
-		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-		CriteriaQuery cr = cb.createQuery(ProjetDto.class);
-		Root projet = cr.from(Projet.class);
-		
 
-		Join<Projet, ProjetMaitreOuvrage> pmo = projet.join("projetMaitreOuvrage", JoinType.INNER);
-		Join<ProjetMaitreOuvrage, Acheteur> mo = pmo.join("maitreOuvrage", JoinType.INNER);
-		Join<Projet, Localisation> loc = projet.join("localisations", JoinType.INNER);
-		Join<Localisation, Commune> com = loc.join("commune", JoinType.INNER);
-		
-		cr.select(
-				cb.construct(
-					ProjetDto.class,
-					projet.get("id"),
-					projet.get("intitule"),
-					projet.get("taux"),
-					mo.get("nom"),
-					com.get("id"),
-					com.get("nom")
-			    )
-		);
-
-		Predicate sPredic = null;
-		
-		if(bean.intitule != null) {
-			sPredic = cb.like(projet.get("intitule"), "%"+bean.intitule+"%");
-		}
-
-		if(bean.secteur != null) {
-			sPredic = cb.equal(projet.get("secteur"), bean.secteur);
-		}
-		
-		if(bean.maitreOuvrage != null) {
-			sPredic = cb.equal(pmo.get("maitreOuvrage"), bean.maitreOuvrage);
-		}
-		
-		cr.where(sPredic)
-		;
-		 
-
-		
-		List<ProjetDto> results = entityManager.createQuery(cr).getResultList();
-
-
-		return results;
-	}
 	
 	
 
 
-	
-	@SuppressWarnings("unchecked")
-	public List<LocalisationBean> getCommunesWithFractions(){
-		
-		return entityManager.createQuery(" "
-				
-				+ " SELECT new beans.LocalisationBean(c.id, c.nom, f.id, f.nom) "
-					+ " FROM Commune c "
-					+ " LEFT JOIN c.fractions f ")
-				
-				.getResultList() ;
-		
-	}
+
 
 	
 
