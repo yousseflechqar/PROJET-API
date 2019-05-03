@@ -33,6 +33,9 @@ public class Societe implements java.io.Serializable {
 
 	public Societe() {
 	}
+	public Societe(Integer id) {
+		this.id = id;
+	}
 
 	public Societe(Responsable responsable, String nom, String adresse) {
 		this.responsable = responsable;

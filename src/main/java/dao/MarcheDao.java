@@ -16,21 +16,21 @@ public class MarcheDao {
 	private EntityManager entityManager;
 	
 	
-	public Marches getProjetForEdit(Integer idProjet){
+	public Marches getMarcheForEdit(Integer idMarche){
 		
 		try {
 			return entityManager.createQuery(""
-//					+ "SELECT p FROM Projet p "
-//						+ "LEFT JOIN FETCH p.projetMaitreOuvrage pmo "
-//							+ "LEFT JOIN FETCH pmo.maitreOuvrage "
-//						+ "LEFT JOIN FETCH p.projetMaitreOuvrageDelegue pmo_ "
-//							+ "LEFT JOIN FETCH pmo_.maitreOuvrage "
-//						+ "LEFT JOIN FETCH p.localisations loc "
-//						+ "LEFT JOIN FETCH p.projetPartenaires pp "
-//							+ "LEFT JOIN FETCH pp.partenaire "
-//					+ "WHERE p.id = :idProjet"
-					, Marches.class)
-					.setParameter("idProjet", idProjet)
+					+ "SELECT m FROM Marches m "
+
+						+ "LEFT JOIN FETCH m.marchesSocietes mSte "
+							+ "LEFT JOIN FETCH mSte.societe ste "
+						+ "LEFT JOIN FETCH m.marchesTaux  "
+						+ "LEFT JOIN FETCH m.MarchesOss  "
+						+ "LEFT JOIN FETCH m.marchesDecomptes  "
+
+					+ "WHERE m.id = :idMarche "
+					+ "", Marches.class)
+					.setParameter("idMarche", idMarche)
 					.getSingleResult();
 		}
 		catch (NoResultException e) {

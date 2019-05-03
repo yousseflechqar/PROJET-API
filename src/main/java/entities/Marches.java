@@ -4,6 +4,8 @@ package entities;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -30,6 +32,41 @@ public class Marches implements java.io.Serializable {
 	private Integer id;
 
 
+
+	
+	private String intitule;
+	
+	@Column(name = "num_marche")
+	private String numMarche;
+	
+	@Column(name = "delai_execution")
+	private Integer delaiExecution;
+	
+	private Double montant;
+
+	@Temporal(TemporalType.DATE)
+	@Column(name = "date_plis")
+	private Date datePlis;
+	
+	@Temporal(TemporalType.DATE)
+	@Column(name = "date_approbation")
+	private Date dateApprobation;
+	
+	@Temporal(TemporalType.DATE)
+	@Column(name = "date_os_commencement")
+	private Date dateOsStart;
+	
+
+	@Temporal(TemporalType.DATE)
+	@Column(name = "date_reception_provisoire")
+	private Date dateReceptionProvisoire;
+	
+	@Temporal(TemporalType.DATE)
+	@Column(name = "date_reception_definitive")
+	private Date dateReceptionDefinitive;
+
+	////////////////// @JoinColumn
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "projet")
 	private Projet projet;
@@ -47,40 +84,20 @@ public class Marches implements java.io.Serializable {
 	@JoinColumn(name = "etat_marche")
 	private MarchesEtat marchesEtat;
 	
-	private String intitule;
-	private String numMarche;
-	private Integer delaiExecution;
-	private Double montant;
 
-	@Temporal(TemporalType.DATE)
-	@Column(name = "date_plis", length = 10)
-	private Date datePlis;
+	////////////////// mappedBy
 	
-	@Temporal(TemporalType.DATE)
-	@Column(name = "date_approbation")
-	private Date dateApprobation;
-	
-	@Temporal(TemporalType.DATE)
-	@Column(name = "date_os_commencement")
-	private Date dateOrdreService;
-	
-
-	@Temporal(TemporalType.DATE)
-	@Column(name = "date_reception_provisoire")
-	private Date dateReceptionProvisoire;
-	
-	@Temporal(TemporalType.DATE)
-	@Column(name = "date_reception_definitive")
-	private Date dateReceptionDefinitive;
-
-	
-
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "marches")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "marches", cascade = CascadeType.ALL, orphanRemoval=true)
 	private Set<MarchesSociete> marchesSocietes = new HashSet<MarchesSociete>(0);
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "marches")
-	private Set<MarchesTaux> marchesTauxes = new HashSet<MarchesTaux>(0);
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "marches", cascade = CascadeType.ALL, orphanRemoval=true)
+	private Set<MarchesTaux> marchesTaux = new HashSet<MarchesTaux>(0);
 	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "marches", cascade = CascadeType.ALL, orphanRemoval=true)
+	private Set<MarchesOs> MarchesOss = new HashSet<MarchesOs>(0);
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "marches", cascade = CascadeType.ALL, orphanRemoval=true)
+	private Set<MarchesDecomptes> marchesDecomptes = new HashSet<MarchesDecomptes>(0);
 	
 	
 
@@ -154,13 +171,6 @@ public class Marches implements java.io.Serializable {
 		this.datePlis = datePlis;
 	}
 
-	public Date getDateOrdreService() {
-		return this.dateOrdreService;
-	}
-
-	public void setDateOrdreService(Date dateOrdreService) {
-		this.dateOrdreService = dateOrdreService;
-	}
 
 	public Date getDateApprobation() {
 		return this.dateApprobation;
@@ -219,13 +229,7 @@ public class Marches implements java.io.Serializable {
 	}
 
 
-	public Set<MarchesTaux> getMarchesTauxes() {
-		return this.marchesTauxes;
-	}
 
-	public void setMarchesTauxes(Set<MarchesTaux> marchesTauxes) {
-		this.marchesTauxes = marchesTauxes;
-	}
 	
 
 	public Set<MarchesSociete> getMarchesSocietes() {
@@ -236,4 +240,38 @@ public class Marches implements java.io.Serializable {
 		this.marchesSocietes = marchesSocietes;
 	}
 
+	public Set<MarchesTaux> getMarchesTaux() {
+		return marchesTaux;
+	}
+
+	public void setMarchesTaux(Set<MarchesTaux> marchesTaux) {
+		this.marchesTaux = marchesTaux;
+	}
+
+	public Set<MarchesOs> getMarchesOss() {
+		return MarchesOss;
+	}
+
+	public void setMarchesOss(Set<MarchesOs> marchesOss) {
+		MarchesOss = marchesOss;
+	}
+
+	public Set<MarchesDecomptes> getMarchesDecomptes() {
+		return marchesDecomptes;
+	}
+
+	public void setMarchesDecomptes(Set<MarchesDecomptes> marchesDecomptes) {
+		this.marchesDecomptes = marchesDecomptes;
+	}
+
+	public Date getDateOsStart() {
+		return dateOsStart;
+	}
+
+	public void setDateOsStart(Date dateOsStart) {
+		this.dateOsStart = dateOsStart;
+	}
+
+	
+	
 }

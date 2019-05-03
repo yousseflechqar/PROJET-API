@@ -17,6 +17,8 @@ import dto.QProjetDto;
 import entities.QAcheteur;
 import entities.QCommune;
 import entities.QLocalisation;
+import entities.QMarches;
+import entities.QMarchesType;
 import entities.QProjet;
 import entities.QProjetMaitreOuvrage;
 import entities.QProjetPartenaire;
@@ -37,6 +39,9 @@ public class SearchProjetDao {
 		
 		QProjet prj = new QProjet("prj");
 		
+		QMarches marche = new QMarches("marche");
+		QMarchesType mType = new QMarchesType("mType");
+		
 		QProjetMaitreOuvrage pMo = new QProjetMaitreOuvrage("pMo");
 		QAcheteur mo = new QAcheteur("mo");
 		QLocalisation loc = new QLocalisation("loc");
@@ -45,7 +50,7 @@ public class SearchProjetDao {
 		
 		BooleanBuilder sWhere = new BooleanBuilder();
 		
-		if(!bean.intitule.isEmpty()) {
+		if(bean.intitule != null && !bean.intitule.isEmpty()) {
 			sWhere.and(prj.intitule.contains(bean.intitule));
 		}
 		if(bean.secteur != null) {
@@ -86,15 +91,18 @@ public class SearchProjetDao {
 		}
 		
 		return new JPAQuery<ProjetDto>(entityManager)
-				.select(new QProjetDto(prj.id, prj.intitule, prj.taux, mo.nom, com.id, com.nom))
+				.select(new QProjetDto(prj.id, prj.intitule, prj.taux, mo.nom, com.id, com.nom,
+						marche.id, mType.nom))
 				.from(prj)
+					.leftJoin(prj.marches, marche)
+						.leftJoin(marche.marchesType, mType)
 					.leftJoin(prj.projetMaitreOuvrage, pMo)
 						.leftJoin(pMo.maitreOuvrage, mo)
 					.leftJoin(prj.localisations, loc)
 						.leftJoin(loc.commune, com)
 				
 				.where(sWhere.and(where_loc).and(where_ach))
-				.orderBy(prj.id.asc())
+				.orderBy(prj.dateSaisie.desc())
 				.fetch()
 				;
 

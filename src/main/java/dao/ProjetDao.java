@@ -53,8 +53,8 @@ public class ProjetDao {
 						+ "LEFT JOIN FETCH p.localisations loc "
 						+ "LEFT JOIN FETCH p.projetPartenaires pp "
 							+ "LEFT JOIN FETCH pp.partenaire "
-					+ "WHERE p.id = :idProjet"
-					, Projet.class)
+					+ "WHERE p.id = :idProjet "
+					+ "", Projet.class)
 					.setParameter("idProjet", idProjet)
 					.getSingleResult();
 		}

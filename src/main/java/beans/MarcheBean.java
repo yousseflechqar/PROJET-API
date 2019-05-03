@@ -1,41 +1,86 @@
 package beans;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class MarcheBean {
 	
 	
 	public Integer idMarche;
+	public Integer idProjet;
 	public Integer marcheType;
+	public Integer marcheEtat;
 	public String intitule;
 	public Integer delai;
 	public Double montant;
-	public List<Integer> societe;
-	public String dateStart;
-	public List<OsBean> os;
-	public List<TauxBean> taux;
-	public List<DecomptesBean> decomptes;
-	public String dateReceptionProv;
-	public String dateReceptionDef;
+	public JsonNode societes;
+	public Date dateStart;
+	public List<OsBean> os = new ArrayList<>();
+	public List<TauxBean> taux = new ArrayList<>();
+	public List<DecomptesBean> decomptes = new ArrayList<>();
+	public Date dateReceptionProv;
+	public Date dateReceptionDef;
 	
+	public MarcheBean() {}
 	
-	
-	static class OsBean {
+	public MarcheBean(Integer idMarche, Integer marcheType, Integer marcheEtat, String intitule, Integer delai,
+			Double montant, Date dateStart, Date dateReceptionProv, Date dateReceptionDef) {
+		
+		super();
+		System.out.println(dateStart);
+		this.idMarche = idMarche;
+		this.marcheType = marcheType;
+		this.marcheEtat = marcheEtat;
+		this.intitule = intitule;
+		this.delai = delai;
+		this.montant = montant;
+//		this.dateStart = new Date(dateStart.getTime());;
+		this.dateStart = dateStart;
+		this.dateReceptionProv = dateReceptionProv;
+		this.dateReceptionDef = dateReceptionDef;
+	}
+
+	public static class OsBean {
 		public Integer typeOs;
-		public Integer dateOs;
-		public Integer commentaire;
+		public Date dateOs;
+		public String commentaire;
+		
+		public OsBean() {}
+		public OsBean(Integer typeOs, Date dateOs, String commentaire) {
+			this.typeOs = typeOs;
+			this.dateOs = dateOs;
+			this.commentaire = commentaire;
+		}
 	}
 	
-	static class TauxBean {
+	public static class TauxBean {
 		public Integer valueTaux;
-		public Integer dateTaux;
-		public Integer commentaire;
+		public Date dateTaux;
+		public String commentaire;
+		
+		public TauxBean() {}
+		public TauxBean(Integer valueTaux, Date dateTaux, String commentaire) {
+			this.valueTaux = valueTaux;
+			this.dateTaux = dateTaux;
+			this.commentaire = commentaire;
+		}
 	}
 	
-	static class DecomptesBean {
+	public static class DecomptesBean {
 		public Double montant;
-		public Integer dateDec;
-		public Integer commentaire;
+		public Date dateDec;
+		public String commentaire;
+		
+		public DecomptesBean() {}
+		public DecomptesBean(Double montant, Date dateDec, String commentaire) {
+			this.montant = montant;
+			this.dateDec = dateDec;
+			this.commentaire = commentaire;
+		}
 	}
 
 

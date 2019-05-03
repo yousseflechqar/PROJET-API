@@ -1,6 +1,10 @@
 package controllers;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import beans.MarcheBean;
 import dao.GenericDao;
 import dao.MarcheDao;
+import dto.ProjetEditDto;
 import entities.Marches;
 import services.MarcheService;
 
@@ -26,11 +31,14 @@ public class MarcheRest {
 	
 	
 	@PostMapping(value = "/marches")
-	public Integer saveMarches(@RequestBody MarcheBean bean) {
-
-		
-
+	public Integer saveMarches(@RequestBody MarcheBean bean) throws IOException {
 		return marcheService.saveMarche(bean);
+	}
+	
+	@GetMapping(value = "/marches/edit/{idMarche}")
+	public MarcheBean getMarcheForEdit(@PathVariable Integer idMarche) {
+		
+		return marcheService.getMarcheForEdit(idMarche);
 	}
 
 }
