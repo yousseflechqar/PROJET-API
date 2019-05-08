@@ -7,9 +7,11 @@ public class SimpleDto {
 	
 	public SimpleDto() {}
 	public SimpleDto(Integer value, String label) {
-		super();
 		this.value = value;
 		this.label = label;
+	}
+	public SimpleDto(Integer value) {
+		this.value = value;
 	}
 	
 }

@@ -4,13 +4,13 @@ public class PartnerDto {
 
 	
 	public SimpleDto partner;
-	public double montant;
+	public Double montant;
 	public SimpleDto srcFinancement;
 	
 	
 	public PartnerDto() {}
 	
-	public PartnerDto(SimpleDto partner, double montant, SimpleDto srcFinancement) {
+	public PartnerDto(SimpleDto partner, Double montant, SimpleDto srcFinancement) {
 		super();
 		this.partner = partner;
 		this.montant = montant;

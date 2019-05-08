@@ -26,6 +26,7 @@ import dao.GenericDao;
 import dao.ProjetDao;
 import dao.SearchProjetDao;
 import dto.PartnerDto;
+import dto.ProjetBasicDto;
 import dto.ProjetDto;
 import dto.ProjetEditDto;
 import dto.SelectGrpDto;
@@ -174,6 +175,60 @@ public class ProjetService {
 		return dto;
 	} 
 	
+	public ProjetBasicDto<TreeDto, SimpleDto> getProjetForDetail(Integer idProjet) {
+		
+		Projet projet = projetDao.getProjetForEdit(idProjet);
+		
+		ProjetMaitreOuvrage pMod = projet.getProjetMaitreOuvrageDelegue();
+		ProjetMaitreOuvrage pMo = projet.getProjetMaitreOuvrage();
+		Acheteur mod = pMod != null ? pMod.getMaitreOuvrage() : null;
+		Acheteur mo = pMo.getMaitreOuvrage();
+		SimpleDto modDto = pMod != null ? new SimpleDto(mod.getId(), mod.getNom()) : null;
+
+		
+		ProjetBasicDto<TreeDto, SimpleDto> dto = new ProjetBasicDto<>(
+				projet.getIntitule(), projet.getMontant(), projet.isConvention(), 
+				modDto != null, new SimpleDto(mo.getId(), mo.getNom()), modDto,
+				projet.getIndh() != null, projet.isPrdts()
+			);
+		
+		dto.taux = projet.getTaux();
+
+		projet.getProjetPartenaires().forEach(pp -> {
+			dto.partners.add(new PartnerDto(
+					new SimpleDto(pp.getPartenaire().getId(), pp.getPartenaire().getNom()), pp.getFinancement(), 
+					pp.getSrcFinancement() != null ? new SimpleDto(pp.getSrcFinancement().getId(), pp.getSrcFinancement().getLabel()) : null
+					)
+			);
+		});
+		
+		if(projet.getIndh() != null) {			
+			dto.indhProgramme = new SimpleDto(projet.getIndh().getProgramme().getId(), projet.getIndh().getProgramme().getLabel()) ;
+		}
+		
+		dto.secteur = new SimpleDto(projet.getSecteur().getId(), projet.getSecteur().getNom()) ;
+		
+		if(projet.getProjetPartenaires().isEmpty() && pMo.getSrcFinancement() != null) {
+			dto.srcFinancement = new SimpleDto(pMo.getSrcFinancement().getId(), pMo.getSrcFinancement().getLabel()) ;
+		}
+		
+		Map<Integer, TreeDto> locMap = new LinkedHashMap<>();
+		projet.getLocalisations().forEach(loc -> {
+			Commune com = loc.getCommune();
+			if( !locMap.containsKey(com.getId()) ) {
+				locMap.put(com.getId(), new TreeDto(com.getId(), com.getNom()));
+			}
+			if(loc.getFraction() != null) {				
+				locMap.get(com.getId()).children.add(new TreeDto(loc.getFraction().getId(), loc.getFraction().getNom()));
+			}
+		});
+		dto.localisations = locMap.values();
+		
+		return dto;
+	} 
+	
+	
+
 
 
 	

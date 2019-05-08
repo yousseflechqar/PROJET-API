@@ -38,6 +38,10 @@ public class MarchesTaux implements java.io.Serializable {
 	public MarchesTaux() {
 	}
 
+	public MarchesTaux(Integer id) {
+		this.id = id;
+	}
+	
 	public MarchesTaux(Marches marches, Integer taux, Date dateTaux, String commentaire) {
 		this.marches = marches;
 		this.taux = taux;

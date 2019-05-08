@@ -57,6 +57,12 @@ public class SearchProjetDao {
 			sWhere.and(prj.secteur.id.eq(bean.secteur));
 		}		
 		
+		////// SRC FINANCEMENT
+		
+		BooleanBuilder where_srcFi = new BooleanBuilder();
+		if( bean.srcFinancement != null && bean.srcFinancement != 0 ) {
+			where_srcFi.and(pMo.srcFinancement.id.eq(bean.srcFinancement));
+		}
 		
 		////// MAITRE OUVRAGE ET PARTENAIRE
 
@@ -68,13 +74,11 @@ public class SearchProjetDao {
 			}
 			else if(bean.acheteurType.equals(2)) {
 				QProjetPartenaire pPartner = new QProjetPartenaire("pPartner");
-				where_ach.and(prj.id.in(JPAExpressions
-						.select(pPartner.projet.id).from(pPartner)
+				where_ach.and(prj.id.in(
+						JPAExpressions.select(pPartner.projet.id).from(pPartner)
 						.where(pPartner.partenaire.id.eq(bean.acheteur))
-			
 				));
-			}
-				
+			}	
 		}
 		
 		////// LOCALISATION
@@ -90,6 +94,8 @@ public class SearchProjetDao {
 			));
 		}
 		
+
+		
 		return new JPAQuery<ProjetDto>(entityManager)
 				.select(new QProjetDto(prj.id, prj.intitule, prj.taux, mo.nom, com.id, com.nom,
 						marche.id, mType.nom))
@@ -101,7 +107,7 @@ public class SearchProjetDao {
 					.leftJoin(prj.localisations, loc)
 						.leftJoin(loc.commune, com)
 				
-				.where(sWhere.and(where_loc).and(where_ach))
+				.where(sWhere.and(where_loc).and(where_ach).and(where_srcFi))
 				.orderBy(prj.dateSaisie.desc())
 				.fetch()
 				;

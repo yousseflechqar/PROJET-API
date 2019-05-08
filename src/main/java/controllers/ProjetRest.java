@@ -27,8 +27,11 @@ import beans.ProjetBean;
 import beans.ProjetSearchBean;
 import beans.SimpleBean;
 import dao.GenericDao;
+import dao.MarcheDao;
 import dao.ProjetDao;
 import dao.SearchProjetDao;
+import dto.DetailDto;
+import dto.ProjetBasicDto;
 import dto.ProjetDto;
 import dto.ProjetEditDto;
 import dto.SelectGrpDto;
@@ -36,6 +39,7 @@ import dto.SimpleDto;
 import dto.TreeDto;
 import dto.TreePathDto;
 import entities.Projet;
+import services.MarcheService;
 import services.ProjetService;
 
 @RestController
@@ -47,7 +51,11 @@ public class ProjetRest {
 	@Autowired
 	private ProjetDao projetDao;
 	@Autowired
+	private MarcheDao marcheDao;
+	@Autowired
 	private ProjetService projetService;
+	@Autowired
+	private MarcheService marcheService;
 	@Autowired
 	private SearchProjetDao searchProjetDao;
 
@@ -63,6 +71,16 @@ public class ProjetRest {
 	public ProjetEditDto getProjetForEdit(@PathVariable Integer idProjet) {
 		
 		return projetService.getProjetForEdit(idProjet);
+	}
+	
+	@GetMapping(value = "/projets/detail/{idProjet}") 
+	public DetailDto getProjetForDetail(@PathVariable Integer idProjet) {
+		
+		return new DetailDto(
+				projetService.getProjetForDetail(idProjet), 
+				marcheService.getDefaultMarcheForDetail(idProjet),
+				marcheDao.getMarchesIdsWithTypeByProjet(idProjet)
+		);
 	}
 	
 	@GetMapping(value = "/projets")

@@ -14,6 +14,7 @@ import beans.MarcheBean;
 import dao.GenericDao;
 import dao.MarcheDao;
 import dto.ProjetEditDto;
+import dto.SimpleDto;
 import entities.Marches;
 import services.MarcheService;
 
@@ -39,6 +40,18 @@ public class MarcheRest {
 	public MarcheBean getMarcheForEdit(@PathVariable Integer idMarche) {
 		
 		return marcheService.getMarcheForEdit(idMarche);
+	}
+	
+	@GetMapping(value = "/marches/default/{idProjet}")
+	public MarcheBean getDefaultMarcheForDetail(@PathVariable Integer idProjet) {
+		
+		return marcheService.getDefaultMarcheForDetail(idProjet);
+	}
+	
+	@GetMapping(value = "/marches/detail/{idMarche}")
+	public MarcheBean getMarcheForDetail(@PathVariable Integer idMarche) {
+		
+		return marcheService.getMarcheForDetail(idMarche);
 	}
 
 }

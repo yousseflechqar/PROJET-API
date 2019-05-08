@@ -7,7 +7,7 @@ public class TreeDto {
 	
 	public Integer value;
 	public String label;
-	public List<TreeDto> children = new ArrayList<TreeDto>();
+	public List<TreeDto> children = new ArrayList<>();
 	
 	public TreeDto() {}
 	

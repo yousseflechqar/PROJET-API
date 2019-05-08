@@ -64,6 +64,10 @@ public class Marches implements java.io.Serializable {
 	@Temporal(TemporalType.DATE)
 	@Column(name = "date_reception_definitive")
 	private Date dateReceptionDefinitive;
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "date_saisie")
+	private Date dateSaisie;
 
 	////////////////// @JoinColumn
 	
@@ -270,6 +274,14 @@ public class Marches implements java.io.Serializable {
 
 	public void setDateOsStart(Date dateOsStart) {
 		this.dateOsStart = dateOsStart;
+	}
+
+	public Date getDateSaisie() {
+		return dateSaisie;
+	}
+
+	public void setDateSaisie(Date dateSaisie) {
+		this.dateSaisie = dateSaisie;
 	}
 
 	
