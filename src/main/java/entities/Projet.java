@@ -50,6 +50,10 @@ public class Projet implements java.io.Serializable {
 	@Column(name = "date_saisie")
 	private Date dateSaisie;
 	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "date_last_modif")
+	private Date DateLastModif;
+	
 	
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "projet_maitre_ouvrage")
@@ -59,14 +63,23 @@ public class Projet implements java.io.Serializable {
 	private ProjetMaitreOuvrage projetMaitreOuvrageDelegue;
 	
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "charge_suivi")
+	public User chargeSuivi;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_saisie")
+	public User userSaisie;
+	
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "src_financement")
+	private SrcFinancement srcFinancement;
 	
 	//// MAPPED BY
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
 	private Set<Marches> marches = new HashSet<Marches>(0);
-
-//	@OneToMany(fetch = FetchType.LAZY, mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
-//	private Set<ProjetMaitreOuvrage> projetMaitreOuvrages = new HashSet<ProjetMaitreOuvrage>(0);
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
 	private Set<Localisation> localisations = new HashSet<Localisation>(0);
@@ -196,13 +209,45 @@ public class Projet implements java.io.Serializable {
 		this.taux = taux;
 	}
 
-//	public Set<ProjetMaitreOuvrage> getProjetMaitreOuvrages() {
-//		return projetMaitreOuvrages;
-//	}
-//
-//	public void setProjetMaitreOuvrages(Set<ProjetMaitreOuvrage> projetMaitreOuvrages) {
-//		this.projetMaitreOuvrages = projetMaitreOuvrages;
-//	}
+	public User getChargeSuivi() {
+		return chargeSuivi;
+	}
+
+	public void setChargeSuivi(User chargeSuivi) {
+		this.chargeSuivi = chargeSuivi;
+	}
+
+	public Set<Marches> getMarches() {
+		return marches;
+	}
+
+	public void setMarches(Set<Marches> marches) {
+		this.marches = marches;
+	}
+
+	public User getUserSaisie() {
+		return userSaisie;
+	}
+
+	public void setUserSaisie(User userSaisie) {
+		this.userSaisie = userSaisie;
+	}
+
+	public Date getDateLastModif() {
+		return DateLastModif;
+	}
+
+	public void setDateLastModif(Date dateLastModif) {
+		DateLastModif = dateLastModif;
+	}
+
+	public SrcFinancement getSrcFinancement() {
+		return srcFinancement;
+	}
+
+	public void setSrcFinancement(SrcFinancement srcFinancement) {
+		this.srcFinancement = srcFinancement;
+	}
 
 
 

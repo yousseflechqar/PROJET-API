@@ -28,9 +28,7 @@ public class ProjetMaitreOuvrage implements java.io.Serializable {
 	@JoinColumn(name = "projet")
 	private Projet projet;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "src_financement")
-	private SrcFinancement srcFinancement;
+
 	
 	private boolean delegate;
 
@@ -43,12 +41,7 @@ public class ProjetMaitreOuvrage implements java.io.Serializable {
 		this.delegate = delegate;
 	}
 
-	public ProjetMaitreOuvrage(Acheteur maitreOuvrage, Projet projet, SrcFinancement srcFinancement, boolean delegate) {
-		this.maitreOuvrage = maitreOuvrage;
-		this.projet = projet;
-		this.srcFinancement = srcFinancement;
-		this.delegate = delegate;
-	}
+
 
 	public Integer getId() {
 		return id;
@@ -74,13 +67,6 @@ public class ProjetMaitreOuvrage implements java.io.Serializable {
 		this.projet = projet;
 	}
 
-	public SrcFinancement getSrcFinancement() {
-		return srcFinancement;
-	}
-
-	public void setSrcFinancement(SrcFinancement srcFinancement) {
-		this.srcFinancement = srcFinancement;
-	}
 
 	public boolean isDelegate() {
 		return delegate;

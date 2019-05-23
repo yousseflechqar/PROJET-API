@@ -1,6 +1,11 @@
 package controllers;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,13 +16,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import beans.LoginBean;
 import beans.UserBean;
 import dao.GenericDao;
 import dao.UserDao;
-import dto.ProjetEditDto;
+import dto.SelectGrpDto;
 import dto.SimpleDto;
-import entities.Projet;
 import entities.User;
+import services.LoginService;
 import services.UserService;
 
 @RestController
@@ -27,9 +33,22 @@ public class UserRest {
 	@Autowired
 	private UserService userService;
 	@Autowired
+	private LoginService loginService;
+	@Autowired
 	private UserDao userDao;
 	@Autowired
 	private GenericDao<User, Integer> gUserDao;
+	
+	@PostMapping(value = "/login")
+	public Object login(@RequestBody LoginBean bean, HttpServletRequest request, HttpSession session) {
+		
+		return loginService.login(bean, request, session);
+	}
+	
+	@RequestMapping(value="/logout") 
+	public void logout(HttpServletRequest request) {
+		request.getSession().invalidate();
+	}
 	
 	@PostMapping(value = "/users")
 	public Integer saveUser(@RequestBody UserBean bean) {
@@ -53,10 +72,18 @@ public class UserRest {
 		gUserDao.delete(User.class, idUser);
 	}
 	
-	@GetMapping(value = "/profiles")
-	public List<SimpleDto> getListProfiles() {
-		return userDao.getListProfiles();
+	
+	@GetMapping(value = "/chargesSuivi")
+	public Collection<SelectGrpDto> getChargesSuivi() {
+		return userService.getChargesSuivi2();
 	}
+	
+	
+	@GetMapping(value = "/profiles")
+	public List<SimpleDto> getListProfiles() { return userDao.getListProfiles(); }
+	
+	@GetMapping(value = "/divisions")
+	public List<SimpleDto> getDivisions() { return userDao.getDivisions(); }
 	
 	
 }

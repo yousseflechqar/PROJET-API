@@ -57,6 +57,7 @@ public class Marches implements java.io.Serializable {
 	private Date dateOsStart;
 	
 
+	
 	@Temporal(TemporalType.DATE)
 	@Column(name = "date_reception_provisoire")
 	private Date dateReceptionProvisoire;
@@ -79,29 +80,36 @@ public class Marches implements java.io.Serializable {
 	@JoinColumn(name = "type_marche")
 	private MarchesType marchesType;
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "etat_marche")
+	private MarchesEtat marchesEtat;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "current_taux")
 	private MarchesTaux currentTaux;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "etat_marche")
-	private MarchesEtat marchesEtat;
+	@JoinColumn(name = "current_os")
+	private MarchesOs currentOs;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "current_decompte")
+	private MarchesDecomptes currentDecompte;
 	
 
 	////////////////// mappedBy
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "marches", cascade = CascadeType.ALL, orphanRemoval=true)
-	private Set<MarchesSociete> marchesSocietes = new HashSet<MarchesSociete>(0);
+	private Set<MarchesSociete> marchesSocietes = new HashSet<>(0);
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "marches", cascade = CascadeType.ALL, orphanRemoval=true)
-	private Set<MarchesTaux> marchesTaux = new HashSet<MarchesTaux>(0);
+	private Set<MarchesTaux> marchesTaux = new HashSet<>(0);
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "marches", cascade = CascadeType.ALL, orphanRemoval=true)
-	private Set<MarchesOs> MarchesOss = new HashSet<MarchesOs>(0);
+	private Set<MarchesOs> MarchesOss = new HashSet<>(0);
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "marches", cascade = CascadeType.ALL, orphanRemoval=true)
-	private Set<MarchesDecomptes> marchesDecomptes = new HashSet<MarchesDecomptes>(0);
+	private Set<MarchesDecomptes> marchesDecomptes = new HashSet<>(0);
 	
 	
 
@@ -283,6 +291,24 @@ public class Marches implements java.io.Serializable {
 	public void setDateSaisie(Date dateSaisie) {
 		this.dateSaisie = dateSaisie;
 	}
+
+	public MarchesOs getCurrentOs() {
+		return currentOs;
+	}
+
+	public void setCurrentOs(MarchesOs currentOs) {
+		this.currentOs = currentOs;
+	}
+
+	public MarchesDecomptes getCurrentDecompte() {
+		return currentDecompte;
+	}
+
+	public void setCurrentDecompte(MarchesDecomptes currentDecompte) {
+		this.currentDecompte = currentDecompte;
+	}
+
+
 
 	
 	

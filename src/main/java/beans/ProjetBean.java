@@ -1,6 +1,9 @@
 package beans;
 
 import java.util.List;
+import java.util.Map;
+
+import dto.SimpleDto;
 
 public class ProjetBean {
 	
@@ -20,5 +23,9 @@ public class ProjetBean {
 	public String maitreOuvrage;
 	public boolean isMaitreOuvrageDel = false;
 	public Integer maitreOuvrageDel;
+	
+	public Integer chargeSuivi;
+	
+	public Integer srcFinancement;
 
 }

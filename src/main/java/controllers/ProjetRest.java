@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -38,6 +39,7 @@ import dto.SelectGrpDto;
 import dto.SimpleDto;
 import dto.TreeDto;
 import dto.TreePathDto;
+import dto.UserSession;
 import entities.Projet;
 import services.MarcheService;
 import services.ProjetService;
@@ -56,13 +58,13 @@ public class ProjetRest {
 	private ProjetService projetService;
 	@Autowired
 	private MarcheService marcheService;
-	@Autowired
-	private SearchProjetDao searchProjetDao;
+
 
 	@PostMapping(value = "/projets")
-	public ProjetBean saveProjet(@RequestBody ProjetBean bean) {
+	public ProjetBean saveProjet(@RequestBody ProjetBean bean, HttpSession session) {
 
-		projetService.saveProjet(bean);
+		UserSession userSession = (UserSession) session.getAttribute("user");
+		projetService.saveProjet(bean, userSession);
 
 		return bean;
 	}

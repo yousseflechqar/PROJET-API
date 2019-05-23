@@ -33,6 +33,13 @@ public class MarchesTaux implements java.io.Serializable {
 	@Column(name = "date_taux")
 	private Date dateTaux;
 	
+	
+	@Column(name = "retard_en_jour")
+	private Integer retardEnJour;
+	
+	@Column(name = "worked_days")
+	private Integer workedDays;
+	
 	private String commentaire;
 
 	public MarchesTaux() {
@@ -91,6 +98,28 @@ public class MarchesTaux implements java.io.Serializable {
 
 	public void setCommentaire(String commentaire) {
 		this.commentaire = commentaire;
+	}
+
+	@Override
+	public String toString() {
+		return "MarchesTaux [id=" + id + ", taux=" + taux + ", dateTaux=" + dateTaux + ", commentaire=" + commentaire
+				+ "]";
+	}
+
+	public Integer getRetardEnJour() {
+		return retardEnJour;
+	}
+
+	public void setRetardEnJour(Integer retardEnJour) {
+		this.retardEnJour = retardEnJour;
+	}
+
+	public Integer getWorkedDays() {
+		return workedDays;
+	}
+
+	public void setWorkedDays(Integer workedDays) {
+		this.workedDays = workedDays;
 	}
 	
 	

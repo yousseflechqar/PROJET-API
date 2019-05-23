@@ -1,10 +1,13 @@
 package services;
 
-import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -30,6 +33,8 @@ import entities.MarchesType;
 import entities.OsType;
 import entities.Projet;
 import entities.Societe;
+import exceptions.OsIntegrityException;
+import helpers.Helpers;
 
 @Service
 public class MarcheService {
@@ -38,32 +43,45 @@ public class MarcheService {
 	private EntityManager entityManager;
 	@Autowired
 	private MarcheDao marcheDao;
-	@Autowired
-	private GenericDao<Projet, Integer> gProjetDao;
+//	@Autowired
+//	private GenericDao<Projet, Integer> gProjetDao;
 	@Autowired
 	private GenericDao<Marches, Integer> gMarchesDao;
 
 	
 	@Transactional(rollbackOn = Exception.class)
-	public Integer saveMarche(MarcheBean bean) throws IOException {
+	public Integer saveMarche(MarcheBean bean) {
 		
 		
-		Projet projet = new Projet();
+		boolean dirtyCheckTaux = false;
+
 		Marches marche = new Marches();
 
 		if( bean.idMarche != null ) {
 			marche = gMarchesDao.read(bean.idMarche, Marches.class);
-			projet = marche.getProjet();
 		} else {
-			projet = gProjetDao.read(bean.idProjet, Projet.class);
+			marche.setProjet( new Projet(bean.idProjet) );
 		}
-		
-		marche.setProjet( projet ); // a minimiser
+
 		marche.setIntitule(bean.intitule);
 		marche.setMontant(bean.montant);
-		marche.setDelaiExecution(bean.delai);		
+		
+		if( bean.delai != null && ! bean.delai.equals(marche.getDelaiExecution()) ) {
+			System.out.println("Delai Execution CHANGED !!");
+			dirtyCheckTaux = true;
+		}
+		
+		marche.setDelaiExecution(bean.delai);	
+		marche.setNumMarche(bean.numMarche);
 		marche.setMarchesType(new MarchesType(bean.marcheType.value));
 		marche.setMarchesEtat(new MarchesEtat(bean.marcheEtat.value));
+		
+		marche.setDateApprobation(bean.dateApprobation);
+		
+		if( bean.dateStart != null && ! Helpers.isEqual(bean.dateStart, marche.getDateOsStart()) ) {
+			System.out.println("Date Start CHANGED !!");
+			dirtyCheckTaux = true;
+		}
 		
 		marche.setDateOsStart(bean.dateStart);
 		marche.setDateReceptionProvisoire(bean.dateReceptionProv);
@@ -75,12 +93,21 @@ public class MarcheService {
 			gMarchesDao.create(marche);
 		}
 		
+
+		
 		marche.getMarchesSocietes().clear();
 		marche.getMarchesOss().clear();
-		marche.getMarchesTaux().clear();
 		marche.getMarchesDecomptes().clear();
 		
+		marche.setCurrentOs(null);
+		marche.setCurrentDecompte(null);
+		
+		
+
 		entityManager.flush();
+		
+		
+		//////////////////////////////////// SOCITIES
 		
 		if(bean.societes != null) {
 			for(SimpleDto ste : bean.societes){
@@ -88,31 +115,138 @@ public class MarcheService {
 			}
 		}
 
-		if(bean.taux != null) {
-			for(TauxBean tb : bean.taux){
-				marche.getMarchesTaux().add(new MarchesTaux(marche, tb.valueTaux, tb.dateTaux, tb.commentaire));
+		
+		
+		
+		//////////////////////////////////// ORDRES SERVICE
+		
+		boolean isOs = ( bean.os != null && ! bean.os.isEmpty() );
+		if( isOs ) {
+			// we have to sort les ordres de service par date
+			bean.os.sort((o1, o2) -> o1.dateOs.compareTo(o2.dateOs));
+			
+			// check integrity os
+			Integer previousOsType = enums.OsType.REPRISE.value;
+			for(OsBean os : bean.os) {
+				if( os.typeOs.value.equals(previousOsType) ) {
+					throw new OsIntegrityException();
+				} else {
+					marche.getMarchesOss().add(new MarchesOs(marche, new OsType(os.typeOs.value), os.dateOs, os.commentaire));
+					previousOsType = os.typeOs.value;
+				}
 			}
 		}
 
-		if(bean.os != null)
-		for(OsBean os : bean.os){
-			marche.getMarchesOss().add(new MarchesOs(marche, new OsType(os.typeOs.value), os.dateOs, os.commentaire));
+
+		//////////////////////////////////// TAUX AVANCEMNT
+		
+		boolean isTaux = bean.taux != null && !bean.taux.isEmpty();
+		if( isTaux ) {
+			
+			// delete 
+			marche.getMarchesTaux().removeIf(mt -> bean.taux.stream().noneMatch(tb -> tb.id != null && tb.id.equals(mt.getId())));
+
+			/// CHECK IF TAUX HAS CHANGED
+			MarchesTaux oldCurrentTaux = marche.getCurrentTaux();
+			TauxBean newCurrentTaux = Collections.max(bean.taux, Comparator.comparing(tb -> tb.dateTaux));
+			
+			if( oldCurrentTaux == null ||  
+					! oldCurrentTaux.getTaux().equals(newCurrentTaux.valueTaux) ||  
+					! Helpers.isEqual(newCurrentTaux.dateTaux, oldCurrentTaux.getDateTaux()) ) {
+				System.out.println("TAUX CHANGED !!");
+				dirtyCheckTaux = true;
+			}
+
+			for(TauxBean tb : bean.taux) {
+				MarchesTaux mT = new MarchesTaux();
+				if( tb.id != null ) {		
+					mT = marche.getMarchesTaux().stream().filter(mt -> mt.getId().equals(tb.id)).findAny().orElse(null);
+				} 
+				mT.setTaux(tb.valueTaux);
+				mT.setDateTaux(tb.dateTaux);
+				mT.setCommentaire(tb.commentaire);	
+				// add new ones
+				if( tb.id == null ) {	
+					mT.setMarches(marche);
+					marche.getMarchesTaux().add(mT);
+				} 
+			}
+			
+		} else {
+			marche.setCurrentTaux(null);
+			marche.getMarchesTaux().clear();
 		}
 
-		if(bean.decomptes != null)
-		for(DecomptesBean db : bean.decomptes){
-			marche.getMarchesDecomptes().add(new MarchesDecomptes(marche, db.montant, db.dateDec, db.commentaire));
+
+		//////////////////////////////////// DECOMPTES
+		
+		boolean isDec = bean.decomptes != null && !bean.decomptes.isEmpty();
+		if(isDec) {
+			for(DecomptesBean db : bean.decomptes) {
+				marche.getMarchesDecomptes().add(new MarchesDecomptes(marche, db.montant, db.dateDec, db.commentaire));
+			}			
 		}
 		
+		entityManager.flush();
+		
+		marche.setCurrentTaux( isTaux ? Collections.max(marche.getMarchesTaux(), Comparator.comparing(mt -> mt.getDateTaux())) : null );
+		marche.setCurrentOs( isOs ? Collections.max(marche.getMarchesOss(), Comparator.comparing(os -> os.getDateOs())) : null );
+		marche.setCurrentDecompte( isDec ? Collections.max(marche.getMarchesDecomptes(), Comparator.comparing(dec -> dec.getDateDecompte())) : null );
 		
 		
 		entityManager.flush();
 		
 		
-		if(bean.taux != null) {
-			marche.setCurrentTaux(Collections.max(marche.getMarchesTaux(), Comparator.comparing(mt -> mt.getDateTaux())));
-		}
+		////////////////////////////////////////// WORKED DAYS && RETARD
+
+		if( isTaux && dirtyCheckTaux ) {
+
+			MarchesTaux currentTaux = marche.getCurrentTaux();
+			
+			// filtrer les os qui ont une date superieur à la date du current taux
+			List<OsBean> filtredOs = isOs ? bean.os.stream().filter(os -> os.dateOs.before(currentTaux.getDateTaux())).collect(Collectors.toList()) : null;
+
+			long workDays = 0;
+			if( filtredOs != null && !filtredOs.isEmpty() ) {
+
+				Date lastReprise = marche.getDateOsStart();
+				OsBean currentOs = null;
+				
+				for(OsBean os : filtredOs) {
+					currentOs = os;
+					if(os.typeOs.value.equals(enums.OsType.ARRET.value)) {
+						workDays += ChronoUnit.DAYS.between( Helpers.toLocalDate(lastReprise), Helpers.toLocalDate(os.dateOs) );
+					} else if(os.typeOs.value.equals(enums.OsType.REPRISE.value)) {
+						lastReprise = os.dateOs;
+					} else {
+						throw new OsIntegrityException();
+					}	
+				}
+				
+				if( currentOs.typeOs.value.equals(enums.OsType.REPRISE.value) ) {
+					workDays += ChronoUnit.DAYS.between( Helpers.toLocalDate(currentOs.dateOs), Helpers.toLocalDate(currentTaux.getDateTaux()) );
+				} 
+
+			} else {
+				workDays = ChronoUnit.DAYS.between( Helpers.toLocalDate(marche.getDateOsStart()), Helpers.toLocalDate(currentTaux.getDateTaux()) );
+			}
+
+			int delaiInDays = marche.getDelaiExecution() * 31 ;
+			int workPrecent = (int)  (workDays * 100 / delaiInDays) ;
+			int currentTauxInDays = (int)  ( currentTaux.getTaux() * delaiInDays / 100 );
+			int retardEnJour = (int) workDays - currentTauxInDays;
+
+			System.out.println("Delai Execution In Days >>>>>>>>>>>>>>>> " + delaiInDays);
+			System.out.println("Real >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + currentTaux.getTaux() + " % -> ("+currentTauxInDays+") jours");
+			System.out.println("Théorique >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + workPrecent + " % -> ("+workDays+") jours");
+			System.out.println("Retard >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ("+retardEnJour+") jours");
+			
+			currentTaux.setRetardEnJour( retardEnJour );
+			currentTaux.setWorkedDays((int) workDays);
+			
+		} 
 		
+
 		return marche.getId();
 		
 		
@@ -154,15 +288,16 @@ public class MarcheService {
 
 		MarcheBean marcheDto = new MarcheBean(
 				marche.getId(), marche.getProjet().getId(), marche.getIntitule(), marche.getDelaiExecution(),
-				marche.getMontant(), marche.getDateOsStart(), marche.getDateReceptionProvisoire(), marche.getDateReceptionDefinitive()
-				);
+				marche.getMontant(), marche.getNumMarche(), 
+				marche.getDateApprobation(), marche.getDateOsStart(), marche.getDateReceptionProvisoire(), marche.getDateReceptionDefinitive()
+		);
 
 		marcheDto.marcheType = new SimpleDto(marche.getMarchesType().getId(), marche.getMarchesType().getNom());
 		marcheDto.marcheEtat = new SimpleDto(marche.getMarchesEtat().getId(), marche.getMarchesEtat().getNom());
 
 		
 		marche.getMarchesTaux().forEach(taux -> {
-			marcheDto.taux.add(new TauxBean(taux.getTaux(), taux.getDateTaux(), taux.getCommentaire()));
+			marcheDto.taux.add(new TauxBean(taux.getId(), taux.getTaux(), taux.getDateTaux(), taux.getCommentaire()));
 		});
 		
 		marche.getMarchesDecomptes().forEach(dec -> {

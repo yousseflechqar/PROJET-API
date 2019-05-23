@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import beans.LocalisationBean;
 import beans.ProgrammeBean;
+import beans.SteBean;
 import dto.SimpleDto;
 import entities.IndhProgramme;
 
@@ -24,6 +25,16 @@ public class DiversDao {
 		return entityManager.createQuery("SELECT new dto.SimpleDto(s.id, s.nom) FROM Societe s WHERE s.nom LIKE :q")
 				.setParameter("q", "%" + q + "%")
 				.getResultList() ;
+	}
+	
+
+	public SteBean fetchtSocietesById(Integer idSte){
+		return entityManager.createQuery(""
+				+ "SELECT new beans.SteBean(s.id, s.nom, s.adresse, rsp.nom, rsp.email, rsp.phones) FROM Societe s "
+					+ "LEFT JOIN s.responsable rsp "
+				+ "WHERE s.id = :idSte", SteBean.class)
+				.setParameter("idSte", idSte)
+				.getSingleResult() ;
 	}
 	
 	@SuppressWarnings("unchecked")

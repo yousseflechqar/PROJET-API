@@ -1,6 +1,11 @@
 package services;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -12,14 +17,11 @@ import org.springframework.stereotype.Service;
 import beans.UserBean;
 import dao.GenericDao;
 import dao.UserDao;
-import dto.PartnerDto;
-import dto.ProjetEditDto;
+import dto.SelectGrpDto;
 import dto.SimpleDto;
+import entities.Division;
 import entities.Profile;
-import entities.Projet;
-import entities.Role;
 import entities.User;
-import entities.UserRole;
 
 
 @Service
@@ -45,6 +47,8 @@ public class UserService {
 		user.setActive(bean.active);
 		user.setDateCreation(new Date());
 		
+		user.setDivision( bean.division != null ? new Division(bean.division) : null );
+		
 		user.setProfile(new Profile(bean.profile));
 		
 		if(bean.id == null) {
@@ -68,7 +72,8 @@ public class UserService {
 		User user = userDao.getUserForEdit(idUser);
 		
 		UserBean dto = new UserBean(
-				user.getId(), user.getLogin(), user.getPassword(), user.getNom(), user.getPrenom(), user.isActive(), user.getProfile().getId()
+				user.getId(), user.getLogin(), user.getPassword(), user.getNom(), user.getPrenom(), user.isActive(), 
+				user.getDivision(), user.getProfile().getId()
 		);
 		
 //		user.getUserRoles().forEach(ur -> {
@@ -77,5 +82,46 @@ public class UserService {
 		
 		return dto;
 	} 
+	
+	
+	public Map<String, List<SimpleDto>> getChargesSuivi() {
+		
+		List<User> chargesSuivi = userDao.getChargesSuivi();
+		
+		Map<String, List<SimpleDto>> usersDivisionMap = new LinkedHashMap<String, List<SimpleDto>>();
+		
+		
+		chargesSuivi.forEach( cs -> {
+			String nomDiv = cs.getDivision().getNom();
+			if( !usersDivisionMap.containsKey(nomDiv) ) {
+				usersDivisionMap.put(nomDiv, new ArrayList<SimpleDto>());
+			}
+			
+			usersDivisionMap.get(nomDiv).add(new SimpleDto(cs.getId(), cs.getNom() + " " + cs.getPrenom()));
+		});
+		
+		return usersDivisionMap;
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Collection<SelectGrpDto> getChargesSuivi2() {
+		
+		List<User> chargesSuivi = userDao.getChargesSuivi();
+		
+
+		Map<Integer, SelectGrpDto> usersDivisionMap = new LinkedHashMap<Integer, SelectGrpDto>();
+		
+		
+		chargesSuivi.forEach( cs -> {
+			Integer idDiv = cs.getDivision().getId();
+			if( !usersDivisionMap.containsKey(idDiv) ) {
+				usersDivisionMap.put(idDiv, new SelectGrpDto(cs.getDivision().getNom()));
+			}
+			
+			usersDivisionMap.get(idDiv).options.add(new SimpleDto(cs.getId(), cs.getNom() + " " + cs.getPrenom()));
+		});
+		
+		return usersDivisionMap.values();
+	}
 	
 }

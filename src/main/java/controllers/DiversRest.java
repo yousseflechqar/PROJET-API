@@ -40,6 +40,12 @@ public class DiversRest {
 		return diversService.saveSte(bean);
 	}
 	
+	@GetMapping(value = "/societes/{idSte}")
+	public SteBean fecthSociete(@PathVariable Integer idSte) {
+		return diversDao.fetchtSocietesById(idSte);
+	}
+	
+	
 	@GetMapping(value = "/societes")
 	public List<SimpleDto> getSocietes(HttpServletRequest request) {
 		return diversDao.getSocietesByName(request.getParameter("q"));

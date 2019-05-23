@@ -8,6 +8,7 @@ public class ProjetSearchBean {
 	public Integer commune;
 	public Integer acheteurType;
 	public Integer srcFinancement;
+	public Integer prSouffrance;
 	
 	
 	
@@ -55,6 +56,12 @@ public class ProjetSearchBean {
 	}
 	public void setSrcFinancement(Integer srcFinancement) {
 		this.srcFinancement = srcFinancement;
+	}
+	public Integer getPrSouffrance() {
+		return prSouffrance;
+	}
+	public void setPrSouffrance(Integer prSouffrance) {
+		this.prSouffrance = prSouffrance;
 	}
 
 	

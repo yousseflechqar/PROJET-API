@@ -43,9 +43,10 @@ public class User implements java.io.Serializable {
 	private String telephone;
 	private boolean active;
 	
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "profile")
-    private Profile profile;
+	private Profile profile;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "last_connexion")

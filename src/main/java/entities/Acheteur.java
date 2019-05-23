@@ -24,9 +24,6 @@ public class Acheteur implements java.io.Serializable {
 	private String nom;
 	
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "acheteur", cascade = CascadeType.ALL, orphanRemoval=true)
-	private Set<AcheteurSrcFinancement> acheteurSrcFinancements = new HashSet<AcheteurSrcFinancement>(0);
-
 	
 	public Acheteur() {}
 	

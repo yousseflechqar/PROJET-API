@@ -18,10 +18,13 @@ import entities.QAcheteur;
 import entities.QCommune;
 import entities.QLocalisation;
 import entities.QMarches;
+import entities.QMarchesOs;
 import entities.QMarchesType;
 import entities.QProjet;
 import entities.QProjetMaitreOuvrage;
 import entities.QProjetPartenaire;
+import enums.OsType;
+import enums.ProjetSouffrance;
 
 @Repository
 public class SearchProjetDao {
@@ -61,7 +64,7 @@ public class SearchProjetDao {
 		
 		BooleanBuilder where_srcFi = new BooleanBuilder();
 		if( bean.srcFinancement != null && bean.srcFinancement != 0 ) {
-			where_srcFi.and(pMo.srcFinancement.id.eq(bean.srcFinancement));
+			where_srcFi.and(prj.srcFinancement.id.eq(bean.srcFinancement));
 		}
 		
 		////// MAITRE OUVRAGE ET PARTENAIRE
@@ -95,6 +98,25 @@ public class SearchProjetDao {
 		}
 		
 
+		/////// PROJET EN SOUFFRANCE
+		
+		BooleanBuilder where_souff = new BooleanBuilder();
+		
+		if( bean.prSouffrance != null &&  bean.prSouffrance != 0 ){
+
+			QMarches marche2 = new QMarches("marche2");
+			QMarchesOs mOs2 = new QMarchesOs("mOs2");
+			
+			if( bean.prSouffrance.equals(ProjetSouffrance.EN_ARRET.value) ) {
+				where_souff.and(prj.id.in(JPAExpressions
+						.select(marche2.projet.id).from(marche2).join(marche2.currentOs, mOs2)
+						.where(mOs2.osType.id.eq(OsType.ARRET.value))
+						
+				));
+			}
+		}
+		
+		
 		
 		return new JPAQuery<ProjetDto>(entityManager)
 				.select(new QProjetDto(prj.id, prj.intitule, prj.taux, mo.nom, com.id, com.nom,
@@ -107,7 +129,7 @@ public class SearchProjetDao {
 					.leftJoin(prj.localisations, loc)
 						.leftJoin(loc.commune, com)
 				
-				.where(sWhere.and(where_loc).and(where_ach).and(where_srcFi))
+				.where(sWhere.and(where_loc).and(where_ach).and(where_srcFi).and(where_souff))
 				.orderBy(prj.dateSaisie.desc())
 				.fetch()
 				;

@@ -1,7 +1,6 @@
 package beans;
 
-import java.util.ArrayList;
-import java.util.List;
+import entities.Division;
 
 public class UserBean {
 	
@@ -11,6 +10,7 @@ public class UserBean {
 	public String nom;
 	public String prenom;
 	public Integer profile;
+	public Integer division;
 	public boolean active;
 	
 	public UserBean() {}
@@ -23,7 +23,7 @@ public class UserBean {
 	}
 	
 	// for save user
-	public UserBean(Integer id, String login, String password, String nom, String prenom, boolean active, Integer profile) {
+	public UserBean(Integer id, String login, String password, String nom, String prenom, boolean active, Integer division, Integer profile) {
 		this.id = id;
 		this.login = login;
 		this.password = password;
@@ -31,6 +31,18 @@ public class UserBean {
 		this.prenom = prenom;
 		this.active = active;
 		this.profile = profile;
+		this.division = division;
+	}
+	
+	public UserBean(Integer id, String login, String password, String nom, String prenom, boolean active, Division division, Integer profile) {
+		this.id = id;
+		this.login = login;
+		this.password = password;
+		this.nom = nom;
+		this.prenom = prenom;
+		this.active = active;
+		this.profile = profile;
+		this.division = division != null ? division.getId() : null;
 	}
 	
 	

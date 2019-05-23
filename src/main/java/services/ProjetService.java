@@ -35,6 +35,7 @@ import dto.SimpleDto;
 import dto.TreeDto;
 import dto.TreePathDto;
 import dto.TreeProgrammeDto;
+import dto.UserSession;
 import entities.Acheteur;
 import entities.Commune;
 import entities.Fraction;
@@ -46,6 +47,7 @@ import entities.ProjetMaitreOuvrage;
 import entities.ProjetPartenaire;
 import entities.Secteur;
 import entities.SrcFinancement;
+import entities.User;
 
 @Service
 public class ProjetService {
@@ -64,7 +66,7 @@ public class ProjetService {
 	
 	
 	@Transactional(rollbackOn = Exception.class)
-	public Integer saveProjet(ProjetBean bean) {
+	public Integer saveProjet(ProjetBean bean, UserSession userSession) {
 		
 		Projet projet = bean.idProjet != null ? genericProjetDao.read(bean.idProjet, Projet.class) : new Projet();
 		
@@ -72,15 +74,19 @@ public class ProjetService {
 		projet.setMontant(bean.montant);
 		projet.setConvention(bean.isConvention);
 		projet.setSecteur(new Secteur(bean.secteur));
-		projet.setDateSaisie(new Date());
+		projet.setSrcFinancement(new SrcFinancement(bean.srcFinancement));
+
+		projet.setChargeSuivi(new User(bean.chargeSuivi != null ? bean.chargeSuivi : userSession.id));
 		
 		projet.setPrdts(bean.prdts);
 		
 		if(bean.idProjet == null) {
+			projet.setDateSaisie(new Date());
+			projet.setUserSaisie(new User(userSession.id));
 			genericProjetDao.create(projet);
+		} else {
+			projet.setDateLastModif(new Date());
 		}
-		
-		
 
 		projet.setIndh(null);
 		projet.getProjetPartenaires().clear();
@@ -91,20 +97,24 @@ public class ProjetService {
 
 		projet.setIndh(bean.indh ? new ProjetIndh(projet, new IndhProgramme(bean.indhProgramme)) : null);
 		
-		bean.localisations.forEach( loc -> {
+		if( bean.localisations != null && !bean.localisations.isEmpty() ) {
 			
-			List<Integer> t = Arrays.stream(loc.split("\\.")).map(Integer::parseInt).collect(Collectors.toList());
+			bean.localisations.forEach( loc -> {
+				
+				List<Integer> t = Arrays.stream(loc.split("\\.")).map(Integer::parseInt).collect(Collectors.toList());
+				
+				projet.getLocalisations().add(
+						new Localisation( 
+								projet,
+								new Commune(t.get(0)), 
+								t.size() > 1 ? new Fraction(t.get(1)) : null
+								));
+			});
 			
-			projet.getLocalisations().add(
-					new Localisation( 
-							projet,
-							new Commune(t.get(0)), 
-							t.size() > 1 ? new Fraction(t.get(1)) : null
-					));
-		});
+		}
 		
 		
-		///////// Partenaires
+		/////////////////////////////////////////////////// Partenaires
 		
 		if(bean.isConvention) {
 			bean.partners.forEach( p -> {
@@ -114,29 +124,25 @@ public class ProjetService {
 						new ProjetPartenaire(
 									projet, 
 									new Acheteur(Integer.parseInt(t[0])), 
-									Double.parseDouble(t[1]),
-									t.length == 3 ? new SrcFinancement(Integer.parseInt(t[2])) : null
+									Double.parseDouble(t[1])
 								)
 						);
 			});
 		}
 		
 
-		///////// Maitre ouvrage
+		/////////////////////////////////////////////////// Maitre ouvrage
+		
 		String[] t = bean.maitreOuvrage.split("\\:");
 		projet.setProjetMaitreOuvrage(gProjetMaitreOuvrageDao.create(new ProjetMaitreOuvrage(
 				new Acheteur(Integer.parseInt(t[0])), 
 				projet, 
-				t.length == 2 ? new SrcFinancement(Integer.parseInt(t[1])) : null,
 				false
 		)));
 		projet.setProjetMaitreOuvrageDelegue(
 				bean.isMaitreOuvrageDel ? gProjetMaitreOuvrageDao.create(new ProjetMaitreOuvrage(new Acheteur(bean.maitreOuvrageDel), projet, true)) : null
 		);
-		
 
-		
-//		entityManager.flush();
 
 		return projet.getId();
 	}
@@ -145,27 +151,18 @@ public class ProjetService {
 	public ProjetEditDto getProjetForEdit(Integer idProjet) {
 		
 		Projet projet = projetDao.getProjetForEdit(idProjet);
-	
-		ProjetMaitreOuvrage pMod = projet.getProjetMaitreOuvrageDelegue();
-		Acheteur mod = pMod != null ? pMod.getMaitreOuvrage() : null;
-		Acheteur mo = projet.getProjetMaitreOuvrage().getMaitreOuvrage();
-		SimpleDto modDto = pMod != null ? new SimpleDto(mod.getId(), mod.getNom()) : null;
-		SrcFinancement moSrcFin = projet.getProjetMaitreOuvrage().getSrcFinancement();
 		
 		ProjetEditDto dto = new ProjetEditDto(
-			projet.getIntitule(), projet.getMontant(), projet.isConvention(), 
-			new SimpleDto(mo.getId(), mo.getNom()) , moSrcFin != null ? moSrcFin.getId() : null,
-			modDto != null, modDto,
-			projet.getSecteur().getId(),
-			projet.getIndh() != null, projet.getIndh() != null ? projet.getIndh().getProgramme().getId():null, projet.isPrdts()
+			projet.getIntitule(), projet.getMontant(), projet.getSrcFinancement(), projet.isConvention(), 
+			projet.getProjetMaitreOuvrage(),
+			projet.getProjetMaitreOuvrageDelegue(),
+			projet.getSecteur().getId(), projet.getChargeSuivi(),
+			projet.getIndh(),
+			projet.isPrdts()
 		);
 		
 		projet.getProjetPartenaires().forEach(pp -> {
-			dto.partners.add(new PartnerDto(
-					new SimpleDto(pp.getPartenaire().getId(), pp.getPartenaire().getNom()), pp.getFinancement(), 
-					pp.getSrcFinancement() != null ? new SimpleDto(pp.getSrcFinancement().getId(), pp.getSrcFinancement().getLabel()) : null
-					)
-			);
+			dto.partners.add( new PartnerDto( new SimpleDto(pp.getPartenaire().getId(), pp.getPartenaire().getNom()), pp.getFinancement() ) );
 		});
 		
 		projet.getLocalisations().forEach(loc -> {
@@ -195,11 +192,7 @@ public class ProjetService {
 		dto.taux = projet.getTaux();
 
 		projet.getProjetPartenaires().forEach(pp -> {
-			dto.partners.add(new PartnerDto(
-					new SimpleDto(pp.getPartenaire().getId(), pp.getPartenaire().getNom()), pp.getFinancement(), 
-					pp.getSrcFinancement() != null ? new SimpleDto(pp.getSrcFinancement().getId(), pp.getSrcFinancement().getLabel()) : null
-					)
-			);
+			dto.partners.add( new PartnerDto( new SimpleDto(pp.getPartenaire().getId(), pp.getPartenaire().getNom()), pp.getFinancement() ) );
 		});
 		
 		if(projet.getIndh() != null) {			
@@ -208,9 +201,7 @@ public class ProjetService {
 		
 		dto.secteur = new SimpleDto(projet.getSecteur().getId(), projet.getSecteur().getNom()) ;
 		
-		if(projet.getProjetPartenaires().isEmpty() && pMo.getSrcFinancement() != null) {
-			dto.srcFinancement = new SimpleDto(pMo.getSrcFinancement().getId(), pMo.getSrcFinancement().getLabel()) ;
-		}
+
 		
 		Map<Integer, TreeDto> locMap = new LinkedHashMap<>();
 		projet.getLocalisations().forEach(loc -> {

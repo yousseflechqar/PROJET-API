@@ -1,3 +1,11 @@
+Optional
+
+Polymorphism.
+
+compareTo
+
+Collections.max(marche.getMarchesTaux(), Comparator.comparing(mt -> mt.getDateTaux()));
+
 equals and hashcode ??
 reflexion
 

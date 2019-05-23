@@ -27,6 +27,10 @@ public class GenericDao<T, PK extends Serializable>  {
 	    return this.entityManager.find(entityClass, id);
 	}
 	
+	public T getReference(PK id, Class<T> entityClass) {
+		return this.entityManager.getReference(entityClass, id);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public List<T> findAll(Class<T> entityClass) {
 		return entityManager.createQuery("Select t from " + entityClass.getSimpleName() + " t").getResultList();

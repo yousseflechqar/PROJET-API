@@ -121,11 +121,29 @@ public class DiversService {
 	@Transactional(rollbackOn = Exception.class)
 	public Integer saveSte(SteBean bean) {
 		
+		boolean editMode = bean.idSte != null;
+		
 		Societe ste = new Societe();
+		Responsable rsp = new Responsable();
+		
+		if(editMode) {
+			ste = gSocieteDao.read(bean.idSte, Societe.class);
+			rsp = ste.getResponsable();
+		}
+		
 		ste.setNom(bean.name);
 		ste.setAdresse(bean.location);
-		ste.setResponsable(gResponsableDao.create(new Responsable(bean.responsable, bean.email, bean.phones)));
-		gSocieteDao.create(ste);
+		
+		rsp.setNom(bean.responsable);
+		rsp.setEmail(bean.email);
+		rsp.setPhones(bean.phones);
+
+		if(!editMode) {
+			ste.setResponsable(gResponsableDao.create(rsp));
+			gSocieteDao.create(ste);
+		}
+		
+		
 		return ste.getId();
 		
 	}

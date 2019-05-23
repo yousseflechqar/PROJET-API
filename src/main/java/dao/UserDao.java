@@ -10,7 +10,9 @@ import org.springframework.stereotype.Repository;
 
 import beans.UserBean;
 import dto.SimpleDto;
+import entities.Division;
 import entities.User;
+import enums.ProfilesEnum;
 
 @Repository
 public class UserDao {
@@ -18,6 +20,24 @@ public class UserDao {
 	
 	@PersistenceContext
 	private EntityManager entityManager;
+	
+	
+	public User checkUser(String login, String password){
+		
+		try {
+			return entityManager.createQuery(""
+					
+					 + " SELECT u FROM User u "
+					 	+ " WHERE login = :login AND password = :password ", User.class)
+					
+			.setParameter("login", login)
+			.setParameter("password", password)
+			.getSingleResult();
+		}
+		catch (NoResultException e) {
+			return null;
+		}
+	}
 	
 	
 	@SuppressWarnings("unchecked")
@@ -55,4 +75,26 @@ public class UserDao {
 		return entityManager.createQuery("SELECT new dto.SimpleDto(r.id, r.label) FROM Profile r")
 				.getResultList() ;
 	}
+	
+
+	public List<SimpleDto> getDivisions() {
+		return entityManager.createQuery("SELECT new dto.SimpleDto(d.id, d.nom) FROM Division d", SimpleDto.class).getResultList() ;
+	}
+
+
+	public List<User> getChargesSuivi() {
+		return entityManager.createQuery(""
+				+ "SELECT u FROM User u "
+					+ "LEFT JOIN FETCH u.division "
+					+ "JOIN u.profile prf "
+				+ "WHERE prf.id = :profile", User.class)
+				.setParameter("profile", ProfilesEnum.charge_suivi.value)
+				.getResultList();
+	}
+	
 }
+
+
+
+
+

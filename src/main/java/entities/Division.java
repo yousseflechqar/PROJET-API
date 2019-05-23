@@ -30,6 +30,10 @@ public class Division implements java.io.Serializable {
 	public Division() {
 	}
 
+	public Division(Integer id) {
+		this.id = id;
+	}
+	
 	public Division(String nom) {
 		this.nom = nom;
 	}
