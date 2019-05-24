@@ -23,6 +23,7 @@ public class ProjetEditDto {
 	
 	
 	public Integer indhProgramme;
+	public Integer anneeProjet;
 	public Integer secteur;
 	public Integer srcFinancement;
 	public Integer chargeSuivi;
@@ -36,7 +37,7 @@ public class ProjetEditDto {
 	
 	public ProjetEditDto(String intitule, Double montant, SrcFinancement srcFinancement, boolean isConvention,
 			ProjetMaitreOuvrage pMo, ProjetMaitreOuvrage pMod, 
-			Integer secteur, User chargeSuivi,
+			Integer secteur, User chargeSuivi, Integer anneeProjet,
 			ProjetIndh indh, boolean prdts) {
 		super();
 		this.intitule = intitule;
@@ -49,8 +50,9 @@ public class ProjetEditDto {
 		this.secteur = secteur;
 		this.chargeSuivi = chargeSuivi != null ? chargeSuivi.getId() : null;
 		this.indh = (indh != null);
-		this.prdts = prdts;
 		this.indhProgramme = (indh != null) ? indh.getProgramme().getId() : null;
+		this.prdts = prdts;
+		this.anneeProjet = anneeProjet;
 	}
 	
 	

@@ -26,17 +26,18 @@ public class ProjetPartenaire implements java.io.Serializable {
 	private Acheteur partenaire;
 	
 
-	
-	private double financement;
+	private Double financement;
+	private String commentaire;
 	
 	
 	
 	public ProjetPartenaire() {}
 
-	public ProjetPartenaire(Projet projet, Acheteur partenaire, double financement) {
+	public ProjetPartenaire(Projet projet, Acheteur partenaire, Double financement, String commentaire) {
 		this.projet = projet;
 		this.partenaire = partenaire;
 		this.financement = financement;
+		this.commentaire = commentaire;
 	}
 
 
@@ -48,11 +49,11 @@ public class ProjetPartenaire implements java.io.Serializable {
 		this.partenaire = partenaire;
 	}
 
-	public double getFinancement() {
+	public Double getFinancement() {
 		return financement;
 	}
 
-	public void setFinancement(double financement) {
+	public void setFinancement(Double financement) {
 		this.financement = financement;
 	}
 
@@ -70,6 +71,14 @@ public class ProjetPartenaire implements java.io.Serializable {
 
 	public void setProjet(Projet projet) {
 		this.projet = projet;
+	}
+
+	public String getCommentaire() {
+		return commentaire;
+	}
+
+	public void setCommentaire(String commentaire) {
+		this.commentaire = commentaire;
 	}
 
 

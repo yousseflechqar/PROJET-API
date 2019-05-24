@@ -39,6 +39,9 @@ public class Projet implements java.io.Serializable {
 	private boolean prdts;
 	private Integer taux;
 	
+	@Column(name = "annee_projet")
+	private Integer anneeProjet;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "secteur")
 	private Secteur secteur;
@@ -247,6 +250,14 @@ public class Projet implements java.io.Serializable {
 
 	public void setSrcFinancement(SrcFinancement srcFinancement) {
 		this.srcFinancement = srcFinancement;
+	}
+
+	public Integer getAnneeProjet() {
+		return anneeProjet;
+	}
+
+	public void setAnneeProjet(Integer anneeProjet) {
+		this.anneeProjet = anneeProjet;
 	}
 
 

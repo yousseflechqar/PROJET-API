@@ -48,6 +48,7 @@ import entities.ProjetPartenaire;
 import entities.Secteur;
 import entities.SrcFinancement;
 import entities.User;
+import enums.ContributionEnum;
 
 @Service
 public class ProjetService {
@@ -75,6 +76,7 @@ public class ProjetService {
 		projet.setConvention(bean.isConvention);
 		projet.setSecteur(new Secteur(bean.secteur));
 		projet.setSrcFinancement(new SrcFinancement(bean.srcFinancement));
+		projet.setAnneeProjet(bean.anneeProjet);
 
 		projet.setChargeSuivi(new User(bean.chargeSuivi != null ? bean.chargeSuivi : userSession.id));
 		
@@ -118,13 +120,14 @@ public class ProjetService {
 		
 		if(bean.isConvention) {
 			bean.partners.forEach( p -> {
-				String[] t = p.split("\\:");
+
 
 				projet.getProjetPartenaires().add(
 						new ProjetPartenaire(
 									projet, 
-									new Acheteur(Integer.parseInt(t[0])), 
-									Double.parseDouble(t[1])
+									new Acheteur(p.partner.value), 
+									p.montant,
+									p.commentaire
 								)
 						);
 			});
@@ -133,9 +136,9 @@ public class ProjetService {
 
 		/////////////////////////////////////////////////// Maitre ouvrage
 		
-		String[] t = bean.maitreOuvrage.split("\\:");
+
 		projet.setProjetMaitreOuvrage(gProjetMaitreOuvrageDao.create(new ProjetMaitreOuvrage(
-				new Acheteur(Integer.parseInt(t[0])), 
+				new Acheteur(bean.maitreOuvrage), 
 				projet, 
 				false
 		)));
@@ -156,13 +159,16 @@ public class ProjetService {
 			projet.getIntitule(), projet.getMontant(), projet.getSrcFinancement(), projet.isConvention(), 
 			projet.getProjetMaitreOuvrage(),
 			projet.getProjetMaitreOuvrageDelegue(),
-			projet.getSecteur().getId(), projet.getChargeSuivi(),
-			projet.getIndh(),
-			projet.isPrdts()
+			projet.getSecteur().getId(), projet.getChargeSuivi(), projet.getAnneeProjet(),
+			projet.getIndh(), projet.isPrdts()
 		);
 		
 		projet.getProjetPartenaires().forEach(pp -> {
-			dto.partners.add( new PartnerDto( new SimpleDto(pp.getPartenaire().getId(), pp.getPartenaire().getNom()), pp.getFinancement() ) );
+			dto.partners.add( new PartnerDto( 
+					new SimpleDto(pp.getPartenaire().getId(), pp.getPartenaire().getNom()), 
+					pp.getFinancement(), pp.getFinancement() != null ? ContributionEnum.financiere.value : ContributionEnum.autres.value ,
+					pp.getCommentaire()		
+			));
 		});
 		
 		projet.getLocalisations().forEach(loc -> {
@@ -192,7 +198,11 @@ public class ProjetService {
 		dto.taux = projet.getTaux();
 
 		projet.getProjetPartenaires().forEach(pp -> {
-			dto.partners.add( new PartnerDto( new SimpleDto(pp.getPartenaire().getId(), pp.getPartenaire().getNom()), pp.getFinancement() ) );
+			dto.partners.add( new PartnerDto( 
+					new SimpleDto(pp.getPartenaire().getId(), pp.getPartenaire().getNom()), 
+					pp.getFinancement(), pp.getFinancement() != null ? ContributionEnum.financiere.value : ContributionEnum.autres.value ,
+					pp.getCommentaire()		
+			));
 		});
 		
 		if(projet.getIndh() != null) {			
