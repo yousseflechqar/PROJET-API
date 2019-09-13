@@ -8,6 +8,7 @@ import javax.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 
@@ -23,6 +24,7 @@ import entities.QMarchesType;
 import entities.QProjet;
 import entities.QProjetMaitreOuvrage;
 import entities.QProjetPartenaire;
+import entities.QUser;
 import enums.OsType;
 import enums.ProjetSouffrance;
 
@@ -44,6 +46,7 @@ public class SearchProjetDao {
 		
 		QMarches marche = new QMarches("marche");
 		QMarchesType mType = new QMarchesType("mType");
+		QUser chargeSuiv = new QUser("chargeSuiv");
 		
 		QProjetMaitreOuvrage pMo = new QProjetMaitreOuvrage("pMo");
 		QAcheteur mo = new QAcheteur("mo");
@@ -120,8 +123,12 @@ public class SearchProjetDao {
 		
 		return new JPAQuery<ProjetDto>(entityManager)
 				.select(new QProjetDto(prj.id, prj.intitule, prj.taux, mo.nom, com.id, com.nom,
-						marche.id, mType.nom))
+						marche.id, mType.nom, 
+						chargeSuiv.id, chargeSuiv.prenom.concat(Expressions.stringTemplate("' '").concat(chargeSuiv.nom))
+				))
+				
 				.from(prj)
+					.leftJoin(prj.chargeSuivi, chargeSuiv)
 					.leftJoin(prj.marches, marche)
 						.leftJoin(marche.marchesType, mType)
 					.leftJoin(prj.projetMaitreOuvrage, pMo)

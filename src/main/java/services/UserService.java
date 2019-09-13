@@ -21,6 +21,8 @@ import dto.SelectGrpDto;
 import dto.SimpleDto;
 import entities.Division;
 import entities.Profile;
+import entities.ProfileRoles;
+import entities.Role;
 import entities.User;
 
 
@@ -34,6 +36,8 @@ public class UserService {
 	private UserDao userDao;
 	@Autowired
 	private GenericDao<User, Integer> gUserDao;
+	@Autowired
+	private GenericDao<ProfileRoles, Integer> gProfileRolesDao;
 	
 	@Transactional(rollbackOn = Exception.class)
 	public Integer saveUser(UserBean bean) {
@@ -54,7 +58,7 @@ public class UserService {
 		if(bean.id == null) {
 			gUserDao.create(user);
 		} else {
-			user.getUserRoles().clear();
+//			user.getUserRoles().clear();
 		}
 		
 		entityManager.flush();
@@ -122,6 +126,16 @@ public class UserService {
 		});
 		
 		return usersDivisionMap.values();
+	}
+
+	@Transactional(rollbackOn = Exception.class)
+	public void saveRolesToProfile(Integer idProfile, List<Integer> roles) {
+		
+		userDao.deleteRolesByProfile(idProfile);
+
+		roles.forEach(role -> {
+			gProfileRolesDao.create(new ProfileRoles(new Profile(idProfile), new Role(role)));
+		});
 	}
 	
 }

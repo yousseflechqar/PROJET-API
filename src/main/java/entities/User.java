@@ -61,10 +61,7 @@ public class User implements java.io.Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
 	private Set<ProjetUser> projetUsers = new HashSet<ProjetUser>(0);
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval=true)
-	private Set<UserRole> userRoles = new HashSet<UserRole>(0);
 
-	
 	
 	public User() {
 	}
@@ -176,12 +173,6 @@ public class User implements java.io.Serializable {
 
 	public void setProjetUsers(Set<ProjetUser> projetUsers) {
 		this.projetUsers = projetUsers;
-	}
-	public Set<UserRole> getUserRoles() {
-		return userRoles;
-	}
-	public void setUserRoles(Set<UserRole> userRoles) {
-		this.userRoles = userRoles;
 	}
 	public Profile getProfile() {
 		return profile;

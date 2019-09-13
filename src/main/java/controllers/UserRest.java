@@ -82,6 +82,19 @@ public class UserRest {
 	@GetMapping(value = "/profiles")
 	public List<SimpleDto> getListProfiles() { return userDao.getListProfiles(); }
 	
+	@GetMapping(value = "/roles")
+	public List<SimpleDto> getListRoles() { return userDao.getListRoles(); }
+	
+	@PostMapping(value = "/roles/{idProfile}")
+	public void saveRolesToProfile(@PathVariable Integer idProfile, @RequestBody List<Integer> roles) { 
+		userService.saveRolesToProfile(idProfile, roles); 
+	}
+	
+	@GetMapping(value = "/roles/{idProfile}")
+	public List<SimpleDto> getRolesByProfile(@PathVariable Integer idProfile) { return userDao.getRolesByProfile(idProfile); }
+	
+
+	
 	@GetMapping(value = "/divisions")
 	public List<SimpleDto> getDivisions() { return userDao.getDivisions(); }
 	

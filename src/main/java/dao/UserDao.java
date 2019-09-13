@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 import beans.UserBean;
 import dto.SimpleDto;
 import entities.Division;
+import entities.Profile;
+import entities.Role;
 import entities.User;
 import enums.ProfilesEnum;
 
@@ -65,7 +67,7 @@ public class UserDao {
 
 
 	@SuppressWarnings("unchecked")
-	public List<SimpleDto> getListRoles2() {
+	public List<SimpleDto> getListRoles() {
 		return entityManager.createQuery("SELECT new dto.SimpleDto(r.id, r.label) FROM Role r")
 				.getResultList() ;
 	}
@@ -90,6 +92,36 @@ public class UserDao {
 				+ "WHERE prf.id = :profile", User.class)
 				.setParameter("profile", ProfilesEnum.charge_suivi.value)
 				.getResultList();
+	}
+
+
+
+	public List<SimpleDto> getRolesByProfile(Integer idProfile) {
+		return entityManager.createQuery(""
+				+ "SELECT new dto.SimpleDto(r.id, r.label) FROM ProfileRoles pR "
+					+ "JOIN pR.role r "
+				+ "WHERE pR.profile.id = :idProfile", SimpleDto.class)
+				.setParameter("idProfile", idProfile)
+				.getResultList();
+	}
+	
+	public List<Integer> getRolesByProfile2(Integer idProfile) {
+		return entityManager.createQuery(""
+				+ "SELECT r.id FROM ProfileRoles pR "
+				+ "JOIN pR.role r "
+				+ "WHERE pR.profile.id = :idProfile", Integer.class)
+				.setParameter("idProfile", idProfile)
+				.getResultList();
+	}
+
+
+	public void deleteRolesByProfile(Integer idProfile) {
+
+		entityManager.createQuery(""
+				+ "DELETE FROM ProfileRoles pR WHERE pR.profile.id = :idProfile")
+				.setParameter("idProfile", idProfile)
+				.executeUpdate();;
+		
 	}
 	
 }
