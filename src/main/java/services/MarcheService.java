@@ -1,21 +1,37 @@
 package services;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import beans.AttachmentBean;
+import beans.MarcheAttachs;
 import beans.MarcheBean;
 import beans.MarcheBean.DecomptesBean;
 import beans.MarcheBean.OsBean;
@@ -50,8 +66,9 @@ public class MarcheService {
 
 	
 	@Transactional(rollbackOn = Exception.class)
-	public Integer saveMarche(MarcheBean bean) {
+	public Integer saveMarche(MarcheBean bean, MarcheAttachs attachs) throws IOException {
 		
+
 		
 		boolean dirtyCheckTaux = false;
 
@@ -96,11 +113,11 @@ public class MarcheService {
 
 		
 		marche.getMarchesSocietes().clear();
-		marche.getMarchesOss().clear();
-		marche.getMarchesDecomptes().clear();
+//		marche.getMarchesOss().clear();
+//		marche.getMarchesDecomptes().clear();
 		
-		marche.setCurrentOs(null);
-		marche.setCurrentDecompte(null);
+//		marche.setCurrentOs(null);
+//		marche.setCurrentDecompte(null);
 		
 		
 
@@ -121,32 +138,65 @@ public class MarcheService {
 		//////////////////////////////////// ORDRES SERVICE
 		
 		boolean isOs = ( bean.os != null && ! bean.os.isEmpty() );
+
+		List<MarchesOs> deletedOs = new ArrayList<MarchesOs>();
+		
 		if( isOs ) {
+			
+			
+			// on detect les os supprimés
+			deletedOs = marche.getMarchesOss().stream().filter( oldOs -> bean.os.stream().noneMatch(os -> os.id.equals(oldOs.getId())) )
+														.collect(Collectors.toList());
+			
+			marche.getMarchesOss().removeIf(os -> bean.os.stream().noneMatch(del -> del.id != null && del.id.equals(os.getId())));
+			
+			
 			// we have to sort les ordres de service par date
 			bean.os.sort((o1, o2) -> o1.dateOs.compareTo(o2.dateOs));
 			
 			// check integrity os
 			Integer previousOsType = enums.OsType.REPRISE.value;
 			for(OsBean os : bean.os) {
+
 				if( os.typeOs.value.equals(previousOsType) ) {
 					throw new OsIntegrityException();
 				} else {
-					marche.getMarchesOss().add(new MarchesOs(marche, new OsType(os.typeOs.value), os.dateOs, os.commentaire));
+					
+					MarchesOs mOs = new MarchesOs();
+					
+					// get existing os
+					if(os.id != null) {
+						mOs = marche.getMarchesOss().stream().filter( mos -> mos.getId().equals(os.id) ).findFirst().get();
+					} 
+					// add new os
+					else {
+						mOs.setMarches(marche);
+						marche.getMarchesOss().add(mOs);
+					}
+					
+					mOs.setCommentaire(os.commentaire);
+					mOs.setDateOs(os.dateOs);
+					mOs.setOsType(new OsType(os.typeOs.value));
+
 					previousOsType = os.typeOs.value;
 				}
 			}
+		} else {
+			marche.setCurrentOs(null);
+			marche.getMarchesOss().clear();
 		}
 
-
 		//////////////////////////////////// TAUX AVANCEMNT
-		
-		boolean isTaux = bean.taux != null && !bean.taux.isEmpty();
-		if( isTaux ) {
-			
-			// delete 
-			marche.getMarchesTaux().removeIf(mt -> bean.taux.stream().noneMatch(tb -> tb.id != null && tb.id.equals(mt.getId())));
 
-			/// CHECK IF TAUX HAS CHANGED
+		
+		boolean isTaux = bean.taux != null && ! bean.taux.isEmpty();
+		
+		if( isTaux ) {
+
+			// On supprime les taux qui ont etait supprimés par le user dans la page "Edit Marche"
+			marche.getMarchesTaux().removeIf(mt -> bean.taux.stream().noneMatch( tb -> tb.id != null && tb.id.equals(mt.getId()) ));
+
+			/// CHECK IF THE CURRENT TAUX HAS CHANGED
 			MarchesTaux oldCurrentTaux = marche.getCurrentTaux();
 			TauxBean newCurrentTaux = Collections.max(bean.taux, Comparator.comparing(tb -> tb.dateTaux));
 			
@@ -160,7 +210,8 @@ public class MarcheService {
 			for(TauxBean tb : bean.taux) {
 				MarchesTaux mT = new MarchesTaux();
 				if( tb.id != null ) {		
-					mT = marche.getMarchesTaux().stream().filter(mt -> mt.getId().equals(tb.id)).findAny().orElse(null);
+					mT = marche.getMarchesTaux().stream().filter(mt -> mt.getId().equals(tb.id)).findFirst().get();
+//					mT = marche.getMarchesTaux().stream().filter(mt -> mt.getId().equals(tb.id)).findAny().orElse(null);
 				} 
 				mT.setTaux(tb.valueTaux);
 				mT.setDateTaux(tb.dateTaux);
@@ -181,10 +232,37 @@ public class MarcheService {
 		//////////////////////////////////// DECOMPTES
 		
 		boolean isDec = bean.decomptes != null && !bean.decomptes.isEmpty();
+		
+		List<MarchesDecomptes> deletedDec = new ArrayList<MarchesDecomptes>();
+		
 		if(isDec) {
-			for(DecomptesBean db : bean.decomptes) {
-				marche.getMarchesDecomptes().add(new MarchesDecomptes(marche, db.montant, db.dateDec, db.commentaire));
+			
+			// on detect les DEC supprimés
+			deletedDec = marche.getMarchesDecomptes().stream().filter( oldDec -> bean.decomptes.stream().noneMatch(dec -> dec.id.equals(oldDec.getId())) )
+														.collect(Collectors.toList());
+			
+			marche.getMarchesDecomptes().removeIf(dec -> bean.decomptes.stream().noneMatch(del -> del.id != null && del.id.equals(dec.getId())));
+			
+			
+			for(DecomptesBean dec : bean.decomptes) {
+				MarchesDecomptes mDec = new MarchesDecomptes();
+				
+				if ( dec.id != null ) {
+					mDec = marche.getMarchesDecomptes().stream().filter(mdec -> mdec.getId().equals(dec.id)).findFirst().get();
+				} 
+				else {
+					mDec.setMarches(marche);
+					marche.getMarchesDecomptes().add(mDec);
+				}
+				
+				mDec.setDecompte(dec.montant);
+				mDec.setDateDecompte(dec.dateDec);
+				mDec.setCommentaire(dec.commentaire);
+
 			}			
+		} else {
+			marche.setCurrentDecompte(null);
+			marche.getMarchesDecomptes().clear();
 		}
 		
 		entityManager.flush();
@@ -246,13 +324,130 @@ public class MarcheService {
 			
 		} 
 		
+		
+		
+//		for(OsBean os : bean.os) {
+
+//			mrequest.getFile("attachOs[")
+//			OutputStream OUT = Files.newOutputStream( 
+//					Paths.get("D:/attachements/" + attach.file.getOriginalFilename()) 
+//			) ;
+//			IOUtils.copy( attach.file.getInputStream() , OUT ); 
+//			OUT.close();
+//		}
+		
+		
+		//////////// SAVING ATTACHEMENTS
+		
+		if( isOs ) {
+			
+			
+			
+			for(OsBean os : bean.os) {
+				saveAttachments(
+						os.resources, 
+						os.index != null ? attachs.osAttachs[os.index] : null, 
+						Helpers.getOsPathDate(marche.getId(), os.dateOs), 
+						os.dateOs, marche.getId(), "OS-"
+				);
+			}
+			
+
+			for(MarchesOs del : deletedOs) {
+				Helpers.deleteDir(Helpers.getOsPathDate(marche.getId(), del.getDateOs()));
+			}
+
+			
+		} else { Helpers.deleteDir(Helpers.getOsPath(marche.getId())); }
+		
+		
+		if(isDec) {
+			
+			for(DecomptesBean dec : bean.decomptes) {
+				saveAttachments(dec.resources, 
+						dec.index != null ? attachs.decAttachs[dec.index] : null, 
+						Helpers.getDecPathDate(marche.getId(), dec.dateDec),  
+						dec.dateDec, marche.getId(), "DEC-"
+				);
+			}	
+			
+
+			for(MarchesDecomptes del : deletedDec) {
+				Helpers.deleteDir(Helpers.getDecPathDate(marche.getId(), del.getDateDecompte()));
+			}
+
+			
+		} else { Helpers.deleteDir(Helpers.getDecPath(marche.getId())); }
 
 		return marche.getId();
 		
 		
 		
 	}
+	
+	
 
+	public void saveAttachments(List<String> resources, List<MultipartFile> attachments, String savingPath, 
+			Date namingDate, Integer idMarche, String prefix) throws IOException {
+		
+		boolean weAlreadyDelete = false;
+		List<String> existingResources = Helpers.getDirFilesName(savingPath);
+		
+		
+		int i = 1;
+
+		if( ! resources.isEmpty() && existingResources.size() != resources.size() ) {
+
+			System.out.println(">> resources iterating ...");
+			for(String fileName : existingResources) {
+				
+				System.out.println(">> " + fileName);
+				
+				String currentPath = savingPath + "/" + fileName;
+				
+				boolean notExist = resources.stream().noneMatch(n -> n.equals(fileName));
+				
+				if ( notExist ) {
+					System.out.println("deleting ................................ > : "+currentPath);
+					Files.delete(Paths.get(currentPath));
+					weAlreadyDelete = true;
+					continue;
+				}
+				
+				// RENAMNE RESOURCES
+				if( weAlreadyDelete ) {
+					String newName = Helpers.namingAttachFiles(savingPath, namingDate, idMarche, fileName, prefix, i, fileName.startsWith("IMG-"));
+					System.out.println("renaming : "+ currentPath + " => : " + newName);
+					Helpers.renameFile(currentPath, newName);
+				}
+				
+				i++;
+
+			}
+
+		} else if( resources.isEmpty() ) {
+			Helpers.deleteDir(savingPath);
+		} else if( existingResources.size() == resources.size() ) {
+			i+= existingResources.size();
+		}
+
+		// Saving attachements related to this OS
+		if( attachments != null ) {
+
+			for(MultipartFile mpFile : attachments) {
+				
+				Helpers.createFile(
+						mpFile, 
+						Helpers.namingAttachFiles(
+								savingPath, namingDate, idMarche, mpFile.getOriginalFilename(), prefix, i++, mpFile.getContentType().startsWith("image/")
+						)
+				);
+			}
+		}
+	}
+	
+	
+	
 	public MarcheBean getMarcheForEdit(Integer idMarche) {
 
 		MarcheBean marcheDto = prepareMarcheDto(idMarche);
@@ -272,12 +467,12 @@ public class MarcheService {
 
 //		List<Integer> marchesIds = marcheDao.getMarchesIdsByProjet(idProjet);
 		
-		Integer travauxMarcheId = marcheDao.getTravauxMarcheId(idProjet);
+		Integer idMarche = marcheDao.getTravauxMarcheId(idProjet);
 		
-		if( travauxMarcheId == null )
+		if( idMarche == null )
 			return null;
 		
-		return getMarcheForDetail(travauxMarcheId);
+		return getMarcheForDetail(idMarche);
 
 	}
 	
@@ -300,16 +495,42 @@ public class MarcheService {
 			marcheDto.taux.add(new TauxBean(taux.getId(), taux.getTaux(), taux.getDateTaux(), taux.getCommentaire()));
 		});
 		
-		marche.getMarchesDecomptes().forEach(dec -> {
-			marcheDto.decomptes.add(new DecomptesBean(dec.getDecompte(), dec.getDateDecompte(), dec.getCommentaire()));
-		});
 		
 		marche.getMarchesSocietes().forEach(mSte -> {
 			marcheDto.societes.add(new SimpleDto(mSte.getSociete().getId(), mSte.getSociete().getNom()));
 		});
 		
+		marche.getMarchesDecomptes().forEach(dec -> {
+			
+					try {
+						marcheDto.decomptes.add(new DecomptesBean(
+								dec.getId(),
+								dec.getDecompte(), 
+								dec.getDateDecompte(), 
+								dec.getCommentaire(), 
+								Helpers.getDirFilesName(Helpers.getDecPathDate(marche.getId(), dec.getDateDecompte()))
+						));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		});
+		
 		marche.getMarchesOss().forEach(os -> {
-			marcheDto.os.add(new OsBean(new SimpleDto(os.getOsType().getId(), os.getOsType().getLabel()), os.getDateOs(), os.getCommentaire()));
+			
+					try {
+						marcheDto.os.add(new OsBean(
+								os.getId(),
+								new SimpleDto(os.getOsType().getId(), 
+								os.getOsType().getLabel()), 
+								os.getDateOs(), 
+								os.getCommentaire(),
+								Helpers.getDirFilesName(Helpers.getOsPathDate(marche.getId(), os.getDateOs()))
+						));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 		});
 		
 		return marcheDto;

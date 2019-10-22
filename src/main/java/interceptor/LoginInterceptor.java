@@ -31,12 +31,21 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 			return true;
 		}
 		
+		String attachsUri = url+"/attachments/";
+		if(uri.startsWith(attachsUri)) {
+			return true;
+		}
+		
 		
 		if( uri.equals(url+"/") ) {
 			return true;
 		}
 		
 		if( uri.startsWith(url+"/routes/") ) {
+			return true;
+		}
+		
+		if( uri.startsWith(url+"/api/postman/") ) {
 			return true;
 		}
 		

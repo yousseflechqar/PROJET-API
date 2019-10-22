@@ -10,3 +10,8 @@ equals and hashcode ??
 reflexion
 
 generic type :::: a must
+
+
+exception with walk files
+
+

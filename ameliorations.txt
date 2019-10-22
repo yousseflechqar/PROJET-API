@@ -4,3 +4,5 @@ json dynamic field
 hashcode and equal in hibernate why ??
 
 for try catch slect where -> try with aop to catch the exception
+
+rollback for saving attachments files if error

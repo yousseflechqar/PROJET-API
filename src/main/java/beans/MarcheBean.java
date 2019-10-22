@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import dto.SimpleDto;
 
 public class MarcheBean {
@@ -30,6 +32,8 @@ public class MarcheBean {
 	public SimpleDto marcheEtat;
 	public List<SimpleDto> societes = new ArrayList<>();
 	
+
+	
 	public MarcheBean() {}
 	
 	public MarcheBean(Integer idMarche, Integer idProjet, String intitule, Integer delai,
@@ -50,16 +54,24 @@ public class MarcheBean {
 	}
 
 	public static class OsBean {
+		
+		public Integer id;
 		public SimpleDto typeOs;
 		public Date dateOs;
 		public String commentaire;
+		public Integer index;
+		public List<String> resources = new ArrayList<String>();
 		
 		public OsBean() {}
-		public OsBean(SimpleDto typeOs, Date dateOs, String commentaire) {
+		
+		public OsBean(Integer id, SimpleDto typeOs, Date dateOs, String commentaire, List<String> resources) {
+			this.id = id;
 			this.typeOs = typeOs;
 			this.dateOs = dateOs;
 			this.commentaire = commentaire;
+			this.resources = resources;
 		}
+
 	}
 	
 	public static class TauxBean {
@@ -77,19 +89,30 @@ public class MarcheBean {
 			this.dateTaux = dateTaux;
 			this.commentaire = commentaire;
 		}
+
+
+		
 	}
 	
 	public static class DecomptesBean {
+		
+		public Integer id;
 		public Double montant;
 		public Date dateDec;
 		public String commentaire;
+		public Integer index;
+		public List<String> resources = new ArrayList<String>();
 		
 		public DecomptesBean() {}
-		public DecomptesBean(Double montant, Date dateDec, String commentaire) {
+		
+		public DecomptesBean(Integer id, Double montant, Date dateDec, String commentaire, List<String> resources) {
+			this.id = id;
 			this.montant = montant;
 			this.dateDec = dateDec;
 			this.commentaire = commentaire;
+			this.resources = resources;
 		}
+
 	}
 
 
