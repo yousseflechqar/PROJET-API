@@ -14,3 +14,7 @@ int don't deal with NULL
 
 
 java.nio.file.AccessDeniedException -> append file to directory
+
+
+The message java.lang.NoSuchMethodException: xxx.<init>() means that someone tried to call a constructor without any parameters. 
+Adding a default constructor should solve this problem

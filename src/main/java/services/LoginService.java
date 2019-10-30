@@ -1,5 +1,6 @@
 package services;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,15 +35,19 @@ public class LoginService {
 			return 0;
 		}
 		
-		if( ! user.isActive() ) {
+		if( user.isDisable() ) {
 			return -1;
 		}
 		
-		Integer idProfile = user.getProfile().getId();
+	
 		
-		List<Integer> rolesByProfile = userDao.getRolesByProfile2(idProfile);
+		List<Integer> rolesByProfile = new ArrayList<Integer>();
 		
-		UserSession userSession = new UserSession(user.getId(), user.getNom(), user.getPrenom(), idProfile, rolesByProfile);
+		user.getUserRoles().forEach(ur -> {
+			rolesByProfile.add(ur.getRole().getId());
+		});
+		
+		UserSession userSession = new UserSession(user.getId(), user.getNom(), user.getPrenom(), user.getUserType().getId(), rolesByProfile);
 		
 		session.setAttribute("user", userSession);
 		

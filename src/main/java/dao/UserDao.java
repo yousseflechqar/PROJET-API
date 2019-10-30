@@ -11,10 +11,9 @@ import org.springframework.stereotype.Repository;
 import beans.UserBean;
 import dto.SimpleDto;
 import entities.Division;
-import entities.Profile;
 import entities.Role;
 import entities.User;
-import enums.ProfilesEnum;
+
 
 @Repository
 public class UserDao {
@@ -54,7 +53,7 @@ public class UserDao {
 		try {
 			return (User) entityManager.createQuery(""
 					+ "SELECT u FROM User u "
-//						+ "LEFT JOIN FETCH u.userRoles "
+						+ "LEFT JOIN FETCH u.userRoles "
 					+ "WHERE u.id = :idUser"
 					)
 					.setParameter("idUser", idUser)
@@ -64,19 +63,41 @@ public class UserDao {
 			return null;
 		}
 	}
+	
+	
+	public Integer getChargeSuiviByProj(Integer idProj) {
 
 
-	@SuppressWarnings("unchecked")
-	public List<SimpleDto> getListRoles() {
-		return entityManager.createQuery("SELECT new dto.SimpleDto(r.id, r.label) FROM Role r")
-				.getResultList() ;
+		return entityManager.createQuery("SELECT chargeSuivi.id FROM Projet p WHERE p.id = :idProj", Integer.class)
+					.setParameter("idProj", idProj)
+					.getResultList()
+					.stream().findFirst().orElse(null);
+
+
 	}
 	
-	@SuppressWarnings("unchecked")
-	public List<SimpleDto> getListProfiles() {
-		return entityManager.createQuery("SELECT new dto.SimpleDto(r.id, r.label) FROM Profile r")
-				.getResultList() ;
+	
+	public Integer getChargeSuiviByMarche(Integer idMarch) {
+		
+		
+		return entityManager.createQuery(""
+				+ "SELECT p.chargeSuivi.id FROM Marche m "
+					+ "JOIN m.projet p "
+				+ "WHERE m.id = :idMarch", Integer.class)
+				.setParameter("idMarch", idMarch)
+				.getResultList()
+				.stream().findFirst().orElse(null);
+		
+		
 	}
+
+
+
+	public List<SimpleDto> getListRoles() {
+		return entityManager.createQuery("SELECT new dto.SimpleDto(r.id, r.label) FROM Role r", SimpleDto.class).getResultList();
+	}
+	
+
 	
 
 	public List<SimpleDto> getDivisions() {
@@ -85,45 +106,23 @@ public class UserDao {
 
 
 	public List<User> getChargesSuivi() {
-		return entityManager.createQuery(""
-				+ "SELECT u FROM User u "
-					+ "LEFT JOIN FETCH u.division "
-					+ "JOIN u.profile prf "
-				+ "WHERE prf.id = :profile", User.class)
-				.setParameter("profile", ProfilesEnum.charge_suivi.value)
-				.getResultList();
-	}
-
-
-
-	public List<SimpleDto> getRolesByProfile(Integer idProfile) {
-		return entityManager.createQuery(""
-				+ "SELECT new dto.SimpleDto(r.id, r.label) FROM ProfileRoles pR "
-					+ "JOIN pR.role r "
-				+ "WHERE pR.profile.id = :idProfile", SimpleDto.class)
-				.setParameter("idProfile", idProfile)
-				.getResultList();
+		return entityManager.createQuery("SELECT u FROM User u WHERE u.chargeSuivi = 1", User.class).getResultList();
 	}
 	
-	public List<Integer> getRolesByProfile2(Integer idProfile) {
-		return entityManager.createQuery(""
-				+ "SELECT r.id FROM ProfileRoles pR "
-				+ "JOIN pR.role r "
-				+ "WHERE pR.profile.id = :idProfile", Integer.class)
-				.setParameter("idProfile", idProfile)
-				.getResultList();
+	public List<User> getChargesSuiviWithDivision() {
+		return entityManager.createQuery("SELECT u FROM User u "
+				+ "LEFT JOIN FETCH u.division "
+				+ "WHERE u.chargeSuivi = 1", User.class).getResultList();
 	}
 
 
-	public void deleteRolesByProfile(Integer idProfile) {
 
-		entityManager.createQuery(""
-				+ "DELETE FROM ProfileRoles pR WHERE pR.profile.id = :idProfile")
-				.setParameter("idProfile", idProfile)
-				.executeUpdate();;
-		
+	public List<SimpleDto> getUserTypes() {
+		return entityManager.createQuery("SELECT new dto.SimpleDto(ut.id, ut.label) FROM UserType ut", SimpleDto.class).getResultList();
 	}
-	
+
+
+
 }
 
 

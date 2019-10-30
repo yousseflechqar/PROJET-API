@@ -15,3 +15,10 @@ generic type :::: a must
 exception with walk files
 
 
+In Java 8, you can either use Arrays.stream or Stream.of to convert an Array into a Stream.
+List<String> list = Arrays.asList("one", "two", "three");
+List<String> list = Stream.of("one", "two", "three").collect(Collectors.toList());
+
+
+why ?? -> throws IOException
+

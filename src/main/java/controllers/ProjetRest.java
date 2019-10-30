@@ -1,6 +1,7 @@
 package controllers;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +28,12 @@ import beans.LocalisationBean;
 import beans.ProjetBean;
 import beans.ProjetSearchBean;
 import beans.SimpleBean;
+import dao.DiversDao;
 import dao.GenericDao;
 import dao.MarcheDao;
 import dao.ProjetDao;
 import dao.SearchProjetDao;
+import dao.UserDao;
 import dto.DetailDto;
 import dto.ProjetBasicDto;
 import dto.ProjetDto;
@@ -41,8 +44,12 @@ import dto.TreeDto;
 import dto.TreePathDto;
 import dto.UserSession;
 import entities.Projet;
+import exceptions.ForbiddenException;
+import helpers.Helpers;
+import services.DiversService;
 import services.MarcheService;
 import services.ProjetService;
+import services.UserService;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -58,6 +65,14 @@ public class ProjetRest {
 	private ProjetService projetService;
 	@Autowired
 	private MarcheService marcheService;
+	@Autowired
+	private UserDao userDao;
+	@Autowired
+	private DiversDao diversDao;
+	@Autowired
+	private DiversService diversService;
+	@Autowired
+	private UserService userService;
 
 
 	@PostMapping(value = "/projets")
@@ -69,8 +84,46 @@ public class ProjetRest {
 		return bean;
 	}
 	
+	@GetMapping(value = "/projets/loading")
+	public Map<String, Object> getProjetData(HttpServletRequest request, HttpSession session) {
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		UserSession userSession = (UserSession) session.getAttribute("user");
+
+		
+		if(request.getParameter("edit") != null) {
+			
+			Integer idProjet = Integer.valueOf(request.getParameter("edit"));
+			
+			Helpers.checkProjetEditSecurity(userSession, userDao.getChargeSuiviByProj(idProjet));
+			
+			map.put("projetData", projetService.getProjetForEdit(idProjet));
+		}
+		
+		
+		
+		map.put("secteurs", diversDao.getSecteurs());
+		map.put("localisations", diversService.getCommunesWithFractions());
+		map.put("srcFinancements", diversDao.getSrcFinancements());
+		
+		if( Helpers.canUserAssign(userSession)) {			
+			map.put("chargesSuivi", userService.getChargesSuivi2());
+		}
+		
+
+		
+		return map;
+	}
+	
 	@GetMapping(value = "/projets/edit/{idProjet}")
-	public ProjetEditDto getProjetForEdit(@PathVariable Integer idProjet) {
+	public ProjetEditDto getProjetForEdit(@PathVariable Integer idProjet, HttpSession session) {
+		
+		
+		Helpers.checkProjetEditSecurity(
+				(UserSession) session.getAttribute("user"), 
+				userDao.getChargeSuiviByProj(idProjet)
+		);
 		
 		return projetService.getProjetForEdit(idProjet);
 	}

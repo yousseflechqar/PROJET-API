@@ -1,5 +1,8 @@
 package beans;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import entities.Division;
 
 public class UserBean {
@@ -9,9 +12,17 @@ public class UserBean {
 	public String password;
 	public String nom;
 	public String prenom;
-	public Integer profile;
+	public String email;
+	public String phone;
+	public Integer userType;
 	public Integer division;
-	public boolean active;
+
+	public Boolean isDisable = false;
+
+	public Boolean isChargeSuivi = false;
+	
+	public List<Integer> roles = new ArrayList<Integer>();
+	
 	
 	public UserBean() {}
 	
@@ -22,26 +33,20 @@ public class UserBean {
 		this.prenom = prenom;
 	}
 	
-	// for save user
-	public UserBean(Integer id, String login, String password, String nom, String prenom, boolean active, Integer division, Integer profile) {
+
+	public UserBean(Integer id, String login, String password, String nom, String prenom, String email, String phone,
+			Boolean isDisable, Boolean isChargeSuivi, Integer userType,
+			Division division) {
 		this.id = id;
 		this.login = login;
 		this.password = password;
 		this.nom = nom;
 		this.prenom = prenom;
-		this.active = active;
-		this.profile = profile;
-		this.division = division;
-	}
-	
-	public UserBean(Integer id, String login, String password, String nom, String prenom, boolean active, Division division, Integer profile) {
-		this.id = id;
-		this.login = login;
-		this.password = password;
-		this.nom = nom;
-		this.prenom = prenom;
-		this.active = active;
-		this.profile = profile;
+		this.email = email;
+		this.phone = phone;
+		this.isDisable = isDisable;
+		this.isChargeSuivi = isChargeSuivi;
+		this.userType = userType;
 		this.division = division != null ? division.getId() : null;
 	}
 	

@@ -7,22 +7,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 @Entity
-@Table(name = "profile")
-public class Profile implements java.io.Serializable {
+@Table(name="user_type")
+public class UserType {
 
+	
 	@Id
-	@GeneratedValue(strategy = IDENTITY)
 	private Integer id;
 	
 	private String label;
-
 	
+	public UserType() {}
 	
-	public Profile() {}
-	public Profile(Integer id) {
-		super();
+	public UserType(Integer id) {
 		this.id = id;
 	}
 
@@ -41,8 +38,6 @@ public class Profile implements java.io.Serializable {
 	public void setLabel(String label) {
 		this.label = label;
 	}
-	
-	
 	
 	
 	

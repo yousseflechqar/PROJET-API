@@ -20,10 +20,10 @@ import dao.UserDao;
 import dto.SelectGrpDto;
 import dto.SimpleDto;
 import entities.Division;
-import entities.Profile;
-import entities.ProfileRoles;
 import entities.Role;
 import entities.User;
+import entities.UserRoles;
+import entities.UserType;
 
 
 @Service
@@ -36,36 +36,43 @@ public class UserService {
 	private UserDao userDao;
 	@Autowired
 	private GenericDao<User, Integer> gUserDao;
-	@Autowired
-	private GenericDao<ProfileRoles, Integer> gProfileRolesDao;
+
 	
 	@Transactional(rollbackOn = Exception.class)
 	public Integer saveUser(UserBean bean) {
 
-		User user = bean.id != null ? userDao.getUserForEdit(bean.id) : new User();
+		boolean isNewUser = ( bean.id == null );
+		
+		User user = ( isNewUser ) ? new User() : userDao.getUserForEdit(bean.id) ;
 		
 		user.setLogin(bean.login);
 		user.setPassword(bean.password);
 		user.setNom(bean.nom);
 		user.setPrenom(bean.prenom);
-		user.setActive(bean.active);
-		user.setDateCreation(new Date());
+		user.setTelephone(bean.phone);
+		user.setEmail(bean.email);
 		
-		user.setDivision( bean.division != null ? new Division(bean.division) : null );
 		
-		user.setProfile(new Profile(bean.profile));
+		user.setDisable(bean.isDisable);
+
+		user.setChargeSuivi(bean.isChargeSuivi);
 		
-		if(bean.id == null) {
+		user.setDivision( (bean.division != null) ? new Division(bean.division) : null );
+		
+		user.setUserType(new UserType(bean.userType));
+		
+		if( isNewUser ) {
+			user.setDateCreation(new Date());
 			gUserDao.create(user);
 		} else {
-//			user.getUserRoles().clear();
+			user.getUserRoles().clear();
 		}
 		
 		entityManager.flush();
 		
-//		bean.roles.forEach( role -> {
-//			user.getUserRoles().add(new UserRole(user, new Role(role)));
-//		});
+		bean.roles.forEach( role -> {
+			user.getUserRoles().add(new UserRoles(user.getId(), role));
+		});
 		
 		return user.getId();
 	}
@@ -76,13 +83,14 @@ public class UserService {
 		User user = userDao.getUserForEdit(idUser);
 		
 		UserBean dto = new UserBean(
-				user.getId(), user.getLogin(), user.getPassword(), user.getNom(), user.getPrenom(), user.isActive(), 
-				user.getDivision(), user.getProfile().getId()
+				user.getId(), user.getLogin(), user.getPassword(), user.getNom(), user.getPrenom(), user.getEmail(), user.getTelephone(),
+				user.isDisable(), user.isChargeSuivi(), user.getUserType().getId(),
+				user.getDivision()
 		);
 		
-//		user.getUserRoles().forEach(ur -> {
-//			dto.roles.add(ur.getRole().getId());
-//		});
+		user.getUserRoles().forEach(ur -> {
+			dto.roles.add(ur.getRole().getId());
+		});
 		
 		return dto;
 	} 
@@ -110,7 +118,7 @@ public class UserService {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Collection<SelectGrpDto> getChargesSuivi2() {
 		
-		List<User> chargesSuivi = userDao.getChargesSuivi();
+		List<User> chargesSuivi = userDao.getChargesSuiviWithDivision();
 		
 
 		Map<Integer, SelectGrpDto> usersDivisionMap = new LinkedHashMap<Integer, SelectGrpDto>();
@@ -128,14 +136,5 @@ public class UserService {
 		return usersDivisionMap.values();
 	}
 
-	@Transactional(rollbackOn = Exception.class)
-	public void saveRolesToProfile(Integer idProfile, List<Integer> roles) {
-		
-		userDao.deleteRolesByProfile(idProfile);
 
-		roles.forEach(role -> {
-			gProfileRolesDao.create(new ProfileRoles(new Profile(idProfile), new Role(role)));
-		});
-	}
-	
 }

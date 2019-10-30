@@ -3,6 +3,10 @@ package controllers;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +30,16 @@ import beans.MarcheAttachs;
 import beans.MarcheBean;
 import dao.GenericDao;
 import dao.MarcheDao;
+import dao.UserDao;
 import dto.ProjetEditDto;
 import dto.SimpleDto;
+import dto.UserSession;
 import entities.Marches;
 import entities.Projet;
+import entities.UserType;
+import enums.UserRole;
+import exceptions.ForbiddenException;
+import helpers.Helpers;
 import services.MarcheService;
 
 @RestController
@@ -42,19 +52,13 @@ public class MarcheRest {
 	@Autowired
 	private MarcheDao marcheDao;
 	@Autowired
+	private UserDao userDao;
+	@Autowired
 	private MarcheService marcheService;
 	
 	
-//	@PostMapping(value = "/marches")
-//	public Integer saveMarches(@RequestBody MarcheBean bean) throws IOException {
-//		return marcheService.saveMarche(bean);
-//	}
+
 	
-//	@PostMapping(value = "/marches")
-//	public Integer saveMarches(MarcheForm marcheForm) throws IOException {
-//
-//		return marcheService.saveMarche(marcheForm.formJson, marcheForm.attachOs);
-//	}
 	@PostMapping(value = "/marches", consumes = "multipart/form-data")
 	public Integer saveMarches(
 			@RequestPart("formJson") MarcheBean formJson,
@@ -67,38 +71,22 @@ public class MarcheRest {
 	}
 	
 	
-//	@PostMapping(value = "/postman/marches")
-//	public String savePostmanMarches(@ModelAttribute MarcheBean bean) throws IOException {
-//		return bean.attachment.getOriginalFilename();
-//	}
-//	@PostMapping(value = "/postman/marches3")
-//	public String savePostmanMarches3(@ModelAttribute("apiValues") MarcheBean bean) throws IOException {
-//		return bean.attachment.getOriginalFilename();
-//	}
-//	@PostMapping(value = "/postman/marches2")
-//	public String savePostmanMarches2(@RequestPart("apiValues") MarcheBean bean) throws IOException {
-//		return bean.attachment.getOriginalFilename();
-//	}
-//	
-//	@PostMapping(value = "/postman/marches22")
-//	public String savePostmanMarches22(ApiValues bean) throws IOException {
-//		return bean.apiValues.attachment.getOriginalFilename();
-//	}
-//	
-//	
-//	@PostMapping(value = "/postman/marches33")
-//	public String savePostmanMarches33(@ModelAttribute ApiValues bean) throws IOException {
-//		return bean.apiValues.attachment.getOriginalFilename();
-//	}
-	
-
-
-
-	
 	@GetMapping(value = "/marches/edit/{idMarche}")
-	public MarcheBean getMarcheForEdit(@PathVariable Integer idMarche) {
+	public MarcheBean getMarcheForEdit(@PathVariable Integer idMarche, HttpSession session) {
 		
+		// security check !!!
+		
+		Helpers.checkProjetEditSecurity(
+				(UserSession) session.getAttribute("user"), 
+				userDao.getChargeSuiviByMarche(idMarche)
+		);
+		
+
 		return marcheService.getMarcheForEdit(idMarche);
+		
+		
+		
+		
 	}
 	
 	@GetMapping(value = "/marches/default/{idProjet}")

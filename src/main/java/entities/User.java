@@ -31,9 +31,7 @@ public class User implements java.io.Serializable {
 	
 	
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "division")
-	private Division division;
+
 	
 	private String login;
 	private String password;
@@ -41,13 +39,12 @@ public class User implements java.io.Serializable {
 	private String nom;
 	private String prenom;
 	private String telephone;
-	private boolean active;
 	
+	private boolean disable = false;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "profile")
-	private Profile profile;
-	
+	@Column(name = "charge_suivi")
+	private Boolean chargeSuivi;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "last_connexion")
 	private Date lastConnexion;
@@ -55,6 +52,18 @@ public class User implements java.io.Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "date_creation")
 	private Date dateCreation;
+	
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_type")
+	private UserType userType;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "division")
+	private Division division;
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+	private Set<UserRoles> userRoles = new HashSet<UserRoles>(0);
 	
 	
 	
@@ -140,25 +149,12 @@ public class User implements java.io.Serializable {
 	public void setTelephone(String telephone) {
 		this.telephone = telephone;
 	}
-
-
-
-
-	public boolean isActive() {
-		return active;
-	}
-	public void setActive(boolean active) {
-		this.active = active;
-	}
 	public Date getLastConnexion() {
 		return this.lastConnexion;
 	}
-
 	public void setLastConnexion(Date lastConnexion) {
 		this.lastConnexion = lastConnexion;
 	}
-
-
 	public Date getDateCreation() {
 		return this.dateCreation;
 	}
@@ -174,11 +170,34 @@ public class User implements java.io.Serializable {
 	public void setProjetUsers(Set<ProjetUser> projetUsers) {
 		this.projetUsers = projetUsers;
 	}
-	public Profile getProfile() {
-		return profile;
+	public boolean isDisable() {
+		return disable;
 	}
-	public void setProfile(Profile profile) {
-		this.profile = profile;
+	public void setDisable(boolean disable) {
+		this.disable = disable;
+	}
+
+
+	public Boolean isChargeSuivi() {
+		return chargeSuivi;
+	}
+	public void setChargeSuivi(Boolean chargeSuivi) {
+		this.chargeSuivi = chargeSuivi;
+	}
+	public UserType getUserType() {
+		return userType;
+	}
+	public void setUserType(UserType userType) {
+		this.userType = userType;
+	}
+	public Boolean getChargeSuivi() {
+		return chargeSuivi;
+	}
+	public Set<UserRoles> getUserRoles() {
+		return userRoles;
+	}
+	public void setUserRoles(Set<UserRoles> userRoles) {
+		this.userRoles = userRoles;
 	}
 
 }

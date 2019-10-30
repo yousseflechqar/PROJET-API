@@ -21,6 +21,9 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import dto.UserSession;
+import enums.UserRole;
+import exceptions.ForbiddenException;
 import exceptions.OsIntegrityException;
 import exceptions.UnknowAttachment;
 
@@ -151,6 +154,33 @@ public class Helpers {
 	static public void deleteDir(String dir) throws IOException {
 		FileSystemUtils.deleteRecursively((Paths.get(dir).toFile()));
 //		FileUtils.deleteDirectory(Paths.get(dir).toFile());
+	}
+	
+	
+	static public boolean checkProjetEditSecurity(UserSession userSession, Integer chargeSuiviID) {
+
+		
+		if( userSession.userType.equals(enums.UserType.administrateur.type())
+				|| Stream.of(UserRole.controler_projet, UserRole.valider_projet).anyMatch(
+						authRole -> userSession.roles.stream().anyMatch(userRole -> userRole.equals(authRole.role)))
+				|| chargeSuiviID.equals(userSession.id)
+		) {
+			return true;
+		}
+		
+		System.out.println("@ForbiddenException");
+		throw new ForbiddenException();
+	}
+	
+	static public boolean canUserAssign(UserSession userSession) {
+		
+		
+		if( userSession.userType.equals(enums.UserType.administrateur.type()) ||
+			Stream.of(UserRole.controler_projet, UserRole.valider_projet, UserRole.affecter_projet).anyMatch(
+						authRole -> userSession.roles.stream().anyMatch(userRole -> userRole.equals(authRole.role)))
+		) { return true; }
+		
+		return false;
 	}
 
 }
