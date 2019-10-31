@@ -1,6 +1,7 @@
 package controllers;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -28,6 +29,7 @@ import beans.ApiValues;
 import beans.AttachmentBean;
 import beans.MarcheAttachs;
 import beans.MarcheBean;
+import dao.DiversDao;
 import dao.GenericDao;
 import dao.MarcheDao;
 import dao.UserDao;
@@ -55,6 +57,8 @@ public class MarcheRest {
 	private UserDao userDao;
 	@Autowired
 	private MarcheService marcheService;
+	@Autowired
+	private DiversDao diversDao;
 	
 	
 
@@ -70,24 +74,39 @@ public class MarcheRest {
 		return marcheService.saveMarche(formJson, attachs);
 	}
 	
-	
-	@GetMapping(value = "/marches/edit/{idMarche}")
-	public MarcheBean getMarcheForEdit(@PathVariable Integer idMarche, HttpSession session) {
+	@GetMapping(value = "/marches/loading")
+	public Map<String, Object> getMarchesData(HttpServletRequest request, HttpSession session) {
 		
-		// security check !!!
-		
-		Helpers.checkProjetEditSecurity(
-				(UserSession) session.getAttribute("user"), 
-				userDao.getChargeSuiviByMarche(idMarche)
-		);
-		
+		Map<String, Object> map = new HashMap<String, Object>();
+		UserSession userSession = (UserSession) session.getAttribute("user");
 
-		return marcheService.getMarcheForEdit(idMarche);
-		
-		
-		
-		
+		if(request.getParameter("edit") != null) {
+			Integer idMarche = Integer.valueOf(request.getParameter("edit"));
+			Helpers.checkProjetEditSecurity(userSession, userDao.getChargeSuiviByMarche(idMarche));
+			map.put("marcheData", marcheService.getMarcheForEdit(idMarche));
+		}
+
+		map.put("marcheTypes", diversDao.getMarcheTypes());
+		map.put("marcheEtats", diversDao.getMarcheEtats());
+		map.put("osTypes", diversDao.getOsTypes());
+
+		return map;
 	}
+	
+//	@GetMapping(value = "/marches/edit/{idMarche}")
+//	public MarcheBean getMarcheForEdit(@PathVariable Integer idMarche, HttpSession session) {
+//		
+//		// security check !!!
+//		
+//		Helpers.checkProjetEditSecurity(
+//				(UserSession) session.getAttribute("user"), 
+//				userDao.getChargeSuiviByMarche(idMarche)
+//		);
+//		
+//
+//		return marcheService.getMarcheForEdit(idMarche);
+//
+//	}
 	
 	@GetMapping(value = "/marches/default/{idProjet}")
 	public MarcheBean getDefaultMarcheForDetail(@PathVariable Integer idProjet) {

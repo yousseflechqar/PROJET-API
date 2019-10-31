@@ -12,8 +12,8 @@ public class ProjetBean {
 	public String intitule;
 	public Double montant;
 	public boolean isConvention = false;
-	public boolean indh = false;
-	public boolean prdts = false;
+//	public boolean indh = false;
+//	public boolean prdts = false;
 	public Integer indhProgramme;
 	
 	public List<String> localisations;

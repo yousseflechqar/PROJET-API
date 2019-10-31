@@ -81,7 +81,7 @@ public class UserDao {
 		
 		
 		return entityManager.createQuery(""
-				+ "SELECT p.chargeSuivi.id FROM Marche m "
+				+ "SELECT p.chargeSuivi.id FROM Marches m "
 					+ "JOIN m.projet p "
 				+ "WHERE m.id = :idMarch", Integer.class)
 				.setParameter("idMarch", idMarch)

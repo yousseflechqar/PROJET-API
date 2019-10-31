@@ -18,8 +18,8 @@ public class ProjetEditDto {
 	public boolean isMaitreOuvrageDel;
 	public SimpleDto maitreOuvrage;
 	public SimpleDto maitreOuvrageDel;
-	public boolean indh;
-	public boolean prdts;
+//	public boolean indh;
+//	public boolean prdts;
 	
 	
 	public Integer indhProgramme;
@@ -38,7 +38,7 @@ public class ProjetEditDto {
 	public ProjetEditDto(String intitule, Double montant, SrcFinancement srcFinancement, boolean isConvention,
 			ProjetMaitreOuvrage pMo, ProjetMaitreOuvrage pMod, 
 			Integer secteur, User chargeSuivi, Integer anneeProjet,
-			ProjetIndh indh, boolean prdts) {
+			ProjetIndh indh) {
 		super();
 		this.intitule = intitule;
 		this.montant = montant;
@@ -49,9 +49,9 @@ public class ProjetEditDto {
 		this.maitreOuvrageDel = (pMod != null) ? new SimpleDto(pMod.getMaitreOuvrage().getId(), pMod.getMaitreOuvrage().getNom()) : null;
 		this.secteur = secteur;
 		this.chargeSuivi = chargeSuivi != null ? chargeSuivi.getId() : null;
-		this.indh = (indh != null);
+//		this.indh = (indh != null);
 		this.indhProgramme = (indh != null) ? indh.getProgramme().getId() : null;
-		this.prdts = prdts;
+//		this.prdts = prdts;
 		this.anneeProjet = anneeProjet;
 	}
 	

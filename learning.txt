@@ -22,3 +22,7 @@ List<String> list = Stream.of("one", "two", "three").collect(Collectors.toList()
 
 why ?? -> throws IOException
 
+OneToOne ?? FK as PK too ??
+
+lamda and functional !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+

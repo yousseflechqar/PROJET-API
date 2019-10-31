@@ -18,3 +18,14 @@ java.nio.file.AccessDeniedException -> append file to directory
 
 The message java.lang.NoSuchMethodException: xxx.<init>() means that someone tried to call a constructor without any parameters. 
 Adding a default constructor should solve this problem
+
+
+A different object with the same identifier value was already associated with the session ->
+if used with @MapsId we have to set the entity to null first and flush()
+
+object references an unsaved transient instance - save the transient instance before flushing ->
+adding cascade=CascadeType.ALL
+
+
+- orphanRemoval = true: "Child" entity is removed when it's no longer referenced (its parent may not be removed).
+- CascadeType.REMOVE: "Child" entity is removed only when its "Parent" is removed.

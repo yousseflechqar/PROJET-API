@@ -98,7 +98,12 @@ public class ProjetRest {
 			
 			Helpers.checkProjetEditSecurity(userSession, userDao.getChargeSuiviByProj(idProjet));
 			
-			map.put("projetData", projetService.getProjetForEdit(idProjet));
+			ProjetEditDto proj = projetService.getProjetForEdit(idProjet);
+			map.put("projetData", proj);
+			
+			if(proj.srcFinancement.equals(enums.SrcFinancement.INDH.val())) {
+				map.put("indhProgrammes", diversService.getParentProgrammesWithPhases());
+			}
 		}
 		
 		

@@ -80,7 +80,8 @@ public class ProjetService {
 
 		projet.setChargeSuivi(new User(bean.chargeSuivi != null ? bean.chargeSuivi : userSession.id));
 		
-		projet.setPrdts(bean.prdts);
+//		projet.setPrdts(bean.prdts);
+
 		
 		if(bean.idProjet == null) {
 			projet.setDateSaisie(new Date());
@@ -95,9 +96,11 @@ public class ProjetService {
 		projet.getLocalisations().clear();
 		entityManager.flush();
 		
-		///////// Localisations
+		projet.setIndh(
+				bean.srcFinancement.equals(enums.SrcFinancement.INDH.val()) ? 
+						new ProjetIndh(projet, new IndhProgramme(bean.indhProgramme)) : null
+		);
 
-		projet.setIndh(bean.indh ? new ProjetIndh(projet, new IndhProgramme(bean.indhProgramme)) : null);
 		
 		if( bean.localisations != null && !bean.localisations.isEmpty() ) {
 			
@@ -160,7 +163,7 @@ public class ProjetService {
 			projet.getProjetMaitreOuvrage(),
 			projet.getProjetMaitreOuvrageDelegue(),
 			projet.getSecteur().getId(), projet.getChargeSuivi(), projet.getAnneeProjet(),
-			projet.getIndh(), projet.isPrdts()
+			projet.getIndh()
 		);
 		
 		projet.getProjetPartenaires().forEach(pp -> {

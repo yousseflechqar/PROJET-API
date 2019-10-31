@@ -127,4 +127,18 @@ public class DiversDao {
 		.getResultList();
 		
 	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public List<SimpleDto> getOsTypes(){
+		return entityManager.createQuery("SELECT new dto.SimpleDto(os.id, os.label) FROM OsType os").getResultList() ;
+	}
+
+
+	@SuppressWarnings("unchecked")
+	public List<SimpleDto> getMarcheEtats() {
+		return entityManager.createQuery("SELECT new dto.SimpleDto(me.id, me.nom) FROM MarchesEtat me").getResultList() ;
+	}
+
+	
 }
