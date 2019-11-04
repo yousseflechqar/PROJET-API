@@ -193,6 +193,7 @@ public class ProjetService {
 
 		
 		ProjetBasicDto<TreeDto, SimpleDto> dto = new ProjetBasicDto<>(
+				projet.getId(),
 				projet.getIntitule(), projet.getMontant(), projet.isConvention(), 
 				modDto != null, new SimpleDto(mo.getId(), mo.getNom()), modDto,
 				projet.getIndh() != null, projet.isPrdts()

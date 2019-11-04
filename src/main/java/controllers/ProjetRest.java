@@ -43,6 +43,7 @@ import dto.SimpleDto;
 import dto.TreeDto;
 import dto.TreePathDto;
 import dto.UserSession;
+import entities.Marches;
 import entities.Projet;
 import exceptions.ForbiddenException;
 import helpers.Helpers;
@@ -56,7 +57,7 @@ import services.UserService;
 public class ProjetRest {
 
 	@Autowired
-	private GenericDao<Projet, Integer> genericDao;
+	private GenericDao<Projet, Integer> gProjetDao;
 	@Autowired
 	private ProjetDao projetDao;
 	@Autowired
@@ -153,14 +154,16 @@ public class ProjetRest {
 	@DeleteMapping(value = "/projets/{idProjet}")
 	public void deleteProjet(@PathVariable Integer idProjet) {
 		
-		 genericDao.delete(Projet.class, idProjet);
+		gProjetDao.delete(Projet.class, idProjet);
 	}
 	
-	@DeleteMapping(value = "/projets")
+	@DeleteMapping(value = "/projets/all")
 	public void deleteAllProjets() {
 		
-		genericDao.deleteAll(Projet.class);
+		gProjetDao.deleteAll(Projet.class);
 	}
+	
+
 	
 
 }

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ProjetBasicDto<TL, T> {
 
-	
+	public Integer id;
 	public String intitule;
 	public Double montant;
 	public boolean isConvention;
@@ -25,8 +25,9 @@ public class ProjetBasicDto<TL, T> {
 	public T secteur;
 	public T srcFinancement;
 
-	public ProjetBasicDto(String intitule, Double montant, boolean isConvention, boolean isMaitreOuvrageDel,
+	public ProjetBasicDto(Integer id, String intitule, Double montant, boolean isConvention, boolean isMaitreOuvrageDel,
 			SimpleDto maitreOuvrage, SimpleDto maitreOuvrageDel, boolean indh, boolean prdts) {
+		this.id = id;
 		this.intitule = intitule;
 		this.montant = montant;
 		this.isConvention = isConvention;

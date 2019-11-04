@@ -95,7 +95,7 @@ public class MarcheService {
 		
 		marche.setDateApprobation(bean.dateApprobation);
 		
-		if( bean.dateStart != null && ! Helpers.isEqual(bean.dateStart, marche.getDateOsStart()) ) {
+		if( bean.dateStart != null && (marche.getDateOsStart() == null || ! Helpers.isEqual(bean.dateStart, marche.getDateOsStart())) ) {
 			System.out.println("Date Start CHANGED !!");
 			dirtyCheckTaux = true;
 		}
