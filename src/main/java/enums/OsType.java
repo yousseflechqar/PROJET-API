@@ -2,7 +2,7 @@ package enums;
 
 public enum OsType {
 
-	ARRET(1), REPRISE(2); 
+	ARRET(1), REPRISE(2), COMMENCEMENT(3); 
 
     public Integer value ;  
     

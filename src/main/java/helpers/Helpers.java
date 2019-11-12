@@ -30,11 +30,11 @@ import exceptions.UnknowAttachment;
 public class Helpers {
 
 	
-	static public LocalDate toLocalDate(Date input) {
+	static public LocalDate toLocalDate(Date date) {
 		
-		if( input instanceof java.sql.Date )
-			return ((java.sql.Date) input).toLocalDate();
-		return input.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		if( date instanceof java.sql.Date )
+			return ((java.sql.Date) date).toLocalDate();
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 	}
 	
 	static public boolean isEqual(Date d1, Date d2) {

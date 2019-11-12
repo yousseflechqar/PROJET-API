@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -66,11 +67,11 @@ public class MarcheService {
 
 	
 	@Transactional(rollbackOn = Exception.class)
-	public Integer saveMarche(MarcheBean bean, MarcheAttachs attachs) throws IOException {
+	public Integer saveMarche(MarcheBean bean, MarcheAttachs attachs) throws IOException, ParseException {
 		
 
 		
-		boolean dirtyCheckTaux = false;
+//		boolean dirtyCheckTaux = false;
 
 		Marches marche = new Marches();
 
@@ -83,10 +84,10 @@ public class MarcheService {
 		marche.setIntitule(bean.intitule);
 		marche.setMontant(bean.montant);
 		
-		if( bean.delai != null && ! bean.delai.equals(marche.getDelaiExecution()) ) {
-			System.out.println("Delai Execution CHANGED !!");
-			dirtyCheckTaux = true;
-		}
+//		if( bean.delai != null && ! bean.delai.equals(marche.getDelaiExecution()) ) {
+//			System.out.println("Delai Execution CHANGED !!");
+//			dirtyCheckTaux = true;
+//		}
 		
 		marche.setDelaiExecution(bean.delai);	
 		marche.setNumMarche(bean.numMarche);
@@ -95,12 +96,9 @@ public class MarcheService {
 		
 		marche.setDateApprobation(bean.dateApprobation);
 		
-		if( bean.dateStart != null && (marche.getDateOsStart() == null || ! Helpers.isEqual(bean.dateStart, marche.getDateOsStart())) ) {
-			System.out.println("Date Start CHANGED !!");
-			dirtyCheckTaux = true;
-		}
+
 		
-		marche.setDateOsStart(bean.dateStart);
+//		marche.setDateOsStart(bean.dateStart);
 		marche.setDateReceptionProvisoire(bean.dateReceptionProv);
 		marche.setDateReceptionDefinitive(bean.dateReceptionDef);
 
@@ -137,49 +135,69 @@ public class MarcheService {
 		
 		//////////////////////////////////// ORDRES SERVICE
 		
-		boolean isOs = ( bean.os != null && ! bean.os.isEmpty() );
+		boolean isOs = ! bean.os.isEmpty();
 
 		List<MarchesOs> deletedOs = new ArrayList<MarchesOs>();
 		
 		if( isOs ) {
+
+			// on recupère d'abord les os qui ont été supprimés par UI on va les utiliser apres dans les attachements
+			deletedOs = marche.getMarchesOss().stream().filter(oldOs -> bean.os.stream().noneMatch(os -> os.id != null && os.id.equals(oldOs.getId())))
+							.collect(Collectors.toList());
 			
-			
-			// on detect les os supprimés
-			deletedOs = marche.getMarchesOss().stream().filter( oldOs -> bean.os.stream().noneMatch(os -> os.id.equals(oldOs.getId())) )
-														.collect(Collectors.toList());
-			
+			// on les supprime
+//			marche.getMarchesOss().removeIf(os -> deletedOs.stream().anyMatch(del -> del.getId().equals(os.getId())));
 			marche.getMarchesOss().removeIf(os -> bean.os.stream().noneMatch(del -> del.id != null && del.id.equals(os.getId())));
-			
 			
 			// we have to sort les ordres de service par date
 			bean.os.sort((o1, o2) -> o1.dateOs.compareTo(o2.dateOs));
 			
+			// we check if the first os is osStart
+			OsBean osStartBean = bean.os.get(0);
+			if( ! osStartBean.typeOs.value.equals(enums.OsType.COMMENCEMENT.value) ) {
+				throw new OsIntegrityException();
+			}
+			
+//			if( marche.getStartOs() == null || ! Helpers.isEqual(osStartBean.dateOs, marche.getStartOs().getDateOs()) ) {
+//				System.out.println("Date Start CHANGED !!");
+//				dirtyCheckTaux = true;
+//			}
+
 			// check integrity os
-			Integer previousOsType = enums.OsType.REPRISE.value;
+			Integer previousOsType = enums.OsType.REPRISE.value; 
+			int i=0;
+			
 			for(OsBean os : bean.os) {
-
-				if( os.typeOs.value.equals(previousOsType) ) {
-					throw new OsIntegrityException();
-				} else {
-					
-					MarchesOs mOs = new MarchesOs();
-					
-					// get existing os
-					if(os.id != null) {
-						mOs = marche.getMarchesOss().stream().filter( mos -> mos.getId().equals(os.id) ).findFirst().get();
-					} 
-					// add new os
-					else {
-						mOs.setMarches(marche);
-						marche.getMarchesOss().add(mOs);
-					}
-					
-					mOs.setCommentaire(os.commentaire);
-					mOs.setDateOs(os.dateOs);
-					mOs.setOsType(new OsType(os.typeOs.value));
-
+				
+				if( i > 0 ) {
+					if( os.typeOs.value.equals(enums.OsType.COMMENCEMENT.value) ) { throw new OsIntegrityException(); } 
+					if( os.typeOs.value.equals(previousOsType) ) { throw new OsIntegrityException(); } 
 					previousOsType = os.typeOs.value;
 				}
+
+				MarchesOs mOs = new MarchesOs();
+				
+				// get existing os
+				if(os.id != null) {
+					mOs = marche.getMarchesOss().stream().filter( mos -> mos.getId().equals(os.id) ).findFirst().get();
+				} 
+				// add new os
+				else {
+					mOs.setMarches(marche);
+					marche.getMarchesOss().add(mOs);
+				}
+				
+				mOs.setCommentaire(os.commentaire);
+				mOs.setDateOs(os.dateOs);
+//				mOs.setDateOs(new SimpleDateFormat("dd/MM/yyyy").parse("01/11/2019"));
+//				mOs.setDateOs(new SimpleDateFormat("dd/MM/yyyy").parse("01/09/2019"));
+				mOs.setOsType(new OsType(os.typeOs.value));
+				
+				if( i == 0 ) {
+					marche.setStartOs(mOs);
+				}
+
+				i++;
 			}
 		} else {
 			marche.setCurrentOs(null);
@@ -200,12 +218,12 @@ public class MarcheService {
 			MarchesTaux oldCurrentTaux = marche.getCurrentTaux();
 			TauxBean newCurrentTaux = Collections.max(bean.taux, Comparator.comparing(tb -> tb.dateTaux));
 			
-			if( oldCurrentTaux == null ||  
-					! oldCurrentTaux.getTaux().equals(newCurrentTaux.valueTaux) ||  
-					! Helpers.isEqual(newCurrentTaux.dateTaux, oldCurrentTaux.getDateTaux()) ) {
-				System.out.println("TAUX CHANGED !!");
-				dirtyCheckTaux = true;
-			}
+//			if( oldCurrentTaux == null ||  
+//					! oldCurrentTaux.getTaux().equals(newCurrentTaux.valueTaux) ||  
+//					! Helpers.isEqual(newCurrentTaux.dateTaux, oldCurrentTaux.getDateTaux()) ) {
+//				System.out.println("TAUX CHANGED !!");
+//				dirtyCheckTaux = true;
+//			}
 
 			for(TauxBean tb : bean.taux) {
 				MarchesTaux mT = new MarchesTaux();
@@ -277,52 +295,52 @@ public class MarcheService {
 		
 		////////////////////////////////////////// WORKED DAYS && RETARD
 
-		if( isTaux && dirtyCheckTaux ) {
-
-			MarchesTaux currentTaux = marche.getCurrentTaux();
-			
-			// filtrer les os qui ont une date superieur à la date du current taux
-			List<OsBean> filtredOs = isOs ? bean.os.stream().filter(os -> os.dateOs.before(currentTaux.getDateTaux())).collect(Collectors.toList()) : null;
-
-			long workDays = 0;
-			if( filtredOs != null && !filtredOs.isEmpty() ) {
-
-				Date lastReprise = marche.getDateOsStart();
-				OsBean currentOs = null;
-				
-				for(OsBean os : filtredOs) {
-					currentOs = os;
-					if(os.typeOs.value.equals(enums.OsType.ARRET.value)) {
-						workDays += ChronoUnit.DAYS.between( Helpers.toLocalDate(lastReprise), Helpers.toLocalDate(os.dateOs) );
-					} else if(os.typeOs.value.equals(enums.OsType.REPRISE.value)) {
-						lastReprise = os.dateOs;
-					} else {
-						throw new OsIntegrityException();
-					}	
-				}
-				
-				if( currentOs.typeOs.value.equals(enums.OsType.REPRISE.value) ) {
-					workDays += ChronoUnit.DAYS.between( Helpers.toLocalDate(currentOs.dateOs), Helpers.toLocalDate(currentTaux.getDateTaux()) );
-				} 
-
-			} else {
-				workDays = ChronoUnit.DAYS.between( Helpers.toLocalDate(marche.getDateOsStart()), Helpers.toLocalDate(currentTaux.getDateTaux()) );
-			}
-
-			int delaiInDays = marche.getDelaiExecution() * 31 ;
-			int workPrecent = (int)  (workDays * 100 / delaiInDays) ;
-			int currentTauxInDays = (int)  ( currentTaux.getTaux() * delaiInDays / 100 );
-			int retardEnJour = (int) workDays - currentTauxInDays;
-
-			System.out.println("Delai Execution In Days >>>>>>>>>>>>>>>> " + delaiInDays);
-			System.out.println("Real >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + currentTaux.getTaux() + " % -> ("+currentTauxInDays+") jours");
-			System.out.println("Théorique >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + workPrecent + " % -> ("+workDays+") jours");
-			System.out.println("Retard >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ("+retardEnJour+") jours");
-			
-			currentTaux.setRetardEnJour( retardEnJour );
-			currentTaux.setWorkedDays((int) workDays);
-			
-		} 
+//		if( isTaux && dirtyCheckTaux ) {
+//
+//			MarchesTaux currentTaux = marche.getCurrentTaux();
+//			
+//			// filtrer les os qui ont une date superieur à la date du current taux
+//			List<OsBean> filtredOs = isOs ? bean.os.stream().filter(os -> os.dateOs.before(currentTaux.getDateTaux())).collect(Collectors.toList()) : null;
+//
+//			long workDays = 0;
+//			if( filtredOs != null && !filtredOs.isEmpty() ) {
+//
+//				Date lastReprise = marche.getStartOs().getDateOs();
+//				OsBean currentOs = null;
+//				
+//				for(OsBean os : filtredOs) {
+//					currentOs = os;
+//					if(os.typeOs.value.equals(enums.OsType.ARRET.value)) {
+//						workDays += ChronoUnit.DAYS.between( Helpers.toLocalDate(lastReprise), Helpers.toLocalDate(os.dateOs) );
+//					} else if(os.typeOs.value.equals(enums.OsType.REPRISE.value)) {
+//						lastReprise = os.dateOs;
+//					} else {
+//						throw new OsIntegrityException();
+//					}	
+//				}
+//				
+//				if( currentOs.typeOs.value.equals(enums.OsType.REPRISE.value) ) {
+//					workDays += ChronoUnit.DAYS.between( Helpers.toLocalDate(currentOs.dateOs), Helpers.toLocalDate(currentTaux.getDateTaux()) );
+//				} 
+//
+//			} else {
+//				workDays = ChronoUnit.DAYS.between( Helpers.toLocalDate(marche.getStartOs().getDateOs()), Helpers.toLocalDate(currentTaux.getDateTaux()) );
+//			}
+//
+//			int delaiInDays = marche.getDelaiExecution() * 31 ;
+//			int workPrecent = (int)  (workDays * 100 / delaiInDays) ;
+//			int currentTauxInDays = (int)  ( currentTaux.getTaux() * delaiInDays / 100 );
+//			int retardEnJour = (int) workDays - currentTauxInDays;
+//
+//			System.out.println("Delai Execution In Days >>>>>>>>>>>>>>>> " + delaiInDays);
+//			System.out.println("Real >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + currentTaux.getTaux() + " % -> ("+currentTauxInDays+") jours");
+//			System.out.println("Théorique >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + workPrecent + " % -> ("+workDays+") jours");
+//			System.out.println("Retard >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ("+retardEnJour+") jours");
+//			
+//			currentTaux.setRetardEnJour( retardEnJour );
+//			currentTaux.setWorkedDays((int) workDays);
+//			
+//		} 
 		
 		
 		
@@ -484,7 +502,7 @@ public class MarcheService {
 		MarcheBean marcheDto = new MarcheBean(
 				marche.getId(), marche.getProjet().getId(), marche.getIntitule(), marche.getDelaiExecution(),
 				marche.getMontant(), marche.getNumMarche(), 
-				marche.getDateApprobation(), marche.getDateOsStart(), marche.getDateReceptionProvisoire(), marche.getDateReceptionDefinitive()
+				marche.getDateApprobation(), marche.getDateReceptionProvisoire(), marche.getDateReceptionDefinitive()
 		);
 
 		marcheDto.marcheType = new SimpleDto(marche.getMarchesType().getId(), marche.getMarchesType().getNom());
@@ -519,14 +537,22 @@ public class MarcheService {
 		marche.getMarchesOss().forEach(os -> {
 			
 					try {
-						marcheDto.os.add(new OsBean(
+						
+						OsBean dto = new OsBean(
 								os.getId(),
 								new SimpleDto(os.getOsType().getId(), 
 								os.getOsType().getLabel()), 
 								os.getDateOs(), 
 								os.getCommentaire(),
 								Helpers.getDirFilesName(Helpers.getOsPathDate(marche.getId(), os.getDateOs()))
-						));
+						);
+						
+						if( os.getOsType().getId() == enums.OsType.COMMENCEMENT.value ) {
+							marcheDto.osStart.add(dto);
+						} else {							
+							marcheDto.os.add(dto);
+						}
+						
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

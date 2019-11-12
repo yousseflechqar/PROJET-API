@@ -14,6 +14,8 @@ generic type :::: a must
 
 exception with walk files
 
+race conditions
+
 
 In Java 8, you can either use Arrays.stream or Stream.of to convert an Array into a Stream.
 List<String> list = Arrays.asList("one", "two", "three");

@@ -52,9 +52,9 @@ public class Marches implements java.io.Serializable {
 	@Column(name = "date_approbation")
 	private Date dateApprobation;
 	
-	@Temporal(TemporalType.DATE)
-	@Column(name = "date_os_commencement")
-	private Date dateOsStart;
+//	@Temporal(TemporalType.DATE)
+//	@Column(name = "date_os_commencement")
+//	private Date dateOsStart;
 	
 
 	
@@ -84,15 +84,19 @@ public class Marches implements java.io.Serializable {
 	@JoinColumn(name = "etat_marche")
 	private MarchesEtat marchesEtat;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "current_taux")
 	private MarchesTaux currentTaux;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "start_os")
+	private MarchesOs startOs;
+	
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "current_os")
 	private MarchesOs currentOs;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "current_decompte")
 	private MarchesDecomptes currentDecompte;
 	
@@ -276,13 +280,13 @@ public class Marches implements java.io.Serializable {
 		this.marchesDecomptes = marchesDecomptes;
 	}
 
-	public Date getDateOsStart() {
-		return dateOsStart;
-	}
-
-	public void setDateOsStart(Date dateOsStart) {
-		this.dateOsStart = dateOsStart;
-	}
+//	public Date getDateOsStart() {
+//		return dateOsStart;
+//	}
+//
+//	public void setDateOsStart(Date dateOsStart) {
+//		this.dateOsStart = dateOsStart;
+//	}
 
 	public Date getDateSaisie() {
 		return dateSaisie;
@@ -306,6 +310,14 @@ public class Marches implements java.io.Serializable {
 
 	public void setCurrentDecompte(MarchesDecomptes currentDecompte) {
 		this.currentDecompte = currentDecompte;
+	}
+
+	public MarchesOs getStartOs() {
+		return startOs;
+	}
+
+	public void setStartOs(MarchesOs startOs) {
+		this.startOs = startOs;
 	}
 
 

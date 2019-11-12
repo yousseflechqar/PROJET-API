@@ -19,7 +19,7 @@ public class MarcheBean {
 	public Integer delai;
 	public Double montant;
 
-	public Date dateStart;
+//	public OsBean osStart;
 
 	public List<TauxBean> taux = new ArrayList<>();
 	public List<DecomptesBean> decomptes = new ArrayList<>();
@@ -28,6 +28,8 @@ public class MarcheBean {
 	public Date dateReceptionDef;
 	
 	public List<OsBean> os = new ArrayList<>();
+	public List<OsBean> osStart = new ArrayList<>();
+	
 	public SimpleDto marcheType;
 	public SimpleDto marcheEtat;
 	public List<SimpleDto> societes = new ArrayList<>();
@@ -38,7 +40,7 @@ public class MarcheBean {
 	
 	public MarcheBean(Integer idMarche, Integer idProjet, String intitule, Integer delai,
 			Double montant, String numMarche,
-			Date dateApprobation, Date dateStart, Date dateReceptionProv, Date dateReceptionDef) {
+			Date dateApprobation, Date dateReceptionProv, Date dateReceptionDef) {
 		
 		super();
 		this.idMarche = idMarche;
@@ -47,7 +49,6 @@ public class MarcheBean {
 		this.delai = delai;
 		this.numMarche = numMarche;
 		this.montant = montant;
-		this.dateStart = dateStart;
 		this.dateReceptionProv = dateReceptionProv;
 		this.dateReceptionDef = dateReceptionDef;
 		this.dateApprobation = dateApprobation;

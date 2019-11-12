@@ -1,6 +1,7 @@
 package controllers;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class MarcheRest {
 	public Integer saveMarches(
 			@RequestPart("formJson") MarcheBean formJson,
 			@ModelAttribute MarcheAttachs attachs
-	) throws IOException {
+	) throws IOException, ParseException {
 		
 		
 
