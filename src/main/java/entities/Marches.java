@@ -42,6 +42,13 @@ public class Marches implements java.io.Serializable {
 	@Column(name = "delai_execution")
 	private Integer delaiExecution;
 	
+	@Column(name = "work_days_last_arret")
+	private Integer workDaysLastArret;
+	
+	@Temporal(TemporalType.DATE)
+	@Column(name = "last_reprise")
+	private Date lastReprise;
+	
 	private Double montant;
 
 	@Temporal(TemporalType.DATE)
@@ -318,6 +325,22 @@ public class Marches implements java.io.Serializable {
 
 	public void setStartOs(MarchesOs startOs) {
 		this.startOs = startOs;
+	}
+
+	public Integer getWorkDaysLastArret() {
+		return workDaysLastArret;
+	}
+
+	public void setWorkDaysLastArret(Integer workDaysLastArret) {
+		this.workDaysLastArret = workDaysLastArret;
+	}
+
+	public Date getLastReprise() {
+		return lastReprise;
+	}
+
+	public void setLastReprise(Date lastReprise) {
+		this.lastReprise = lastReprise;
 	}
 
 

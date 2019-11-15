@@ -1,14 +1,23 @@
 package beans;
 
+
+
 public class ProjetSearchBean {
 	
-	public String intitule;
+	public String intitule="";
 	public Integer secteur;
 	public Integer acheteur;
 	public Integer commune;
 	public Integer acheteurType;
-	public Integer srcFinancement;
-	public Integer prSouffrance;
+	public Integer srcFinancement=0;
+	public Integer projectStatus=0;
+	
+	
+	public Integer page=1;
+	public Integer size=10;
+	public boolean count=true;
+	public String order ;
+	public String sort="desc";
 	
 	
 	
@@ -57,11 +66,42 @@ public class ProjetSearchBean {
 	public void setSrcFinancement(Integer srcFinancement) {
 		this.srcFinancement = srcFinancement;
 	}
-	public Integer getPrSouffrance() {
-		return prSouffrance;
+
+	public Integer getPage() {
+		return page;
 	}
-	public void setPrSouffrance(Integer prSouffrance) {
-		this.prSouffrance = prSouffrance;
+	public void setPage(Integer page) {
+		this.page = page;
+	}
+	public Integer getSize() {
+		return size;
+	}
+	public void setSize(Integer size) {
+		this.size = size;
+	}
+	public String getOrder() {
+		return order;
+	}
+	public void setOrder(String order) {
+		this.order = order;
+	}
+	public String getSort() {
+		return sort;
+	}
+	public void setSort(String sort) {
+		this.sort = sort;
+	}
+	public boolean isCount() {
+		return count;
+	}
+	public void setCount(boolean count) {
+		this.count = count;
+	}
+	public Integer getProjectStatus() {
+		return projectStatus;
+	}
+	public void setProjectStatus(Integer projectStatus) {
+		this.projectStatus = projectStatus;
 	}
 
 	

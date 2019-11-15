@@ -19,8 +19,10 @@ public class ProjetDto {
 	
 	public String maitreOuvrage;
 	
-	public Integer chargeSuivID;
-	public String chargeSuivLabel;
+	public Integer daysFromLastRepriseTilNow;
+	
+//	public Integer chargeSuivID;
+//	public String chargeSuivLabel;
 	
 	/// TEMP
 	public Integer communeId;
@@ -34,10 +36,17 @@ public class ProjetDto {
 
 	public Map<Integer, String> marches = new LinkedHashMap<Integer, String>();
 
+//	@QueryProjection
+//	public ProjetDto(Integer id) {
+//		this.id = id;
+//	}
+	
 	@QueryProjection
 	public ProjetDto(Integer id, String intitule, Integer taux, String maitreOuvrage, Integer communeId, String communeLabel,
-			Integer marcheId, String marcheType, 
-			Integer chargeSuivID, String chargeSuivLabel) {
+			Integer marcheId, String marcheType,
+			Integer daysFromLastRepriseTilNow
+//			Integer chargeSuivID, String chargeSuivLabel
+			) {
 		this.id = id;
 		this.intitule = intitule;
 		this.taux = taux;
@@ -46,8 +55,9 @@ public class ProjetDto {
 		this.communeLabel = communeLabel;
 		this.marcheId = marcheId;
 		this.marcheType = marcheType;
-		this.chargeSuivID = chargeSuivID;
-		this.chargeSuivLabel = chargeSuivLabel;
+		this.daysFromLastRepriseTilNow = daysFromLastRepriseTilNow;
+//		this.chargeSuivID = chargeSuivID;
+//		this.chargeSuivLabel = chargeSuivLabel;
 	}
 	
 	

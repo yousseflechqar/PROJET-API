@@ -58,8 +58,6 @@ public class ProjetService {
 	@Autowired
 	private ProjetDao projetDao;
 	@Autowired
-	private SearchProjetDao searchProjetDao;
-	@Autowired
 	private GenericDao<Projet, Integer> genericProjetDao;
 	@Autowired
 	private GenericDao<ProjetMaitreOuvrage, Integer> gProjetMaitreOuvrageDao;
@@ -237,33 +235,7 @@ public class ProjetService {
 
 
 	
-	public Collection<ProjetDto> getListProjets(ProjetSearchBean bean){
-		
-		List<ProjetDto> projets = searchProjetDao.getListProjets(bean);
 
-		Map<Integer, ProjetDto> projetsMap = new LinkedHashMap<Integer, ProjetDto>();
-		
-		projets.forEach((proj) -> {
-
-			if (!projetsMap.containsKey(proj.id)) {
-				projetsMap.put(proj.id, proj);
-			}
-			
-			if(!projetsMap.get(proj.id).localisations.containsKey(proj.communeId)) {
-				projetsMap.get(proj.id).localisations.put(proj.communeId, proj.communeLabel);
-			}
-			
-			if( proj.marcheId != null ) {
-				
-				if(!projetsMap.get(proj.id).marches.containsKey(proj.marcheId)) {
-					projetsMap.get(proj.id).marches.put(proj.marcheId, proj.marcheType);
-				} 
-			}
-
-		});
-		
-		return projetsMap.values();
-	}
 	
 
 	

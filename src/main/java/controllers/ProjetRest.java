@@ -35,6 +35,7 @@ import dao.ProjetDao;
 import dao.SearchProjetDao;
 import dao.UserDao;
 import dto.DetailDto;
+import dto.PageResult;
 import dto.ProjetBasicDto;
 import dto.ProjetDto;
 import dto.ProjetEditDto;
@@ -49,6 +50,7 @@ import exceptions.ForbiddenException;
 import helpers.Helpers;
 import services.DiversService;
 import services.MarcheService;
+import services.ProjetSearch;
 import services.ProjetService;
 import services.UserService;
 
@@ -64,6 +66,8 @@ public class ProjetRest {
 	private MarcheDao marcheDao;
 	@Autowired
 	private ProjetService projetService;
+	@Autowired
+	private ProjetSearch projetSearch;
 	@Autowired
 	private MarcheService marcheService;
 	@Autowired
@@ -102,7 +106,7 @@ public class ProjetRest {
 			ProjetEditDto proj = projetService.getProjetForEdit(idProjet);
 			map.put("projetData", proj);
 			
-			if(proj.srcFinancement.equals(enums.SrcFinancement.INDH.val())) {
+			if(proj.srcFinancement != null && proj.srcFinancement.equals(enums.SrcFinancement.INDH.val())) {
 				map.put("indhProgrammes", diversService.getParentProgrammesWithPhases());
 			}
 		}
@@ -145,9 +149,9 @@ public class ProjetRest {
 	}
 	
 	@GetMapping(value = "/projets")
-	public Collection<ProjetDto> getAllProjets(ProjetSearchBean bean) {
+	public PageResult getAllProjets(ProjetSearchBean bean) {
 		
-		return projetService.getListProjets(bean);
+		return projetSearch.getListProjets(bean);
 	}
 	
 

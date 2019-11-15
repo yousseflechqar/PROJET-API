@@ -29,3 +29,10 @@ adding cascade=CascadeType.ALL
 
 - orphanRemoval = true: "Child" entity is removed when it's no longer referenced (its parent may not be removed).
 - CascadeType.REMOVE: "Child" entity is removed only when its "Parent" is removed.
+
+
+if we dont specify getter/setter in dto and we initialize field then this init value will be always returned
+
+
+Expressions.numberTemplate(Integer.class, "datediff(NOW(), {0})", marche2.lastReprise) -> attention pour {0} si pas bon index alors => 
+index (1) must be less than size (1)

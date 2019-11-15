@@ -51,6 +51,7 @@ import entities.OsType;
 import entities.Projet;
 import entities.Societe;
 import exceptions.OsIntegrityException;
+import helpers.CONSTANTS;
 import helpers.Helpers;
 
 @Service
@@ -68,14 +69,11 @@ public class MarcheService {
 	
 	@Transactional(rollbackOn = Exception.class)
 	public Integer saveMarche(MarcheBean bean, MarcheAttachs attachs) throws IOException, ParseException {
-		
 
 		
-//		boolean dirtyCheckTaux = false;
-
 		Marches marche = new Marches();
-
-		if( bean.idMarche != null ) {
+		boolean editMode = bean.idMarche != null ;
+		if( editMode ) {
 			marche = gMarchesDao.read(bean.idMarche, Marches.class);
 		} else {
 			marche.setProjet( new Projet(bean.idProjet) );
@@ -83,41 +81,23 @@ public class MarcheService {
 
 		marche.setIntitule(bean.intitule);
 		marche.setMontant(bean.montant);
-		
-//		if( bean.delai != null && ! bean.delai.equals(marche.getDelaiExecution()) ) {
-//			System.out.println("Delai Execution CHANGED !!");
-//			dirtyCheckTaux = true;
-//		}
-		
-		marche.setDelaiExecution(bean.delai);	
 		marche.setNumMarche(bean.numMarche);
+		marche.setDelaiExecution(bean.delai);	
 		marche.setMarchesType(new MarchesType(bean.marcheType.value));
 		marche.setMarchesEtat(new MarchesEtat(bean.marcheEtat.value));
-		
 		marche.setDateApprobation(bean.dateApprobation);
-		
-
-		
-//		marche.setDateOsStart(bean.dateStart);
 		marche.setDateReceptionProvisoire(bean.dateReceptionProv);
 		marche.setDateReceptionDefinitive(bean.dateReceptionDef);
 
+		
 		marche.setDateSaisie(new Date());
+
 		
 		if( bean.idMarche == null ) {
 			gMarchesDao.create(marche);
 		}
-		
 
-		
 		marche.getMarchesSocietes().clear();
-//		marche.getMarchesOss().clear();
-//		marche.getMarchesDecomptes().clear();
-		
-//		marche.setCurrentOs(null);
-//		marche.setCurrentDecompte(null);
-		
-		
 
 		entityManager.flush();
 		
@@ -130,14 +110,15 @@ public class MarcheService {
 			}
 		}
 
-		
-		
-		
 		//////////////////////////////////// ORDRES SERVICE
 		
 		boolean isOs = ! bean.os.isEmpty();
+		boolean isTaux = ! bean.taux.isEmpty();
 
 		List<MarchesOs> deletedOs = new ArrayList<MarchesOs>();
+		long workDaysLastArret = 0, workDaysCurrentTaux = 0;
+		TauxBean newCurrentTaux = isTaux ? Collections.max(bean.taux, Comparator.comparing(tb -> tb.dateTaux)) : null;
+		OsBean OsCurrentTaux = null;
 		
 		if( isOs ) {
 
@@ -158,21 +139,36 @@ public class MarcheService {
 				throw new OsIntegrityException();
 			}
 			
-//			if( marche.getStartOs() == null || ! Helpers.isEqual(osStartBean.dateOs, marche.getStartOs().getDateOs()) ) {
-//				System.out.println("Date Start CHANGED !!");
-//				dirtyCheckTaux = true;
-//			}
 
 			// check integrity os
-			Integer previousOsType = enums.OsType.REPRISE.value; 
 			int i=0;
+			Integer previousOsType = enums.OsType.REPRISE.value; 			
+			Date lastReprise = osStartBean.dateOs;
 			
 			for(OsBean os : bean.os) {
 				
 				if( i > 0 ) {
-					if( os.typeOs.value.equals(enums.OsType.COMMENCEMENT.value) ) { throw new OsIntegrityException(); } 
+					
 					if( os.typeOs.value.equals(previousOsType) ) { throw new OsIntegrityException(); } 
 					previousOsType = os.typeOs.value;
+
+					if(os.typeOs.value.equals(enums.OsType.ARRET.value)) {
+						workDaysLastArret += ChronoUnit.DAYS.between(Helpers.toLocalDate(lastReprise), Helpers.toLocalDate(os.dateOs));
+					} else if(os.typeOs.value.equals(enums.OsType.REPRISE.value)) {
+						lastReprise = os.dateOs;
+					} else {
+						throw new OsIntegrityException();
+					}	
+					
+					boolean isOsBeforeCurrentTaux = isTaux && os.dateOs.before(newCurrentTaux.dateTaux);
+					if(isOsBeforeCurrentTaux) {
+						OsCurrentTaux = os;
+						if(os.typeOs.value.equals(enums.OsType.ARRET.value)) {
+							workDaysCurrentTaux = workDaysLastArret;
+						}
+					}
+					
+//					if( os.typeOs.value.equals(enums.OsType.COMMENCEMENT.value) ) { throw new OsIntegrityException(); } 
 				}
 
 				MarchesOs mOs = new MarchesOs();
@@ -199,6 +195,26 @@ public class MarcheService {
 
 				i++;
 			}
+			
+			marche.setLastReprise(lastReprise);
+			marche.setWorkDaysLastArret((int) workDaysLastArret);
+			
+			
+			if(isTaux) {
+				
+				// si on a terminer avec une reprise alors on calcule days till date taux courant
+				// pas de panic la date de newCurrentTaux > OsCurrentTaux
+				// OsCurrentTaux null means => la date du taux est inferieure au 1er os (arret)
+				if( OsCurrentTaux != null && OsCurrentTaux.typeOs.value.equals(enums.OsType.REPRISE.value) ) {
+					workDaysCurrentTaux += ChronoUnit.DAYS.between(Helpers.toLocalDate(OsCurrentTaux.dateOs), Helpers.toLocalDate(newCurrentTaux.dateTaux));
+				} 
+				
+				// 0 means que ya pas de OS arret ou reprise
+				if(workDaysCurrentTaux == 0) {
+					workDaysCurrentTaux = ChronoUnit.DAYS.between(Helpers.toLocalDate(marche.getStartOs().getDateOs()), Helpers.toLocalDate(newCurrentTaux.dateTaux) );
+				}
+			}
+			
 		} else {
 			marche.setCurrentOs(null);
 			marche.getMarchesOss().clear();
@@ -207,7 +223,8 @@ public class MarcheService {
 		//////////////////////////////////// TAUX AVANCEMNT
 
 		
-		boolean isTaux = bean.taux != null && ! bean.taux.isEmpty();
+		boolean tauxHasChanged = false;
+
 		
 		if( isTaux ) {
 
@@ -216,20 +233,21 @@ public class MarcheService {
 
 			/// CHECK IF THE CURRENT TAUX HAS CHANGED
 			MarchesTaux oldCurrentTaux = marche.getCurrentTaux();
-			TauxBean newCurrentTaux = Collections.max(bean.taux, Comparator.comparing(tb -> tb.dateTaux));
 			
-//			if( oldCurrentTaux == null ||  
-//					! oldCurrentTaux.getTaux().equals(newCurrentTaux.valueTaux) ||  
-//					! Helpers.isEqual(newCurrentTaux.dateTaux, oldCurrentTaux.getDateTaux()) ) {
-//				System.out.println("TAUX CHANGED !!");
-//				dirtyCheckTaux = true;
-//			}
+			
+			if(  !editMode ||
+					oldCurrentTaux == null ||  
+					! oldCurrentTaux.getTaux().equals(newCurrentTaux.valueTaux) ||  
+					! Helpers.isEqual(newCurrentTaux.dateTaux, oldCurrentTaux.getDateTaux()) 
+			) {
+				System.out.println("TAUX COURANT HAS CHANGED !!");
+				tauxHasChanged = true;
+			}
 
 			for(TauxBean tb : bean.taux) {
 				MarchesTaux mT = new MarchesTaux();
 				if( tb.id != null ) {		
 					mT = marche.getMarchesTaux().stream().filter(mt -> mt.getId().equals(tb.id)).findFirst().get();
-//					mT = marche.getMarchesTaux().stream().filter(mt -> mt.getId().equals(tb.id)).findAny().orElse(null);
 				} 
 				mT.setTaux(tb.valueTaux);
 				mT.setDateTaux(tb.dateTaux);
@@ -295,16 +313,51 @@ public class MarcheService {
 		
 		////////////////////////////////////////// WORKED DAYS && RETARD
 
-//		if( isTaux && dirtyCheckTaux ) {
-//
+		// le nombre de jours effectué depends de :
+//		1. les ordres de services ( start/arret/reprise ) or worked
+//		2. du taux courant
+//		3. delai
+		
+		System.out.println("work Days since last Arrêt >>>>>>>>>>>>>>>> " + workDaysLastArret);
+		MarchesTaux currentTaux = marche.getCurrentTaux();
+		
+		if(isTaux) {
+
+			
+
+			int delaiInDays = marche.getDelaiExecution() * CONSTANTS.MONTH_DAYS ;
+			int workPrecent = (int)  (workDaysCurrentTaux * 100 / delaiInDays) ;
+			int currentTauxInDays = (int)  ( newCurrentTaux.valueTaux * delaiInDays / 100 );
+			int retardEnJour = (int) workDaysCurrentTaux - currentTauxInDays;
+
+			System.out.println("Delai Execution In Days >>>>>>>>>>>>>>>> " + delaiInDays);
+			System.out.println("Le taux courant observé par l'agent sur terrain est de => (" + newCurrentTaux.valueTaux + " %) -> normalement il doit être à -> ("+currentTauxInDays+") jours");
+			System.out.println("pour ce taux courant le nombres de jours effectués est de ("+workDaysCurrentTaux+") jours  -> normalement le taux doit être à (" + workPrecent + " %)");
+			System.out.println( retardEnJour > 0 ? "retard encaissé de ("+retardEnJour+") jours" : "pas de retard ("+retardEnJour+")");
+			
+			
+			currentTaux.setRetardEnJour( retardEnJour );
+			currentTaux.setWorkedDays((int) workDaysCurrentTaux);
+			
+		} 
+//		
+//		////////////////////////////////////////// WORKED DAYS && RETARD
+//		
+//		// le nombre de jours effectué depends de :
+////		1. les ordres de services ( start/arret/reprise ) or worked
+////		2. du taux courant
+////		3. delai
+//		if( isTaux && (!editMode || dirtyCheckTaux) ) {
+//			
 //			MarchesTaux currentTaux = marche.getCurrentTaux();
 //			
 //			// filtrer les os qui ont une date superieur à la date du current taux
+//			// afin de calculer workDays pour le taux courant saisi par l'agent
 //			List<OsBean> filtredOs = isOs ? bean.os.stream().filter(os -> os.dateOs.before(currentTaux.getDateTaux())).collect(Collectors.toList()) : null;
-//
+//			
 //			long workDays = 0;
 //			if( filtredOs != null && !filtredOs.isEmpty() ) {
-//
+//				
 //				Date lastReprise = marche.getStartOs().getDateOs();
 //				OsBean currentOs = null;
 //				
@@ -322,19 +375,18 @@ public class MarcheService {
 //				if( currentOs.typeOs.value.equals(enums.OsType.REPRISE.value) ) {
 //					workDays += ChronoUnit.DAYS.between( Helpers.toLocalDate(currentOs.dateOs), Helpers.toLocalDate(currentTaux.getDateTaux()) );
 //				} 
-//
 //			} else {
 //				workDays = ChronoUnit.DAYS.between( Helpers.toLocalDate(marche.getStartOs().getDateOs()), Helpers.toLocalDate(currentTaux.getDateTaux()) );
 //			}
-//
+//			
 //			int delaiInDays = marche.getDelaiExecution() * 31 ;
 //			int workPrecent = (int)  (workDays * 100 / delaiInDays) ;
 //			int currentTauxInDays = (int)  ( currentTaux.getTaux() * delaiInDays / 100 );
 //			int retardEnJour = (int) workDays - currentTauxInDays;
-//
+//			
 //			System.out.println("Delai Execution In Days >>>>>>>>>>>>>>>> " + delaiInDays);
-//			System.out.println("Real >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + currentTaux.getTaux() + " % -> ("+currentTauxInDays+") jours");
-//			System.out.println("Théorique >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + workPrecent + " % -> ("+workDays+") jours");
+//			System.out.println("Le taux courant observé par l'agent sur terrain est de => (" + currentTaux.getTaux() + " %) -> normalement il doit être à -> ("+currentTauxInDays+") jours");
+//			System.out.println("le nombres de jours equivalent au taux courant est de ("+workDays+") jours  -> normalement le taux doit être à (" + workPrecent + " %)");
 //			System.out.println("Retard >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ("+retardEnJour+") jours");
 //			
 //			currentTaux.setRetardEnJour( retardEnJour );
@@ -344,58 +396,46 @@ public class MarcheService {
 		
 		
 		
-//		for(OsBean os : bean.os) {
 
-//			mrequest.getFile("attachOs[")
-//			OutputStream OUT = Files.newOutputStream( 
-//					Paths.get("D:/attachements/" + attach.file.getOriginalFilename()) 
-//			) ;
-//			IOUtils.copy( attach.file.getInputStream() , OUT ); 
-//			OUT.close();
-//		}
 		
 		
 		//////////// SAVING ATTACHEMENTS
 		
-		if( isOs ) {
-			
-			
-			
-			for(OsBean os : bean.os) {
-				saveAttachments(
-						os.resources, 
-						os.index != null ? attachs.osAttachs[os.index] : null, 
-						Helpers.getOsPathDate(marche.getId(), os.dateOs), 
-						os.dateOs, marche.getId(), "OS-"
-				);
-			}
-			
-
-			for(MarchesOs del : deletedOs) {
-				Helpers.deleteDir(Helpers.getOsPathDate(marche.getId(), del.getDateOs()));
-			}
 
 			
-		} else { Helpers.deleteDir(Helpers.getOsPath(marche.getId())); }
+			
+//		1. saving attachments	
+		for(OsBean os : bean.os) {
+			saveAttachments(
+					os.resources, 
+					os.index != null ? attachs.osAttachs[os.index] : null, 
+					Helpers.getOsPathDate(marche.getId(), os.dateOs), 
+					os.dateOs, marche.getId(), "OS-"
+			);
+		}
 		
+		for(DecomptesBean dec : bean.decomptes) {
+			saveAttachments(dec.resources, 
+					dec.index != null ? attachs.decAttachs[dec.index] : null, 
+					Helpers.getDecPathDate(marche.getId(), dec.dateDec),  
+					dec.dateDec, marche.getId(), "DEC-"
+			);
+		}
+			
+//		2. deleting attachments	
+		for(MarchesOs del : deletedOs) {
+			Helpers.deleteDir(Helpers.getOsPathDate(marche.getId(), del.getDateOs()));
+		}
 		
-		if(isDec) {
-			
-			for(DecomptesBean dec : bean.decomptes) {
-				saveAttachments(dec.resources, 
-						dec.index != null ? attachs.decAttachs[dec.index] : null, 
-						Helpers.getDecPathDate(marche.getId(), dec.dateDec),  
-						dec.dateDec, marche.getId(), "DEC-"
-				);
-			}	
+		for(MarchesDecomptes del : deletedDec) {
+			Helpers.deleteDir(Helpers.getDecPathDate(marche.getId(), del.getDateDecompte()));
+		}
+
+//		3. deleting attachments	
+		if(!isOs) Helpers.deleteDir(Helpers.getOsPath(marche.getId())); 		
+		if(!isDec) Helpers.deleteDir(Helpers.getDecPath(marche.getId()));
 			
 
-			for(MarchesDecomptes del : deletedDec) {
-				Helpers.deleteDir(Helpers.getDecPathDate(marche.getId(), del.getDateDecompte()));
-			}
-
-			
-		} else { Helpers.deleteDir(Helpers.getDecPath(marche.getId())); }
 
 		return marche.getId();
 		

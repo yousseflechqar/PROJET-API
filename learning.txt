@@ -5,6 +5,7 @@ Polymorphism.
 compareTo
 
 Collections.max(marche.getMarchesTaux(), Comparator.comparing(mt -> mt.getDateTaux()));
+bean.os.sort((o1, o2) -> o1.dateOs.compareTo(o2.dateOs));
 
 equals and hashcode ??
 reflexion
@@ -28,3 +29,13 @@ OneToOne ?? FK as PK too ??
 
 lamda and functional !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+// concat -> Expressions.stringTemplate()
+
+private boolean methodName(int variant,int... args)
+Stream.of("val1", "val2", "val3").anyMatch(str::equalsIgnoreCase
+
+public static int checkElementIndex(
+      int index, int size, @Nullable String desc)
+      
+enums too !!!

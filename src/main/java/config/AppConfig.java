@@ -17,6 +17,8 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import dialect.CustomMySQLDialect;
+
 @Configuration
 @EnableTransactionManagement
 @PropertySource("classpath:database.properties")
@@ -48,7 +50,8 @@ public class AppConfig {
 	
     private Properties jpaProperties() {
         Properties properties = new Properties();
-        properties.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
+        properties.put("hibernate.dialect", CustomMySQLDialect.class);
+//        properties.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
         properties.put("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
         properties.put("hibernate.format_sql", env.getProperty("hibernate.format_sql"));
         return properties;        
