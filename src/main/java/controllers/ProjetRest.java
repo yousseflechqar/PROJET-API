@@ -81,12 +81,11 @@ public class ProjetRest {
 
 
 	@PostMapping(value = "/projets")
-	public ProjetBean saveProjet(@RequestBody ProjetBean bean, HttpSession session) {
+	public Integer saveProjet(@RequestBody ProjetBean bean, HttpSession session) {
 
 		UserSession userSession = (UserSession) session.getAttribute("user");
-		projetService.saveProjet(bean, userSession);
-
-		return bean;
+		
+		return projetService.saveProjet(bean, userSession);
 	}
 	
 	@GetMapping(value = "/projets/loading")
