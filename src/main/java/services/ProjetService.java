@@ -230,6 +230,7 @@ public class ProjetService {
 		});
 		dto.localisations = locMap.values();
 		
+		
 		return dto;
 	} 
 	
