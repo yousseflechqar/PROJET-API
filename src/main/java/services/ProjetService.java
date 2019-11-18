@@ -179,7 +179,7 @@ public class ProjetService {
 		return dto;
 	} 
 	
-	public ProjetBasicDto<TreeDto, SimpleDto> getProjetForDetail(Integer idProjet) {
+	public ProjetBasicDto getProjetForDetail(Integer idProjet) {
 		
 		Projet projet = projetDao.getProjetForEdit(idProjet);
 		
@@ -190,9 +190,9 @@ public class ProjetService {
 		SimpleDto modDto = pMod != null ? new SimpleDto(mod.getId(), mod.getNom()) : null;
 
 		
-		ProjetBasicDto<TreeDto, SimpleDto> dto = new ProjetBasicDto<>(
+		ProjetBasicDto dto = new ProjetBasicDto(
 				projet.getId(),
-				projet.getIntitule(), projet.getMontant(), projet.isConvention(), 
+				projet.getIntitule(), projet.getMontant(), projet.isConvention(), projet.getAnneeProjet(), 
 				modDto != null, new SimpleDto(mo.getId(), mo.getNom()), modDto,
 				projet.getIndh() != null, projet.isPrdts()
 			);
@@ -212,8 +212,11 @@ public class ProjetService {
 		}
 		
 		dto.secteur = new SimpleDto(projet.getSecteur().getId(), projet.getSecteur().getNom()) ;
+		dto.srcFinancement = (projet.getSrcFinancement() != null) ? 
+				new SimpleDto(projet.getSrcFinancement() .getId(), projet.getSrcFinancement() .getLabel()) : null ;
 		
-
+		dto.chargeSuivi = (projet.getChargeSuivi() != null) ? 
+				new SimpleDto(projet.getChargeSuivi() .getId(), projet.getChargeSuivi().getPrenom()+" "+projet.getChargeSuivi().getNom()) : null ;
 		
 		Map<Integer, TreeDto> locMap = new LinkedHashMap<>();
 		projet.getLocalisations().forEach(loc -> {

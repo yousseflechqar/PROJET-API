@@ -18,7 +18,8 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 		String uri = request.getRequestURI();
 		String url = request.getServletContext().getContextPath();
 		
-		System.out.println("URI : " +  uri);
+
+		System.out.println("URI : " +  uri + " => " + request.getMethod());
 //		System.out.println("URL : " +  request.getServletContext().getContextPath());
 //		System.out.println("IP : " +  request.getRemoteAddr());
 //		System.out.println("Session : " +  request.getSession() + " > " + request.getSession().getId());

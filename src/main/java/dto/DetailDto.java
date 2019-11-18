@@ -6,17 +6,17 @@ import beans.MarcheBean;
 
 public class DetailDto {
 	
-	public ProjetBasicDto<TreeDto, SimpleDto> projet;
+	public ProjetBasicDto projet;
 	public MarcheBean defaultMarche;
 	public List<SimpleDto> marchesTypes;
 	
 	
-	public DetailDto(ProjetBasicDto<TreeDto, SimpleDto> projet, MarcheBean defaultMarche) {
+	public DetailDto(ProjetBasicDto projet, MarcheBean defaultMarche) {
 		this.projet = projet;
 		this.defaultMarche = defaultMarche;
 	}
 	
-	public DetailDto(ProjetBasicDto<TreeDto, SimpleDto> projet, MarcheBean defaultMarche,
+	public DetailDto(ProjetBasicDto projet, MarcheBean defaultMarche,
 			List<SimpleDto> marchesTypes) {
 		this.projet = projet;
 		this.defaultMarche = defaultMarche;

@@ -4,3 +4,23 @@ check OneToOne it must be maybe OneToMany
 
 QClasses missing ? -> try restarting pc
 
+
+/////
+
+faire
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("secteurs", diversDao.getSecteurs());
+		...
+		return map;
+		
+au lieu de :
+		return new DetailDto(
+				projetService.getProjetForDetail(idProjet), 
+				marcheService.getDefaultMarcheForDetail(idProjet),
+				marcheDao.getMarchesIdsWithTypeByProjet(idProjet)
+		);
+et creer un dto zayed
+
+/////
+
+

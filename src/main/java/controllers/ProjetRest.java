@@ -147,6 +147,19 @@ public class ProjetRest {
 		);
 	}
 	
+	@GetMapping(value = "/projets/search/loading")
+	public Map<String, Object> projetsSearchLoading() {
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		map.put("secteurs", diversDao.getSecteurs());
+		map.put("srcFinancements", diversDao.getSrcFinancements());
+		map.put("communes", diversDao.getCommunes());
+		map.put("acheteurs", diversDao.getAcheteurs());
+		
+		return map;
+	}
+	
 	@GetMapping(value = "/projets")
 	public PageResult getAllProjets(ProjetSearchBean bean) {
 		

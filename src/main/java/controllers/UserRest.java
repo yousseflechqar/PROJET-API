@@ -1,6 +1,7 @@
 package controllers;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,9 +57,20 @@ public class UserRest {
 		return userService.saveUser(bean);
 	}
 	
-	@GetMapping(value = "/users/edit/{idUser}")
-	public UserBean getProjetForEdit(@PathVariable Integer idUser) {
-		return userService.getUserForEdit(idUser);
+	@GetMapping(value = "/users/loading")
+	public Map<String, Object> userLoading(HttpServletRequest request) {
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		if(request.getParameter("user") != null) {			
+			map.put("userInfos", userService.getUserForEdit(Integer.valueOf(request.getParameter("user"))));
+		}
+		map.put("roles", userDao.getListRoles());
+		map.put("userTypes", userDao.getUserTypes());
+		map.put("divisions", userDao.getDivisions());
+	
+		
+		return map;
 	}
 	
 	@GetMapping(value = "/users")

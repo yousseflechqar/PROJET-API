@@ -65,6 +65,8 @@ public class ProjetDao {
 							
 						+ "LEFT JOIN FETCH p.projetPartenaires pp "
 							+ "LEFT JOIN FETCH pp.partenaire "
+							
+						+ "LEFT JOIN FETCH p.chargeSuivi "
 						
 					+ "WHERE p.id = :idProjet "
 					
