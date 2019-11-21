@@ -24,3 +24,8 @@ et creer un dto zayed
 /////
 
 
+org.hibernate.LazyInitializationException: could not initialize proxy [entities.User#0] - no Session
+
+sometimes it occurs when we have FK that references no id (if we SET FOREIGN_KEY_CHECKS=0 for example)
+
+/////

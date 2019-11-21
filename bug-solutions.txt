@@ -36,3 +36,6 @@ if we dont specify getter/setter in dto and we initialize field then this init v
 
 Expressions.numberTemplate(Integer.class, "datediff(NOW(), {0})", marche2.lastReprise) -> attention pour {0} si pas bon index alors => 
 index (1) must be less than size (1)
+
+
+long i = 12345678910L => L

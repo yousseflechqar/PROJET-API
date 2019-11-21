@@ -17,6 +17,7 @@ public class MarcheBean {
 	public String intitule;
 	public String numMarche;
 	public Integer delai;
+	public Long workDays = 0L ;
 	public Double montant;
 
 //	public OsBean osStart;

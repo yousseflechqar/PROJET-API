@@ -256,19 +256,14 @@ public class SearchProjetDao {
 	
 		page.content = new JPAQuery<ProjetDto>(entityManager)
 				
-				.select(new QProjetDto(prj.id, prj.intitule, prj.taux, mo.nom, com.id, com.nom, marche.id, mType.nom, 
+				.select(
+						new QProjetDto(prj.id, prj.intitule, prj.taux, mo.nom, com.id, com.nom, marche.id, mType.nom, 
 						
 						mOs.osType.id.when(enums.OsType.ARRET.value).then(marche.workDaysLastArret)
 						.otherwise(marche.workDaysLastArret.add(Expressions.numberTemplate(Integer.class, "datediff(NOW(), {0})", marche.lastReprise)))
 						
-						))
-				
-				
-
-
-						
-
-
+						)
+				)
 
 				.from(prj)
 					.leftJoin(prj.chargeSuivi, chargeSuiv)

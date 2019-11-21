@@ -548,6 +548,15 @@ public class MarcheService {
 		marcheDto.marcheType = new SimpleDto(marche.getMarchesType().getId(), marche.getMarchesType().getNom());
 		marcheDto.marcheEtat = new SimpleDto(marche.getMarchesEtat().getId(), marche.getMarchesEtat().getNom());
 
+		if( marche.getCurrentOs() != null ) {
+			
+			marcheDto.workDays = marche.getCurrentOs().getOsType().getId().equals(enums.OsType.ARRET.value) ?
+					marche.getWorkDaysLastArret()
+					: 
+					marche.getWorkDaysLastArret() + ChronoUnit.DAYS.between(Helpers.toLocalDate(marche.getLastReprise()), Helpers.toLocalDate(new Date()))
+					;
+		}
+				
 		
 		marche.getMarchesTaux().forEach(taux -> {
 			marcheDto.taux.add(new TauxBean(taux.getId(), taux.getTaux(), taux.getDateTaux(), taux.getCommentaire()));
