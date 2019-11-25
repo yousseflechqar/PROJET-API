@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Repository;
 
@@ -46,33 +47,39 @@ public class MarcheDao {
 	}
 
 
-	public Marches getDefaultMarche(Integer idProjet) {
+	@Transactional
+	public void setDefaultMarche(Integer idProjet, Integer idMarche) {
 
-		entityManager.createQuery(""
-				+ "SELECT m.id from Marches m "
-					+ "WHERE m.projet.id = :idProjet"
-				+ "")
+		entityManager.createQuery(" Update Projet p set p.defaultMarche.id = :idMarche where p.id = :idProjet ")
+			.setParameter("idMarche", idMarche)
+			.setParameter("idProjet", idProjet)
+		.executeUpdate();
+	}
+	
+	public Integer getDefaultMarche(Integer idProjet) {
+		
+		return entityManager.createQuery("SELECT defaultMarche.id from Projet WHERE id = :idProjet", Integer.class)
 				.setParameter("idProjet", idProjet)
-		;
-		return null;
+				.getSingleResult()
+				;
 	}
 	
 	public Integer getTravauxMarcheId(Integer idProjet) {
-		try {
-				return 	
-				entityManager.createQuery(""
-					+ "SELECT m.id from Marches m "
-						+ "WHERE m.projet.id = :idProjet AND m.marchesType.id = :mType "
-						+ "ORDER BY m.id desc "
-					+ "", Integer.class)
-				.setParameter("idProjet", idProjet)
-				.setParameter("mType", MarcheTypeEnum.travaux.value)
-				.setMaxResults(1)
-				.getSingleResult();
+
+		return 	
+		entityManager.createQuery(""
+			+ "SELECT m.id from Marches m "
+				+ "LEFT JOIN m.startOs startOs "
+					+ "WHERE m.projet.id = :idProjet AND m.marchesType.id = :mType "
+				+ "ORDER BY startOs.dateOs DESC, m.id DESC "
+			+ "", Integer.class)
 		
-		} catch (NoResultException e) {
-			return null;
-		}
+		.setParameter("idProjet", idProjet)
+		.setParameter("mType", MarcheTypeEnum.travaux.value)
+		
+		.getResultList().stream().findFirst().orElse(null);
+		
+
 	}
 	
 	public List<Integer> getMarchesIdsByProjet(Integer idProjet) {

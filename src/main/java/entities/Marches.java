@@ -26,14 +26,10 @@ import javax.persistence.TemporalType;
 public class Marches implements java.io.Serializable {
 
 	
-	
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	private Integer id;
 
-
-
-	
 	private String intitule;
 	
 	@Column(name = "num_marche")
@@ -43,11 +39,11 @@ public class Marches implements java.io.Serializable {
 	private Integer delaiExecution;
 	
 	@Column(name = "work_days_last_arret")
-	private Integer workDaysLastArret;
+	private Long workDaysLastArretOrRecep;
 	
-	@Temporal(TemporalType.DATE)
-	@Column(name = "last_reprise")
-	private Date lastReprise;
+//	@Temporal(TemporalType.DATE)
+//	@Column(name = "last_reprise")
+//	private Date lastReprise;
 	
 	private Double montant;
 
@@ -58,10 +54,6 @@ public class Marches implements java.io.Serializable {
 	@Temporal(TemporalType.DATE)
 	@Column(name = "date_approbation")
 	private Date dateApprobation;
-	
-//	@Temporal(TemporalType.DATE)
-//	@Column(name = "date_os_commencement")
-//	private Date dateOsStart;
 	
 
 	
@@ -327,21 +319,23 @@ public class Marches implements java.io.Serializable {
 		this.startOs = startOs;
 	}
 
-	public Integer getWorkDaysLastArret() {
-		return workDaysLastArret;
+	public Long getWorkDaysLastArretOrRecep() {
+		return workDaysLastArretOrRecep;
 	}
 
-	public void setWorkDaysLastArret(Integer workDaysLastArret) {
-		this.workDaysLastArret = workDaysLastArret;
+	public void setWorkDaysLastArretOrRecep(Long workDaysLastArretOrRecep) {
+		this.workDaysLastArretOrRecep = workDaysLastArretOrRecep;
 	}
 
-	public Date getLastReprise() {
-		return lastReprise;
-	}
 
-	public void setLastReprise(Date lastReprise) {
-		this.lastReprise = lastReprise;
-	}
+
+//	public Date getLastReprise() {
+//		return lastReprise;
+//	}
+//
+//	public void setLastReprise(Date lastReprise) {
+//		this.lastReprise = lastReprise;
+//	}
 
 
 

@@ -17,7 +17,6 @@ public class ProjetDto {
 	public String intitule;
 	public Integer taux;
 	public String maitreOuvrage;
-	public Integer daysFromLastRepriseTilNow;
 	public Map<Integer, String> localisations = new LinkedHashMap<Integer, String>();
 	public Map<Integer, String> marches = new LinkedHashMap<Integer, String>();
 	
@@ -29,8 +28,7 @@ public class ProjetDto {
 
 	@QueryProjection
 	public ProjetDto(Integer id, String intitule, Integer taux, String maitreOuvrage, Integer communeId, String communeLabel,
-			Integer marcheId, String marcheType,
-			Integer daysFromLastRepriseTilNow
+			Integer marcheId, String marcheType
 			) {
 		this.id = id;
 		this.intitule = intitule;
@@ -40,7 +38,6 @@ public class ProjetDto {
 		this.communeLabel = communeLabel;
 		this.marcheId = marcheId;
 		this.marcheType = marcheType;
-		this.daysFromLastRepriseTilNow = daysFromLastRepriseTilNow;
 	}
 	
 	

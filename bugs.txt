@@ -1,5 +1,7 @@
 Class<T> ??
 
+maven & jenkins !!
+
 check hibernate query in user rest save user !!
 
 @MapsId ??
@@ -14,3 +16,11 @@ i had to make it not null projet_maitre_ouvrage -> problem avec les one to one !
 int vs Integer ?? it cause me nullPointerException
 
 OsIntegrityException ERROR 
+
+ON DELETE CASCADE => ON UPDATE CASCADE ??
+
+nested @Transactional ??
+
+LEFT JOIN ON vs WHERE ??
+
+then else (otherwise) in where cluse bug with HQL (jpa) !!

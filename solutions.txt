@@ -2,7 +2,10 @@ Hibernate: More than one row with the given identifier was found error ->
 check OneToOne it must be maybe OneToMany
 
 
-QClasses missing ? -> try restarting pc
+QClasses missing ? 
+-> Run As => Maven generate-sources
+Or
+-> try restarting pc
 
 
 /////
@@ -26,6 +29,22 @@ et creer un dto zayed
 
 org.hibernate.LazyInitializationException: could not initialize proxy [entities.User#0] - no Session
 
-sometimes it occurs when we have FK that references no id (if we SET FOREIGN_KEY_CHECKS=0 for example)
+sometimes it occurs when we have FK that references id that doesn"t exist in the parent table (if we SET FOREIGN_KEY_CHECKS=0 for example)
 
 /////
+
+query.getResultList().stream().findFirst().orElse(null);
+but it can return many result !!!
+au lieu de
+
+		try {
+				...
+		
+		} catch (NoResultException e) {
+			return null;
+		}
+
+///
+
+
+@Transactional(rollbackOn = Exception.class) => rollbackOn = Exception.class => there error that will break not the trasaction like parsing date

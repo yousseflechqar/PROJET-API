@@ -36,18 +36,15 @@ public class Projet implements java.io.Serializable {
 	private String intitule;
 	private Double montant;
 	private boolean convention;
-	private boolean prdts;
-	private Integer taux;
+
+
 	
 	@Column(name = "annee_projet")
 	private Integer anneeProjet;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "secteur")
-	private Secteur secteur;
 
-	@OneToOne(mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
-    private ProjetIndh indh;
+
+
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "date_saisie")
@@ -58,28 +55,40 @@ public class Projet implements java.io.Serializable {
 	private Date DateLastModif;
 	
 	
+	// ==> @JoinColumn
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "secteur")
+	private Secteur secteur;
+	
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "projet_maitre_ouvrage")
 	private ProjetMaitreOuvrage projetMaitreOuvrage;
+	
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "projet_maitre_ouvrage_delegue")
 	private ProjetMaitreOuvrage projetMaitreOuvrageDelegue;
-	
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "charge_suivi")
 	public User chargeSuivi;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "default_marche")
+	public Marches defaultMarche;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_saisie")
 	public User userSaisie;
 	
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "src_financement")
 	private SrcFinancement srcFinancement;
 	
 	//// MAPPED BY
+	
+	@OneToOne(mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
+    private ProjetIndh indh;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval=true)
 	private Set<Marches> marches = new HashSet<Marches>(0);
@@ -196,21 +205,6 @@ public class Projet implements java.io.Serializable {
 		this.indh = indh;
 	}
 
-	public boolean isPrdts() {
-		return prdts;
-	}
-
-	public void setPrdts(boolean prdts) {
-		this.prdts = prdts;
-	}
-
-	public Integer getTaux() {
-		return taux;
-	}
-
-	public void setTaux(Integer taux) {
-		this.taux = taux;
-	}
 
 	public User getChargeSuivi() {
 		return chargeSuivi;
@@ -258,6 +252,14 @@ public class Projet implements java.io.Serializable {
 
 	public void setAnneeProjet(Integer anneeProjet) {
 		this.anneeProjet = anneeProjet;
+	}
+
+	public Marches getDefaultMarche() {
+		return defaultMarche;
+	}
+
+	public void setDefaultMarche(Marches defaultMarche) {
+		this.defaultMarche = defaultMarche;
 	}
 
 

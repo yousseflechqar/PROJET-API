@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,6 +52,7 @@ import entities.MarchesType;
 import entities.OsType;
 import entities.Projet;
 import entities.Societe;
+import enums.MarcheTypeEnum;
 import exceptions.OsIntegrityException;
 import helpers.CONSTANTS;
 import helpers.Helpers;
@@ -69,15 +72,34 @@ public class MarcheService {
 	
 	@Transactional(rollbackOn = Exception.class)
 	public Integer saveMarche(MarcheBean bean, MarcheAttachs attachs) throws IOException, ParseException {
-
 		
-		Marches marche = new Marches();
-		boolean editMode = bean.idMarche != null ;
-		if( editMode ) {
-			marche = gMarchesDao.read(bean.idMarche, Marches.class);
-		} else {
-			marche.setProjet( new Projet(bean.idProjet) );
+		Map<String, Integer> idsMap = persistMarche(bean, attachs);
+		
+		Integer idProjet = idsMap.get("idProjet");
+		Integer idMarche = idsMap.get("idMarche");
+		
+		setDefaultMarche(idProjet, idMarche, bean);
+		
+		return idMarche;
+	}
+	
+	@Transactional(rollbackOn = Exception.class)
+	public void setDefaultMarche(Integer idProjet, Integer idMarche, MarcheBean bean) {
+
+		boolean isTravaux = bean.marcheType.value.equals(MarcheTypeEnum.travaux.value);
+
+		if( isTravaux && ! marcheDao.getDefaultMarche(idProjet).equals(idMarche) ) {
+			marcheDao.setDefaultMarche(idProjet, idMarche);
 		}
+	}
+	
+	@Transactional(rollbackOn = Exception.class)
+	public Map<String, Integer> persistMarche(MarcheBean bean, MarcheAttachs attachs) throws IOException, ParseException {
+
+
+		boolean editMode = bean.idMarche != null ;
+
+		Marches marche = editMode ? gMarchesDao.read(bean.idMarche, Marches.class) : new Marches();
 
 		marche.setIntitule(bean.intitule);
 		marche.setMontant(bean.montant);
@@ -90,15 +112,19 @@ public class MarcheService {
 		marche.setDateReceptionDefinitive(bean.dateReceptionDef);
 
 		
-		marche.setDateSaisie(new Date());
-
 		
-		if( bean.idMarche == null ) {
+		if( !editMode ) {
+			marche.setProjet( new Projet(bean.idProjet) );
+			marche.setDateSaisie(new Date());
 			gMarchesDao.create(marche);
 		}
+		else {
+//			marche.setDateLastModif(new Date());
+		}
+		
+
 
 		marche.getMarchesSocietes().clear();
-
 		entityManager.flush();
 		
 		
@@ -112,11 +138,12 @@ public class MarcheService {
 
 		//////////////////////////////////// ORDRES SERVICE
 		
+		
 		boolean isOs = ! bean.os.isEmpty();
 		boolean isTaux = ! bean.taux.isEmpty();
 
 		List<MarchesOs> deletedOs = new ArrayList<MarchesOs>();
-		long workDaysLastArret = 0, workDaysCurrentTaux = 0;
+		long workDaysLastArretOrRecep = 0, workDaysCurrentTaux = 0;
 		TauxBean newCurrentTaux = isTaux ? Collections.max(bean.taux, Comparator.comparing(tb -> tb.dateTaux)) : null;
 		OsBean OsCurrentTaux = null;
 		
@@ -153,7 +180,7 @@ public class MarcheService {
 					previousOsType = os.typeOs.value;
 
 					if(os.typeOs.value.equals(enums.OsType.ARRET.value)) {
-						workDaysLastArret += ChronoUnit.DAYS.between(Helpers.toLocalDate(lastReprise), Helpers.toLocalDate(os.dateOs));
+						workDaysLastArretOrRecep += ChronoUnit.DAYS.between(Helpers.toLocalDate(lastReprise), Helpers.toLocalDate(os.dateOs));
 					} else if(os.typeOs.value.equals(enums.OsType.REPRISE.value)) {
 						lastReprise = os.dateOs;
 					} else {
@@ -164,7 +191,7 @@ public class MarcheService {
 					if(isOsBeforeCurrentTaux) {
 						OsCurrentTaux = os;
 						if(os.typeOs.value.equals(enums.OsType.ARRET.value)) {
-							workDaysCurrentTaux = workDaysLastArret;
+							workDaysCurrentTaux = workDaysLastArretOrRecep;
 						}
 					}
 					
@@ -196,8 +223,16 @@ public class MarcheService {
 				i++;
 			}
 			
-			marche.setLastReprise(lastReprise);
-			marche.setWorkDaysLastArret((int) workDaysLastArret);
+			if( bean.dateReceptionProv != null ) {
+				if(previousOsType.equals(enums.OsType.ARRET.value)) {					
+					throw new OsIntegrityException();
+				}
+				
+				workDaysLastArretOrRecep += ChronoUnit.DAYS.between(Helpers.toLocalDate(lastReprise), Helpers.toLocalDate(bean.dateReceptionProv));
+			}
+			
+//			marche.setLastReprise(lastReprise);
+			marche.setWorkDaysLastArretOrRecep(workDaysLastArretOrRecep);
 			
 			
 			if(isTaux) {
@@ -222,8 +257,6 @@ public class MarcheService {
 
 		//////////////////////////////////// TAUX AVANCEMNT
 
-		
-		boolean tauxHasChanged = false;
 
 		
 		if( isTaux ) {
@@ -235,14 +268,14 @@ public class MarcheService {
 			MarchesTaux oldCurrentTaux = marche.getCurrentTaux();
 			
 			
-			if(  !editMode ||
-					oldCurrentTaux == null ||  
-					! oldCurrentTaux.getTaux().equals(newCurrentTaux.valueTaux) ||  
-					! Helpers.isEqual(newCurrentTaux.dateTaux, oldCurrentTaux.getDateTaux()) 
-			) {
-				System.out.println("TAUX COURANT HAS CHANGED !!");
-				tauxHasChanged = true;
-			}
+//			if(  !editMode ||
+//					oldCurrentTaux == null ||  
+//					! oldCurrentTaux.getTaux().equals(newCurrentTaux.valueTaux) ||  
+//					! Helpers.isEqual(newCurrentTaux.dateTaux, oldCurrentTaux.getDateTaux()) 
+//			) {
+//				System.out.println("TAUX COURANT HAS CHANGED !!");
+//				tauxHasChanged = true;
+//			}
 
 			for(TauxBean tb : bean.taux) {
 				MarchesTaux mT = new MarchesTaux();
@@ -313,17 +346,11 @@ public class MarcheService {
 		
 		////////////////////////////////////////// WORKED DAYS && RETARD
 
-		// le nombre de jours effectué depends de :
-//		1. les ordres de services ( start/arret/reprise ) or worked
-//		2. du taux courant
-//		3. delai
 		
-		System.out.println("work Days since last Arrêt >>>>>>>>>>>>>>>> " + workDaysLastArret);
+		System.out.println("work Days since last Arrêt >>>>>>>>>>>>>>>> " + workDaysLastArretOrRecep);
 		MarchesTaux currentTaux = marche.getCurrentTaux();
 		
 		if(isTaux) {
-
-			
 
 			int delaiInDays = marche.getDelaiExecution() * CONSTANTS.MONTH_DAYS ;
 			int workPrecent = (int)  (workDaysCurrentTaux * 100 / delaiInDays) ;
@@ -340,70 +367,10 @@ public class MarcheService {
 			currentTaux.setWorkedDays((int) workDaysCurrentTaux);
 			
 		} 
-//		
-//		////////////////////////////////////////// WORKED DAYS && RETARD
-//		
-//		// le nombre de jours effectué depends de :
-////		1. les ordres de services ( start/arret/reprise ) or worked
-////		2. du taux courant
-////		3. delai
-//		if( isTaux && (!editMode || dirtyCheckTaux) ) {
-//			
-//			MarchesTaux currentTaux = marche.getCurrentTaux();
-//			
-//			// filtrer les os qui ont une date superieur à la date du current taux
-//			// afin de calculer workDays pour le taux courant saisi par l'agent
-//			List<OsBean> filtredOs = isOs ? bean.os.stream().filter(os -> os.dateOs.before(currentTaux.getDateTaux())).collect(Collectors.toList()) : null;
-//			
-//			long workDays = 0;
-//			if( filtredOs != null && !filtredOs.isEmpty() ) {
-//				
-//				Date lastReprise = marche.getStartOs().getDateOs();
-//				OsBean currentOs = null;
-//				
-//				for(OsBean os : filtredOs) {
-//					currentOs = os;
-//					if(os.typeOs.value.equals(enums.OsType.ARRET.value)) {
-//						workDays += ChronoUnit.DAYS.between( Helpers.toLocalDate(lastReprise), Helpers.toLocalDate(os.dateOs) );
-//					} else if(os.typeOs.value.equals(enums.OsType.REPRISE.value)) {
-//						lastReprise = os.dateOs;
-//					} else {
-//						throw new OsIntegrityException();
-//					}	
-//				}
-//				
-//				if( currentOs.typeOs.value.equals(enums.OsType.REPRISE.value) ) {
-//					workDays += ChronoUnit.DAYS.between( Helpers.toLocalDate(currentOs.dateOs), Helpers.toLocalDate(currentTaux.getDateTaux()) );
-//				} 
-//			} else {
-//				workDays = ChronoUnit.DAYS.between( Helpers.toLocalDate(marche.getStartOs().getDateOs()), Helpers.toLocalDate(currentTaux.getDateTaux()) );
-//			}
-//			
-//			int delaiInDays = marche.getDelaiExecution() * 31 ;
-//			int workPrecent = (int)  (workDays * 100 / delaiInDays) ;
-//			int currentTauxInDays = (int)  ( currentTaux.getTaux() * delaiInDays / 100 );
-//			int retardEnJour = (int) workDays - currentTauxInDays;
-//			
-//			System.out.println("Delai Execution In Days >>>>>>>>>>>>>>>> " + delaiInDays);
-//			System.out.println("Le taux courant observé par l'agent sur terrain est de => (" + currentTaux.getTaux() + " %) -> normalement il doit être à -> ("+currentTauxInDays+") jours");
-//			System.out.println("le nombres de jours equivalent au taux courant est de ("+workDays+") jours  -> normalement le taux doit être à (" + workPrecent + " %)");
-//			System.out.println("Retard >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ("+retardEnJour+") jours");
-//			
-//			currentTaux.setRetardEnJour( retardEnJour );
-//			currentTaux.setWorkedDays((int) workDays);
-//			
-//		} 
-		
-		
-		
-
-		
+	
 		
 		//////////// SAVING ATTACHEMENTS
-		
 
-			
-			
 //		1. saving attachments	
 		for(OsBean os : bean.os) {
 			saveAttachments(
@@ -436,11 +403,11 @@ public class MarcheService {
 		if(!isDec) Helpers.deleteDir(Helpers.getDecPath(marche.getId()));
 			
 
-
-		return marche.getId();
-		
-		
-		
+		// returnig
+		Map<String, Integer> idsMap = new HashMap<String, Integer>();
+		idsMap.put("idMarche", marche.getId());
+		idsMap.put("idProjet", marche.getProjet().getId());
+		return idsMap;
 	}
 	
 	
@@ -548,12 +515,18 @@ public class MarcheService {
 		marcheDto.marcheType = new SimpleDto(marche.getMarchesType().getId(), marche.getMarchesType().getNom());
 		marcheDto.marcheEtat = new SimpleDto(marche.getMarchesEtat().getId(), marche.getMarchesEtat().getNom());
 
-		if( marche.getCurrentOs() != null ) {
+		
+		if( marche.getDateReceptionProvisoire() != null ) {
+			marcheDto.workDays = marche.getWorkDaysLastArretOrRecep();
+		}
+		else if( marche.getCurrentOs() != null ) {
 			
 			marcheDto.workDays = marche.getCurrentOs().getOsType().getId().equals(enums.OsType.ARRET.value) ?
-					marche.getWorkDaysLastArret()
+					marche.getWorkDaysLastArretOrRecep()
 					: 
-					marche.getWorkDaysLastArret() + ChronoUnit.DAYS.between(Helpers.toLocalDate(marche.getLastReprise()), Helpers.toLocalDate(new Date()))
+					marche.getWorkDaysLastArretOrRecep() + ChronoUnit.DAYS.between(
+						Helpers.toLocalDate(marche.getCurrentOs().getDateOs()), Helpers.toLocalDate(new Date())
+					)
 					;
 		}
 				

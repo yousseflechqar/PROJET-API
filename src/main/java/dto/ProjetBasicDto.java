@@ -17,7 +17,7 @@ public class ProjetBasicDto {
 	public SimpleDto maitreOuvrageDel;
 	public Integer anneeProjet;
 	public boolean indh;
-	public boolean prdts;
+
 
 	
 	public List<PartnerDto> partners = new ArrayList<>(); 
@@ -31,7 +31,7 @@ public class ProjetBasicDto {
 	public SimpleDto chargeSuivi;
 
 	public ProjetBasicDto(Integer id, String intitule, Double montant, boolean isConvention, Integer anneeProjet, 
-			boolean isMaitreOuvrageDel, SimpleDto maitreOuvrage, SimpleDto maitreOuvrageDel, boolean indh, boolean prdts) {
+			boolean isMaitreOuvrageDel, SimpleDto maitreOuvrage, SimpleDto maitreOuvrageDel, boolean indh) {
 		this.id = id;
 		this.intitule = intitule;
 		this.montant = montant;
@@ -40,7 +40,6 @@ public class ProjetBasicDto {
 		this.maitreOuvrage = maitreOuvrage;
 		this.maitreOuvrageDel = maitreOuvrageDel;
 		this.indh = indh;
-		this.prdts = prdts;
 		this.anneeProjet = anneeProjet;
 	}
 

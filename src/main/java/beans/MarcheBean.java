@@ -36,6 +36,7 @@ public class MarcheBean {
 	public List<SimpleDto> societes = new ArrayList<>();
 	
 
+//	public boolean isDefault = false;
 	
 	public MarcheBean() {}
 	

@@ -41,6 +41,7 @@ import entities.Commune;
 import entities.Fraction;
 import entities.IndhProgramme;
 import entities.Localisation;
+import entities.Marches;
 import entities.Projet;
 import entities.ProjetIndh;
 import entities.ProjetMaitreOuvrage;
@@ -75,7 +76,6 @@ public class ProjetService {
 		projet.setSecteur(new Secteur(bean.secteur));
 		projet.setSrcFinancement(new SrcFinancement(bean.srcFinancement));
 		projet.setAnneeProjet(bean.anneeProjet);
-
 		projet.setChargeSuivi(new User(bean.chargeSuivi != null ? bean.chargeSuivi : userSession.id));
 		
 //		projet.setPrdts(bean.prdts);
@@ -194,10 +194,23 @@ public class ProjetService {
 				projet.getId(),
 				projet.getIntitule(), projet.getMontant(), projet.isConvention(), projet.getAnneeProjet(), 
 				modDto != null, new SimpleDto(mo.getId(), mo.getNom()), modDto,
-				projet.getIndh() != null, projet.isPrdts()
+				projet.getIndh() != null
 			);
 		
-		dto.taux = projet.getTaux();
+		
+		Marches defaultMarche = projet.getDefaultMarche();
+		dto.taux = 0;
+		if( defaultMarche != null ) {
+			
+			if( defaultMarche.getDateReceptionProvisoire() != null ) {
+				dto.taux = 100;
+			}		
+			else if( defaultMarche.getCurrentTaux() != null ) {			
+				dto.taux = projet.getDefaultMarche().getCurrentTaux().getTaux();
+			}
+		}
+		
+
 
 		projet.getProjetPartenaires().forEach(pp -> {
 			dto.partners.add( new PartnerDto( 

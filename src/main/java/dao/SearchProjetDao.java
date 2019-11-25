@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -31,6 +32,7 @@ import entities.QCommune;
 import entities.QLocalisation;
 import entities.QMarches;
 import entities.QMarchesOs;
+import entities.QMarchesTaux;
 import entities.QMarchesType;
 import entities.QProjet;
 import entities.QProjetMaitreOuvrage;
@@ -57,8 +59,16 @@ public class SearchProjetDao {
 	public PageResult getListProjets(ProjetSearchBean bean){
 		
 		QProjet prj = new QProjet("prj");
+		QMarches marche = new QMarches("marche");
+		QMarches defaultMarche = new QMarches("defaultMarche");
+		QMarchesType mType = new QMarchesType("mType");
+		QUser chargeSuiv = new QUser("chargeSuiv");
+		QAcheteur mo = new QAcheteur("mo");
+		QLocalisation loc = new QLocalisation("loc");
+		QCommune com = new QCommune("com"); 
 		QProjetMaitreOuvrage pMo = new QProjetMaitreOuvrage("pMo");
-		
+		QMarchesOs currentOs = new QMarchesOs("currentOs");
+		QMarchesTaux currentTaux = new QMarchesTaux("currentTaux");
 
 		
 		
@@ -115,95 +125,59 @@ public class SearchProjetDao {
 		/////// PROJET EN SOUFFRANCE
 		
 		BooleanBuilder whereStatus = new BooleanBuilder();
+		boolean defaultMarcheJoin = false;
+		boolean currentOsJoin = false;
 		
 		if( bean.projectStatus != 0 ){
-			QMarches marche2 = new QMarches("marche2");
+
+			defaultMarcheJoin = true;
 
 			if( bean.projectStatus.equals(ProjetStatus.EN_ARRET.status()) ) {
-				QMarchesOs mOs2 = new QMarchesOs("mOs2");
-				whereStatus.and(prj.id.in(JPAExpressions
-						.select(marche2.projet.id).from(marche2).join(marche2.currentOs, mOs2)
-						.where(mOs2.osType.id.eq(OsType.ARRET.value))
-				));
+				currentOsJoin = true;
+				whereStatus.and(currentOs.osType.id.eq(OsType.ARRET.value));
 			}
 			
 			else if(bean.projectStatus.equals(ProjetStatus.EN_COURS.status())) {
-				whereStatus.and(prj.id.in(JPAExpressions
-						.select(marche2.projet.id).from(marche2)
-						.where(marche2.marchesEtat.id.in(
-								Arrays.asList(MarcheEtatEnum.adjudication.value, MarcheEtatEnum.approbation.value, MarcheEtatEnum.realisation.value))
-						)
-				));
+				whereStatus.and(defaultMarche.marchesEtat.id.in(
+								Arrays.asList(MarcheEtatEnum.adjudication.value, MarcheEtatEnum.approbation.value, MarcheEtatEnum.realisation.value)));
 			}
 			else if(bean.projectStatus.equals(ProjetStatus.ACHEVE.status())) {
-				whereStatus.and(prj.id.in(JPAExpressions
-						.select(marche2.projet.id).from(marche2)
-						.where(marche2.marchesEtat.id.eq(MarcheEtatEnum.acheve.value))
-						));
+				whereStatus.and(defaultMarche.marchesEtat.id.eq(MarcheEtatEnum.acheve.value)
+						.or(defaultMarche.dateReceptionProvisoire.isNotNull()));
 			}
 			else if(bean.projectStatus.equals(ProjetStatus.RESILIE.status())) {
-				whereStatus.and(prj.id.in(JPAExpressions
-						.select(marche2.projet.id).from(marche2)
-						.where(marche2.marchesEtat.id.eq(MarcheEtatEnum.resilie.value))
-						));
+				whereStatus.and(defaultMarche.marchesEtat.id.eq(MarcheEtatEnum.resilie.value));
 			}
 			
 			
 			else if(bean.projectStatus.equals(ProjetStatus.DELAI_DEPASSE.status())) {
 				
-				QMarchesOs mOs2 = new QMarchesOs("mOs2");
-
-				BooleanBuilder whereDelai = new BooleanBuilder();
+				currentOsJoin = true;
 				
-				whereDelai.and(
-						mOs2.osType.id.when(enums.OsType.ARRET.value)
-						.then(
-								marche2.workDaysLastArret.gt(marche2.delaiExecution.multiply(CONSTANTS.MONTH_DAYS))
-						)
-						
-						.otherwise(
-								marche2.workDaysLastArret
-								.add(Expressions.numberTemplate(Integer.class, "datediff(NOW(), {0})", marche2.lastReprise))
-								.gt(marche2.delaiExecution.multiply(CONSTANTS.MONTH_DAYS))
-						)
-//						.eq(true)
+				NumberExpression<Integer> delaiInDays = defaultMarche.delaiExecution.multiply(CONSTANTS.MONTH_DAYS);
+				NumberPath<Long> workDaysLastArretOrRecep = defaultMarche.workDaysLastArretOrRecep;
+//				BooleanExpression workGtDelai = workDaysLastArretOrRecep.gt(delaiInDays)
+				
+				whereStatus.and(
+							(
+									defaultMarche.dateReceptionProvisoire.isNotNull().and(
+										workDaysLastArretOrRecep.gt(delaiInDays)
+									)
+							)
+							.or
+							(
+								currentOs.osType.id.eq(enums.OsType.ARRET.value).and(
+										workDaysLastArretOrRecep.gt(delaiInDays)
+									)
+							)
+							.or
+							(
+								currentOs.osType.id.ne(enums.OsType.ARRET.value).and(
+									workDaysLastArretOrRecep.add(Expressions.numberTemplate(Integer.class, "datediff(NOW(), {0})", currentOs.dateOs))
+									.gt(delaiInDays))
+							)
 				);
 				
-				
-
-				whereStatus.and(prj.id.in(JPAExpressions
-						.select(marche2.projet.id).from(marche2).leftJoin(marche2.currentOs, mOs2)
-						.where( 
-//								whereDelai
-								
-								(
-									mOs2.osType.id.eq(enums.OsType.ARRET.value).and(
-											marche2.workDaysLastArret
-											.gt(marche2.delaiExecution.multiply(CONSTANTS.MONTH_DAYS)))
-								)
-								.or
-								(
-									mOs2.osType.id.ne(enums.OsType.ARRET.value).and(
-											marche2.workDaysLastArret
-											.add(Expressions.numberTemplate(Integer.class, "datediff(NOW(), {0})", marche2.lastReprise))
-											.gt(marche2.delaiExecution.multiply(CONSTANTS.MONTH_DAYS)))
-								)
-							    
-////							    (
-//								mOs2.osType.id.when(enums.OsType.ARRET.value)
-//								.then(
-//										marche2.workDaysLastArret.gt(marche2.delaiExecution.multiply(CONSTANTS.MONTH_DAYS))
-//								)
-//								
-//								.otherwise(
-//										marche2.workDaysLastArret
-//										.add(Expressions.numberTemplate(Integer.class, "datediff(NOW(), {0})", marche2.lastReprise))
-//										.gt(marche2.delaiExecution.multiply(CONSTANTS.MONTH_DAYS))
-//								)
-////								)
-////							    .eq(true)
-
-						)));
 			}
 		}
 
@@ -216,6 +190,12 @@ public class SearchProjetDao {
 
 		if(pMoJoin) {
 			query.leftJoin(prj.projetMaitreOuvrage, pMo);
+		}
+		if(defaultMarcheJoin) {
+			query.leftJoin(prj.defaultMarche, defaultMarche);
+		}
+		if(currentOsJoin) {
+			query.leftJoin(defaultMarche.currentOs, currentOs);
 		}
 		
 		query.where(sWhere.and(where_loc).and(where_ach).and(where_srcFi).and(whereStatus));
@@ -245,32 +225,30 @@ public class SearchProjetDao {
 		// fetch all fields
 		a = System.currentTimeMillis();
 		
-		QMarches marche = new QMarches("marche");
-		QMarchesType mType = new QMarchesType("mType");
-		QUser chargeSuiv = new QUser("chargeSuiv");
-		QAcheteur mo = new QAcheteur("mo");
-		QLocalisation loc = new QLocalisation("loc");
-		QCommune com = new QCommune("com"); 
-		QMarchesOs mOs = new QMarchesOs("mOs");
+
 
 	
 		page.content = new JPAQuery<ProjetDto>(entityManager)
 				
 				.select(
-						new QProjetDto(prj.id, prj.intitule, prj.taux, mo.nom, com.id, com.nom, marche.id, mType.nom, 
-						
-						mOs.osType.id.when(enums.OsType.ARRET.value).then(marche.workDaysLastArret)
-						.otherwise(marche.workDaysLastArret.add(Expressions.numberTemplate(Integer.class, "datediff(NOW(), {0})", marche.lastReprise)))
-						
+						new QProjetDto(
+								prj.id, prj.intitule, 
+								new CaseBuilder()
+									.when(defaultMarche.dateReceptionProvisoire.isNotNull()).then(100)
+							     		.otherwise(currentTaux.taux),
+								mo.nom, com.id, com.nom, marche.id, mType.nom
 						)
 				)
 
 				.from(prj)
 					.leftJoin(prj.chargeSuivi, chargeSuiv)
+					
 					.leftJoin(prj.marches, marche)
-//					.leftJoin(prj.marches, marche)
 						.leftJoin(marche.marchesType, mType)
-						.leftJoin(marche.currentOs, mOs)
+						
+					.leftJoin(prj.defaultMarche, defaultMarche)
+						.leftJoin(marche.currentTaux, currentTaux)
+						
 					.leftJoin(prj.projetMaitreOuvrage, pMo)
 						.leftJoin(pMo.maitreOuvrage, mo)
 					.leftJoin(prj.localisations, loc)
@@ -287,57 +265,7 @@ public class SearchProjetDao {
 
 	}
 	
-	
-	//////////// Criteria
-	
-//	@SuppressWarnings({"rawtypes", "unchecked"})
-//	public List<ProjetDto> getListProjetsCriteria(ProjetSearchBean bean){
-//		
-//		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-//		CriteriaQuery cr = cb.createQuery(ProjetDto.class);
-//		Root projet = cr.from(Projet.class);
-//		
-//
-//		Join<Projet, ProjetMaitreOuvrage> pmo = projet.join("projetMaitreOuvrage", JoinType.INNER);
-//		Join<ProjetMaitreOuvrage, Acheteur> mo = pmo.join("maitreOuvrage", JoinType.INNER);
-//		Join<Projet, Localisation> loc = projet.join("localisations", JoinType.INNER);
-//		Join<Localisation, Commune> com = loc.join("commune", JoinType.INNER);
-//		
-//		cr.select(
-//				cb.construct(ProjetDto.class,
-//					projet.get("id"),
-//					projet.get("intitule"),
-//					projet.get("taux"),
-//					mo.get("nom"),
-//					com.get("id"),
-//					com.get("nom")
-//			    )
-//		);
-//
-//		Predicate sPredic = null;
-//		
-//		if(!bean.intitule.isEmpty()) {
-//			sPredic = cb.like(projet.get("intitule"), "%"+bean.intitule+"%");
-//		}
-//
-//		if(bean.secteur != null) {
-//			sPredic = cb.equal(projet.get("secteur"), bean.secteur);
-//		}
-//		
-//		if(bean.maitreOuvrage != null) {
-//			sPredic = cb.equal(pmo.get("maitreOuvrage"), bean.maitreOuvrage);
-//		}
-//		
-//		cr.where(sPredic)
-//		;
-//		 
-//
-//		
-//		List<ProjetDto> results = entityManager.createQuery(cr).getResultList();
-//
-//
-//		return results;
-//	}
+
 	
 	
 }

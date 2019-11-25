@@ -47,6 +47,9 @@ public class ProjetDao {
 			return entityManager.createQuery(""
 					+ "SELECT p FROM Projet p "
 					
+						+ "LEFT JOIN FETCH p.defaultMarche dfM "
+							+ "LEFT JOIN FETCH dfM.currentTaux "
+						
 						+ "LEFT JOIN FETCH p.secteur "
 						+ "LEFT JOIN FETCH p.srcFinancement "
 						
