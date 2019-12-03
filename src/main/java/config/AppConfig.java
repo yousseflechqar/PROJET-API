@@ -22,11 +22,11 @@ import dialect.CustomMySQLDialect;
 @Configuration
 @EnableTransactionManagement
 @PropertySource("classpath:database.properties")
-@ComponentScan({"dao", "services"})
+@ComponentScan({"dao", "services"}) // for @Transactional
 public class AppConfig {
 	
-	@Autowired
-    private Environment env;
+	
+    private @Autowired Environment env; // env.getProperty("...")
 	
 	
 	@Bean
@@ -51,9 +51,8 @@ public class AppConfig {
     private Properties jpaProperties() {
         Properties properties = new Properties();
         properties.put("hibernate.dialect", CustomMySQLDialect.class);
-//        properties.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
-        properties.put("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
-        properties.put("hibernate.format_sql", env.getProperty("hibernate.format_sql"));
+        properties.put("hibernate.show_sql", true);
+        properties.put("hibernate.format_sql", true);
         return properties;        
     }
     

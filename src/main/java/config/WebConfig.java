@@ -33,8 +33,7 @@ public class WebConfig implements WebMvcConfigurer {
 	@Bean(name = "multipartResolver")
 	public CommonsMultipartResolver multipartResolver() {
 	    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-	    multipartResolver.setMaxUploadSize(30000000);
-//	    multipartResolver.setMaxUploadSize(-1);
+	    multipartResolver.setMaxUploadSize(30000000); // -1
 	    return multipartResolver;
 	}
    
@@ -47,10 +46,8 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry
-		.addResourceHandler("/REACT-APP/**")
-		.addResourceLocations("/REACT-APP/")
-//         .resourceChain(true)
-//         .addResolver(new PathResourceResolver())
+			.addResourceHandler("/REACT-APP/**")
+			.addResourceLocations("/REACT-APP/")
 		; 
 	}
 	

@@ -39,3 +39,11 @@ index (1) must be less than size (1)
 
 
 long i = 12345678910L => L
+
+
+///////////////
+httpservletrequest cannot be resolved to a type
+Project > Properties > Java Build Path > Libraries > Add library from library tab > Choose server runtime > Next > choose Apache Tomcat v x.x > Finish > Ok
+or
+Project->Properties->Targeted Runtimes (Select your Tomcat Server)
+

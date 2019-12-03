@@ -27,12 +27,12 @@ import entities.Societe;
 @Service
 public class DiversService {
 
-	@Autowired
-	private DiversDao diversDao;
-	@Autowired
-	private GenericDao<Societe, Integer> gSocieteDao;
-	@Autowired
-	private GenericDao<Responsable, Integer> gResponsableDao;
+	
+	private @Autowired DiversDao diversDao;
+	
+	private @Autowired GenericDao<Societe, Integer> gSocieteDao;
+	
+	private @Autowired GenericDao<Responsable, Integer> gResponsableDao;
 	
 	public Collection<TreePathDto> getCommunesWithFractions() {
 		
