@@ -18,12 +18,12 @@ public class GenericDao<T, PK extends Serializable>  {
 	private EntityManager entityManager;
 	
 	
-	public T create(T t) {
+	public T persist(T t) {
 	    this.entityManager.persist(t);
 	    return t;
 	}
 	
-	public T read(PK id, Class<T> entityClass) {
+	public T find(PK id, Class<T> entityClass) {
 	    return this.entityManager.find(entityClass, id);
 	}
 	

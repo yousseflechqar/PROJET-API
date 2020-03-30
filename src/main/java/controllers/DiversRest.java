@@ -36,13 +36,20 @@ public class DiversRest {
 		return diversDao.getOsTypes();
 	}
 	
+	
 	@GetMapping(value = "/marcheEtats")
 	public List<SimpleDto> getMarcheEtats() {
 		return diversDao.getMarcheEtats();
 	}
 	
+	
+	
+	
+	
+	
 	@GetMapping(value = "/marcheTypes")
 	public List<SimpleDto> getmarcheTypes() {
+		
 		return diversDao.getMarcheTypes();
 	}
 	

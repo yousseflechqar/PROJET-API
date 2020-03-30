@@ -85,8 +85,8 @@ public class UserRest {
 	}
 	
 	
-	@GetMapping(value = "/chargesSuivi")
-	public Collection<SelectGrpDto> getChargesSuivi() {
+//	@GetMapping(value = "/chargesSuivi")
+	public Collection<SelectGrpDto<SimpleDto>> getChargesSuivi() {
 		return userService.getChargesSuivi2();
 	}
 

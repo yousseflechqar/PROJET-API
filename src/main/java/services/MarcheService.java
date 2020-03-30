@@ -99,7 +99,7 @@ public class MarcheService {
 
 		boolean editMode = bean.idMarche != null ;
 
-		Marches marche = editMode ? gMarchesDao.read(bean.idMarche, Marches.class) : new Marches();
+		Marches marche = editMode ? gMarchesDao.find(bean.idMarche, Marches.class) : new Marches();
 
 		marche.setIntitule(bean.intitule);
 		marche.setMontant(bean.montant);
@@ -116,7 +116,7 @@ public class MarcheService {
 		if( !editMode ) {
 			marche.setProjet( new Projet(bean.idProjet) );
 			marche.setDateSaisie(new Date());
-			gMarchesDao.create(marche);
+			gMarchesDao.persist(marche);
 		}
 		else {
 //			marche.setDateLastModif(new Date());
@@ -124,7 +124,8 @@ public class MarcheService {
 		
 
 
-		marche.getMarchesSocietes().clear();
+		// les marchesSocietes existantes vont plus ï¿½tre rï¿½ferencï¿½ alors ils seront supprimï¿½ grace ï¿½ la properties orphanRemoval=true
+		marche.getMarchesSocietes().clear(); // can we putt after flush() just before when we are creating new MarchesSocietes items ?
 		entityManager.flush();
 		
 		
@@ -149,7 +150,7 @@ public class MarcheService {
 		
 		if( isOs ) {
 
-			// on recupère d'abord les os qui ont été supprimés par UI on va les utiliser apres dans les attachements
+			// on recupï¿½re d'abord les os qui ont ï¿½tï¿½ supprimï¿½s par UI on va les utiliser apres dans les attachements
 			deletedOs = marche.getMarchesOss().stream().filter(oldOs -> bean.os.stream().noneMatch(os -> os.id != null && os.id.equals(oldOs.getId())))
 							.collect(Collectors.toList());
 			
@@ -261,11 +262,11 @@ public class MarcheService {
 		
 		if( isTaux ) {
 
-			// On supprime les taux qui ont etait supprimés par le user dans la page "Edit Marche"
+			// On supprime les taux qui ont etait supprimï¿½s par le user dans la page "Edit Marche"
 			marche.getMarchesTaux().removeIf(mt -> bean.taux.stream().noneMatch( tb -> tb.id != null && tb.id.equals(mt.getId()) ));
 
 			/// CHECK IF THE CURRENT TAUX HAS CHANGED
-			MarchesTaux oldCurrentTaux = marche.getCurrentTaux();
+//			MarchesTaux oldCurrentTaux = marche.getCurrentTaux();
 			
 			
 //			if(  !editMode ||
@@ -306,7 +307,7 @@ public class MarcheService {
 		
 		if(isDec) {
 			
-			// on detect les DEC supprimés
+			// on detect les DEC supprimï¿½s
 			deletedDec = marche.getMarchesDecomptes().stream().filter( oldDec -> bean.decomptes.stream().noneMatch(dec -> dec.id.equals(oldDec.getId())) )
 														.collect(Collectors.toList());
 			
@@ -347,7 +348,7 @@ public class MarcheService {
 		////////////////////////////////////////// WORKED DAYS && RETARD
 
 		
-		System.out.println("work Days since last Arrêt >>>>>>>>>>>>>>>> " + workDaysLastArretOrRecep);
+		System.out.println("work Days since last ArrÃªt >>>>>>>>>>>>>>>> " + workDaysLastArretOrRecep);
 		MarchesTaux currentTaux = marche.getCurrentTaux();
 		
 		if(isTaux) {
@@ -358,9 +359,9 @@ public class MarcheService {
 			int retardEnJour = (int) workDaysCurrentTaux - currentTauxInDays;
 
 			System.out.println("Delai Execution In Days >>>>>>>>>>>>>>>> " + delaiInDays);
-			System.out.println("Le taux courant observé par l'agent sur terrain est de => (" + newCurrentTaux.valueTaux + " %) -> normalement il doit être à -> ("+currentTauxInDays+") jours");
-			System.out.println("pour ce taux courant le nombres de jours effectués est de ("+workDaysCurrentTaux+") jours  -> normalement le taux doit être à (" + workPrecent + " %)");
-			System.out.println( retardEnJour > 0 ? "retard encaissé de ("+retardEnJour+") jours" : "pas de retard ("+retardEnJour+")");
+			System.out.println("Le taux courant observÃ© par l'agent sur terrain est de => (" + newCurrentTaux.valueTaux + " %) -> normalement il doit Ãªtre  -> ("+currentTauxInDays+") jours");
+			System.out.println("pour ce taux courant le nombres de jours effectuÃ©s est de ("+workDaysCurrentTaux+") jours  -> normalement le taux doit Ãªtre  (" + workPrecent + " %)");
+			System.out.println( retardEnJour > 0 ? "retard encaissÃ© de ("+retardEnJour+") jours" : "pas de retard ("+retardEnJour+")");
 			
 			
 			currentTaux.setRetardEnJour( retardEnJour );

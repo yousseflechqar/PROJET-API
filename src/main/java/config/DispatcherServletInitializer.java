@@ -2,6 +2,19 @@ package config;
 
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+
+/**
+ * 
+ * SpringServletContainerInitializer which implements ServletContainerInitializer is bootstrapped automatically by any Servlet 3.0 container.
+ * 
+ * Servlet 3.0 ServletContainerInitializer designed to support code-based configuration of the servlet container using Spring's WebApplicationInitializer SPI 
+ * as opposed to (or possibly in combination with) the traditional web.xml-based approach.
+ * 
+ * SpringServletContainerInitializer has to find the right class implementing WebApplicationInitializer
+ * 
+ * AbstractAnnotationConfigDispatcherServletInitializer implements WebApplicationInitializer
+ * 
+ */
 public class DispatcherServletInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
     @Override

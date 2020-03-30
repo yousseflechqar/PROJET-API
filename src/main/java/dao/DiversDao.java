@@ -20,9 +20,9 @@ public class DiversDao {
 	@PersistenceContext
 	private EntityManager entityManager;
 	
-	@SuppressWarnings("unchecked")
+
 	public List<SimpleDto> getSocietesByName(String q){
-		return entityManager.createQuery("SELECT new dto.SimpleDto(s.id, s.nom) FROM Societe s WHERE s.nom LIKE :q")
+		return entityManager.createQuery("SELECT new dto.SimpleDto(s.id, s.nom) FROM Societe s WHERE s.nom LIKE :q", SimpleDto.class)
 				.setParameter("q", "%" + q + "%")
 				.getResultList() ;
 	}
@@ -37,52 +37,53 @@ public class DiversDao {
 				.getSingleResult() ;
 	}
 	
-	@SuppressWarnings("unchecked")
+
 	public List<SimpleDto> getMarcheTypes(){
-		return entityManager.createQuery("SELECT new dto.SimpleDto(mt.id, mt.nom) FROM MarchesType mt")
+		return entityManager.createQuery("SELECT new dto.SimpleDto(mt.id, mt.nom) FROM MarchesType mt", SimpleDto.class)
 				.getResultList() ;
 	}
 	
-	@SuppressWarnings("unchecked")
+
 	public List<SimpleDto> getSecteurs(){
-		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Secteur c")
+		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Secteur c", SimpleDto.class)
 				.getResultList() ;
 	}
 	
-	@SuppressWarnings("unchecked")
+
 	public List<SimpleDto> getAcheteursByName(String q){
-		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Acheteur c WHERE c.nom LIKE :q")
+		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Acheteur c WHERE c.nom LIKE :q", SimpleDto.class)
 				.setParameter("q", "%" + q + "%")
 				.getResultList() ;
 	}
-	@SuppressWarnings("unchecked")
+
 	public List<SimpleDto> getAcheteurs(){
-		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Acheteur c")
+		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Acheteur c", SimpleDto.class)
 				.getResultList() ;
 	}
-	@SuppressWarnings("unchecked")
+
 	public List<SimpleDto> getSrcFinancements(){
-		return entityManager.createQuery("SELECT new dto.SimpleDto(s.id, s.label) FROM SrcFinancement s")
+		return entityManager.createQuery("SELECT new dto.SimpleDto(s.id, s.label) FROM SrcFinancement s", SimpleDto.class)
 				.getResultList() ;
 	}
 	
 
 	
-	@SuppressWarnings("unchecked")
+
 	public List<LocalisationBean> getCommunesWithFractions(){
 		
 		return entityManager.createQuery(" "
 				
 				+ " SELECT new beans.LocalisationBean(c.id, c.nom, f.id, f.nom) "
 					+ " FROM Commune c "
-					+ " LEFT JOIN c.fractions f ")
+					+ " LEFT JOIN c.fractions f "
+					, LocalisationBean.class)
 				
 				.getResultList() ;
 		
 	}
-	@SuppressWarnings("unchecked")
+
 	public List<SimpleDto> getCommunes(){
-		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Commune c")
+		return entityManager.createQuery("SELECT new dto.SimpleDto(c.id, c.nom) FROM Commune c", SimpleDto.class)
 				.getResultList() ;
 	}
 

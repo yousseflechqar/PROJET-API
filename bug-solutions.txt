@@ -1,34 +1,24 @@
-SET FOREIGN_KEY_CHECKS=0;
-
-mappedBy reference an unknown target entity property -> le nom f mappedBy khass ykon bhal name field w machi bhal nom de la table column
-spring not detected -> delete tomcat server w add it again
 
 
-marcheDto.societes = new ObjectMapper().valueToTree(stes);
-
-//			List<Integer> societes = new ObjectMapper().convertValue(bean.societes, ArrayList.class);
 
 
-int default value 0 not null
-int don't deal with NULL
+
+jackson !!
 
 
-java.nio.file.AccessDeniedException -> append file to directory
 
 
-The message java.lang.NoSuchMethodException: xxx.<init>() means that someone tried to call a constructor without any parameters. 
-Adding a default constructor should solve this problem
+
+
 
 
 A different object with the same identifier value was already associated with the session ->
 if used with @MapsId we have to set the entity to null first and flush()
 
-object references an unsaved transient instance - save the transient instance before flushing ->
-adding cascade=CascadeType.ALL
 
 
-- orphanRemoval = true: "Child" entity is removed when it's no longer referenced (its parent may not be removed).
-- CascadeType.REMOVE: "Child" entity is removed only when its "Parent" is removed.
+
+
 
 
 if we dont specify getter/setter in dto and we initialize field then this init value will be always returned

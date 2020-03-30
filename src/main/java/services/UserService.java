@@ -20,7 +20,6 @@ import dao.UserDao;
 import dto.SelectGrpDto;
 import dto.SimpleDto;
 import entities.Division;
-import entities.Role;
 import entities.User;
 import entities.UserRoles;
 import entities.UserType;
@@ -63,7 +62,7 @@ public class UserService {
 		
 		if( isNewUser ) {
 			user.setDateCreation(new Date());
-			gUserDao.create(user);
+			gUserDao.persist(user);
 		} else {
 			user.getUserRoles().clear();
 		}
@@ -115,19 +114,19 @@ public class UserService {
 		return usersDivisionMap;
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Collection<SelectGrpDto> getChargesSuivi2() {
+//	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Collection<SelectGrpDto<SimpleDto>> getChargesSuivi2() {
 		
 		List<User> chargesSuivi = userDao.getChargesSuiviWithDivision();
 		
 
-		Map<Integer, SelectGrpDto> usersDivisionMap = new LinkedHashMap<Integer, SelectGrpDto>();
+		Map<Integer, SelectGrpDto<SimpleDto>> usersDivisionMap = new LinkedHashMap<>();
 		
 		
 		chargesSuivi.forEach( cs -> {
 			Integer idDiv = cs.getDivision().getId();
 			if( !usersDivisionMap.containsKey(idDiv) ) {
-				usersDivisionMap.put(idDiv, new SelectGrpDto(cs.getDivision().getNom()));
+				usersDivisionMap.put(idDiv, new SelectGrpDto<SimpleDto>(cs.getDivision().getNom()));
 			}
 			
 			usersDivisionMap.get(idDiv).options.add(new SimpleDto(cs.getId(), cs.getNom() + " " + cs.getPrenom()));

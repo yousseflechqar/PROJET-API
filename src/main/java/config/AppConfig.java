@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -20,15 +20,18 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import dialect.CustomMySQLDialect;
 
 @Configuration
-@EnableTransactionManagement
+@EnableTransactionManagement // for @Transactional
 @PropertySource("classpath:database.properties")
-@ComponentScan({"dao", "services"}) // for @Transactional
+@ComponentScan({"dao", "services"}) 
 public class AppConfig {
 	
 	
     private @Autowired Environment env; // env.getProperty("...")
 	
 	
+    /**
+     * JpaTransactionManager implements PlatformTransactionManager
+     */
 	@Bean
 	public JpaTransactionManager getJpaTransactionManager() {
 		JpaTransactionManager tm = new JpaTransactionManager();
@@ -53,6 +56,7 @@ public class AppConfig {
         properties.put("hibernate.dialect", CustomMySQLDialect.class);
         properties.put("hibernate.show_sql", true);
         properties.put("hibernate.format_sql", true);
+        properties.put("hibernate.generate_statistics", true);
         return properties;        
     }
     

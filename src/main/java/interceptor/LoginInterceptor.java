@@ -2,13 +2,15 @@ package interceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 
 import exceptions.UnauthorizedException;
 
 
-public class LoginInterceptor extends HandlerInterceptorAdapter {
+public class LoginInterceptor implements HandlerInterceptor {
 
 
 
@@ -25,6 +27,9 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 //		System.out.println("Session : " +  request.getSession() + " > " + request.getSession().getId());
 //		System.out.println("getAttribute(\"user\") : " +  request.getSession().getAttribute("user"));
 		
+		boolean access = true;
+		
+		if( access ) return true;
 
 		
 		String staticUri = url+"/REACT-APP/";
@@ -46,7 +51,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 			return true;
 		}
 		
-		if( uri.startsWith(url+"/api/postman/") ) {
+		if( uri.startsWith(url+"/api/postman/") || uri.startsWith(url+"/postman/") ) {
 			return true;
 		}
 		

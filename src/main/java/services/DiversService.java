@@ -127,7 +127,7 @@ public class DiversService {
 		Responsable rsp = new Responsable();
 		
 		if(editMode) {
-			ste = gSocieteDao.read(bean.idSte, Societe.class);
+			ste = gSocieteDao.find(bean.idSte, Societe.class);
 			rsp = ste.getResponsable();
 		}
 		
@@ -139,8 +139,8 @@ public class DiversService {
 		rsp.setPhones(bean.phones);
 
 		if(!editMode) {
-			ste.setResponsable(gResponsableDao.create(rsp));
-			gSocieteDao.create(ste);
+			ste.setResponsable(gResponsableDao.persist(rsp));
+			gSocieteDao.persist(ste);
 		}
 		
 		

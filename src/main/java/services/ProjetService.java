@@ -68,7 +68,7 @@ public class ProjetService {
 	@Transactional(rollbackOn = Exception.class)
 	public Integer saveProjet(ProjetBean bean, UserSession userSession) {
 		
-		Projet projet = bean.idProjet != null ? genericProjetDao.read(bean.idProjet, Projet.class) : new Projet();
+		Projet projet = bean.idProjet != null ? genericProjetDao.find(bean.idProjet, Projet.class) : new Projet();
 		
 		projet.setIntitule(bean.intitule);
 		projet.setMontant(bean.montant);
@@ -84,7 +84,7 @@ public class ProjetService {
 		if(bean.idProjet == null) {
 			projet.setDateSaisie(new Date());
 			projet.setUserSaisie(new User(userSession.id));
-			genericProjetDao.create(projet);
+			genericProjetDao.persist(projet);
 		} else {
 			projet.setDateLastModif(new Date());
 		}
@@ -138,13 +138,13 @@ public class ProjetService {
 		/////////////////////////////////////////////////// Maitre ouvrage
 		
 
-		projet.setProjetMaitreOuvrage(gProjetMaitreOuvrageDao.create(new ProjetMaitreOuvrage(
+		projet.setProjetMaitreOuvrage(gProjetMaitreOuvrageDao.persist(new ProjetMaitreOuvrage(
 				new Acheteur(bean.maitreOuvrage), 
 				projet, 
 				false
 		)));
 		projet.setProjetMaitreOuvrageDelegue(
-				bean.isMaitreOuvrageDel ? gProjetMaitreOuvrageDao.create(new ProjetMaitreOuvrage(new Acheteur(bean.maitreOuvrageDel), projet, true)) : null
+				bean.isMaitreOuvrageDel ? gProjetMaitreOuvrageDao.persist(new ProjetMaitreOuvrage(new Acheteur(bean.maitreOuvrageDel), projet, true)) : null
 		);
 
 
