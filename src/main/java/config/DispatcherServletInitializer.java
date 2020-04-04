@@ -2,6 +2,10 @@ package config;
 
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import config.security.WebSecurityConfig;
+
+
+
 
 /**
  * 
@@ -19,7 +23,7 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
 
     @Override
     protected Class<?>[] getRootConfigClasses() {
-    	return new Class<?>[] { AppConfig.class };
+    	return new Class<?>[] { PersistenceConfig.class, WebSecurityConfig.class };
     }
 
     @Override

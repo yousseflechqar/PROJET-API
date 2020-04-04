@@ -23,7 +23,7 @@ import dialect.CustomMySQLDialect;
 @EnableTransactionManagement // for @Transactional
 @PropertySource("classpath:database.properties")
 @ComponentScan({"dao", "services"}) 
-public class AppConfig {
+public class PersistenceConfig {
 	
 	
     private @Autowired Environment env; // env.getProperty("...")

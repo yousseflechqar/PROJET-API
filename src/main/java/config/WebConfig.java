@@ -18,15 +18,7 @@ import interceptor.LoginInterceptor;
 @ComponentScan({"controllers"})
 public class WebConfig implements WebMvcConfigurer {
 
-	
-//	@Bean
-//   	public InternalResourceViewResolver resolver() {
-//	   InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-//      	resolver.setViewClass(JstlView.class);
-//      	resolver.setPrefix("/WEB-INF/");
-//      	resolver.setSuffix(".jsp");
-//      	return resolver;
-//   	}
+
 	
 	@Bean(name = "multipartResolver")
 	public MultipartResolver multipartResolver() {
@@ -36,11 +28,6 @@ public class WebConfig implements WebMvcConfigurer {
 	}
    
 	
-//	@Bean
-//	public LoginInterceptor loginInterceptor() {
-//	    return new LoginInterceptor();
-//	}
-	
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry
@@ -49,9 +36,8 @@ public class WebConfig implements WebMvcConfigurer {
 		; 
 	}
 	
-	@Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor( new LoginInterceptor() );
-//        registry.addInterceptor( loginInterceptor() );
-    }
+//	@Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor( new LoginInterceptor() );
+//    }
 }
