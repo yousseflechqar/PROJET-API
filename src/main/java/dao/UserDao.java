@@ -1,11 +1,15 @@
 package dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import beans.UserBean;
@@ -16,7 +20,7 @@ import entities.User;
 
 
 @Repository
-public class UserDao {
+public class UserDao implements UserDetailsService {
 
 	
 	@PersistenceContext
@@ -119,6 +123,28 @@ public class UserDao {
 
 	public List<SimpleDto> getUserTypes() {
 		return entityManager.createQuery("SELECT new dto.SimpleDto(ut.id, ut.label) FROM UserType ut", SimpleDto.class).getResultList();
+	}
+
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+		try {
+			
+			User dbUser = entityManager
+							.createQuery("SELECT u FROM User u WHERE login = :login", User.class)
+							.setParameter("login", username)
+							.getSingleResult();
+			
+			return new org.springframework.security.core.userdetails.User(
+					dbUser.getLogin(), dbUser.getPassword(), new ArrayList<>());
+		}
+		catch (NoResultException e) {
+			throw new UsernameNotFoundException(username);
+		}
+		
+		
+		
 	}
 
 

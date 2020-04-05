@@ -2,8 +2,9 @@
 <Configuration status="INFO">
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT">
+			<PatternLayout pattern="%-5level %logger{36} - %msg%n" />
 			<!-- <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" /> -->
-			<PatternLayout pattern="%msg%n" />
+			<!-- <PatternLayout pattern="%msg%n" /> -->
 		</Console>
 	</Appenders>
 	<Loggers>
@@ -15,7 +16,16 @@
 
 
 		
-		<logger name="org.springframework"  level="OFF" >
+
+		<logger name="org.springframework"  level="ALL" additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		
+		<logger name="javax.servlet"  level="ALL" additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		
+		<logger name="org.springframework.security"  level="ALL" additivity="false">
 		    <appender-ref ref="CONSOLE"/>
 		</logger>
 		
