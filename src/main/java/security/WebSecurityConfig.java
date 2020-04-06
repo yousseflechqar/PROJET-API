@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import config.SpringApplicationContext;
 import dao.UserDao;
 
@@ -34,7 +36,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.anyRequest().authenticated()
 			.and().addFilter(getJwtAuthenticationFilter())
 //			.and().addFilterBefore(getJwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-			.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint())			
+			.exceptionHandling()
+				.authenticationEntryPoint((request, response, exception) -> {
+					HttpUtils.constructJsonResponse(response, exception.getMessage(), 401);
+				})	
+				.accessDeniedHandler((request, response, exception) -> {
+					HttpUtils.constructJsonResponse(response, exception.getMessage(), 403);
+				})
 			;
 
 		http.
@@ -49,36 +57,34 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		auth.userDetailsService(userDetailsService);
 	}
 
-	private JwtAuthenticationFilter getJwtAuthenticationFilter() throws Exception {
+	@Bean
+	public JwtAuthenticationFilter getJwtAuthenticationFilter() throws Exception {
 
-		JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), environment);
+		JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager());
 		
-		filter.setFilterProcessesUrl("/login");
+		filter.setFilterProcessesUrl("/api/login");
 
-		filter.setAuthenticationSuccessHandler((httpServletRequest, httpServletResponse, authentication) -> {
-		    httpServletResponse.setStatus(403);
+//		filter.setAuthenticationSuccessHandler((request, response, authentication) -> {
+//		    response.setStatus(200);
+//		});
+
+		filter.setAuthenticationFailureHandler((request, response, exception) -> {
+			HttpUtils.constructJsonResponse(response, exception.getMessage(), 401);
 		});
-		
-		filter.setAuthenticationFailureHandler((httpServletRequest, httpServletResponse, exception) -> {
-		    httpServletResponse.setStatus(401);
-		});
-		
 
 		return filter;
 	}
 
-	private AuthenticationEntryPoint authenticationEntryPoint() {
-		return (httpServletRequest, httpServletResponse, exception) -> httpServletResponse.setStatus(401);
-	}
+
 
 
 	@Bean
-	SpringApplicationContext SpringApplicationContext() {
+	public SpringApplicationContext SpringApplicationContext() {
 		return new SpringApplicationContext();
 	}
 
 	@Bean
-	PasswordEncoder passwordEncoder() {
+	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 

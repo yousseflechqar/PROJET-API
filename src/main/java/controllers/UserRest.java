@@ -40,11 +40,11 @@ public class UserRest {
 	@Autowired
 	private GenericDao<User, Integer> gUserDao;
 	
-	@PostMapping(value = "/login")
-	public Object login(@RequestBody LoginBean bean, HttpServletRequest request, HttpSession session) {
-		
-		return loginService.login(bean, request, session);
-	}
+//	@PostMapping(value = "/login")
+//	public Object login(@RequestBody LoginBean bean, HttpServletRequest request, HttpSession session) {
+//		
+//		return loginService.login(bean, request, session);
+//	}
 	
 	@RequestMapping(value="/logout") 
 	public void logout(HttpServletRequest request) {

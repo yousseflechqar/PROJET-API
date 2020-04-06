@@ -17,6 +17,7 @@ import dto.SimpleDto;
 import entities.Division;
 import entities.Role;
 import entities.User;
+import security.UserPrincipal;
 
 
 @Repository
@@ -131,13 +132,18 @@ public class UserDao implements UserDetailsService {
 
 		try {
 			
-			User dbUser = entityManager
-							.createQuery("SELECT u FROM User u WHERE login = :login", User.class)
+			User userEntity = entityManager
+							.createQuery("SELECT u FROM User u "
+									+ " LEFT JOIN FETCH u.roles r "
+										+ " LEFT JOIN FETCH r.permissions "
+									+ " WHERE login = :login", User.class)
 							.setParameter("login", username)
 							.getSingleResult();
 			
-			return new org.springframework.security.core.userdetails.User(
-					dbUser.getLogin(), dbUser.getPassword(), new ArrayList<>());
+			return new UserPrincipal(userEntity);
+			
+//			return new org.springframework.security.core.userdetails.User(
+//					dbUser.getLogin(), dbUser.getPassword(), new ArrayList<>());
 		}
 		catch (NoResultException e) {
 			throw new UsernameNotFoundException(username);

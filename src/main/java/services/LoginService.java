@@ -9,6 +9,8 @@ import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import beans.LoginBean;
@@ -16,44 +18,27 @@ import dao.UserDao;
 import dto.SimpleDto;
 import dto.UserSession;
 import entities.User;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 @Service
 public class LoginService {
 
 	
-	@Autowired
-	private UserDao userDao;
+	
+	private @Autowired UserDao userDao;
+	private @Autowired Environment env;
 	
 	
-	@Transactional(rollbackOn = Exception.class)
-	public Object login(LoginBean bean, HttpServletRequest request, HttpSession session) {
 
-		User user = userDao.checkUser(bean.login, bean.password);
-		
-		
-		if( user == null ) {
-			return 0;
-		}
-		
-		if( user.isDisable() ) {
-			return -1;
-		}
-		
-	
-		
-		List<Integer> rolesByProfile = new ArrayList<Integer>();
-		
-		user.getUserRoles().forEach(ur -> {
-			rolesByProfile.add(ur.getRole().getId());
-		});
-		
-		UserSession userSession = new UserSession(user.getId(), user.getNom(), user.getPrenom(), user.getUserType().getId(), rolesByProfile);
-		
-		session.setAttribute("user", userSession);
-		
-		user.setLastConnexion(new Date());
-		
-		return userSession;
+
+	public String generateToken(String login) {
+
+		return Jwts.builder()
+				.setSubject(login)
+				.setExpiration(new Date(System.currentTimeMillis() + env.getProperty("security.token.expiration", Long.class)))
+				.signWith(SignatureAlgorithm.HS512, env.getProperty("security.token.secret-key"))
+				.compact();
 	}
 
 	

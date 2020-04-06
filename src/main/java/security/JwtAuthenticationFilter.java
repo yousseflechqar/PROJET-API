@@ -2,12 +2,15 @@ package security;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,17 +24,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import beans.LoginBean;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import services.LoginService;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-	private Environment env;
+	private @Autowired Environment env;
+	private @Autowired LoginService loginService;
 //	private AuthenticationManager authenticationManager;
 
 	
-	public JwtAuthenticationFilter(AuthenticationManager authenticationManager, Environment env) {
+	public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
 //		super("/**");
 		super.setAuthenticationManager(authenticationManager);
-		this.env = env;
 	}
 	
 	@Override
@@ -57,16 +61,24 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
 
+		
+		UserPrincipal principal = (UserPrincipal) authResult.getPrincipal();
+		
+		response.setHeader(
+			env.getProperty("security.token.header-string"), 
+			env.getProperty("security.token.prefix") + loginService.generateToken(principal.getUsername())
+		);
+		
+		Map<String, Object> userInfo = new HashMap<String, Object>();
+		userInfo.put("id", principal.getUserEntity().getId());
+		userInfo.put("nom", principal.getUserEntity().getNom());
+		userInfo.put("prenom", principal.getUserEntity().getPrenom());
+		userInfo.put("roles", principal.getUserEntity().getRoles());
+		
+		
+		HttpUtils.constructJsonResponse(response, new ObjectMapper().writeValueAsString(userInfo), 200);
+	    		
 
-		String token = Jwts.builder()
-				.setSubject(((User) authResult.getPrincipal()).getUsername())
-				.setExpiration(new Date(System.currentTimeMillis() + env.getProperty("security.token.expiration", Long.class)))
-				.signWith(SignatureAlgorithm.HS512, env.getProperty("security.token.secret-key"))
-				.compact();
-		
-		response.setHeader(env.getProperty("security.token.header-string"), env.getProperty("security.token.prefix") + token);
-		
-		response.setStatus(200);
 
 	}
 

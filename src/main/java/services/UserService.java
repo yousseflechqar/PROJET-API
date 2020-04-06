@@ -20,6 +20,7 @@ import dao.UserDao;
 import dto.SelectGrpDto;
 import dto.SimpleDto;
 import entities.Division;
+import entities.Role;
 import entities.User;
 import entities.UserRoles;
 import entities.UserType;
@@ -52,25 +53,22 @@ public class UserService {
 		user.setEmail(bean.email);
 		
 		
-		user.setDisable(bean.isDisable);
-
-		user.setChargeSuivi(bean.isChargeSuivi);
+		user.setEnabled(bean.enabled);
 		
 		user.setDivision( (bean.division != null) ? new Division(bean.division) : null );
 		
-		user.setUserType(new UserType(bean.userType));
 		
 		if( isNewUser ) {
 			user.setDateCreation(new Date());
 			gUserDao.persist(user);
 		} else {
-			user.getUserRoles().clear();
+			user.getRoles().clear();
 		}
 		
 		entityManager.flush();
 		
 		bean.roles.forEach( role -> {
-			user.getUserRoles().add(new UserRoles(user.getId(), role));
+			user.getRoles().add(new Role(role));
 		});
 		
 		return user.getId();
@@ -83,12 +81,11 @@ public class UserService {
 		
 		UserBean dto = new UserBean(
 				user.getId(), user.getLogin(), user.getPassword(), user.getNom(), user.getPrenom(), user.getEmail(), user.getTelephone(),
-				user.isDisable(), user.isChargeSuivi(), user.getUserType().getId(),
-				user.getDivision()
+				user.isEnabled(), user.getDivision()
 		);
 		
-		user.getUserRoles().forEach(ur -> {
-			dto.roles.add(ur.getRole().getId());
+		user.getRoles().forEach(role -> {
+			dto.roles.add(role.getId());
 		});
 		
 		return dto;
