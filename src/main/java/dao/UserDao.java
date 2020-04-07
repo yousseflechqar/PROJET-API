@@ -21,7 +21,7 @@ import security.UserPrincipal;
 
 
 @Repository
-public class UserDao implements UserDetailsService {
+public class UserDao {
 
 	
 	@PersistenceContext
@@ -127,23 +127,19 @@ public class UserDao implements UserDetailsService {
 	}
 
 
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+	public User fetchUserByLogin(String username) throws UsernameNotFoundException {
 
 		try {
 			
-			User userEntity = entityManager
+			return entityManager
 							.createQuery("SELECT u FROM User u "
 									+ " LEFT JOIN FETCH u.roles r "
 										+ " LEFT JOIN FETCH r.permissions "
 									+ " WHERE login = :login", User.class)
 							.setParameter("login", username)
 							.getSingleResult();
-			
-			return new UserPrincipal(userEntity);
-			
-//			return new org.springframework.security.core.userdetails.User(
-//					dbUser.getLogin(), dbUser.getPassword(), new ArrayList<>());
+
 		}
 		catch (NoResultException e) {
 			throw new UsernameNotFoundException(username);

@@ -12,6 +12,9 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import beans.UserBean;
@@ -24,10 +27,11 @@ import entities.Role;
 import entities.User;
 import entities.UserRoles;
 import entities.UserType;
+import security.UserPrincipal;
 
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
 	
 	@PersistenceContext
@@ -130,6 +134,13 @@ public class UserService {
 		});
 		
 		return usersDivisionMap.values();
+	}
+
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+		return new UserPrincipal(userDao.fetchUserByLogin(username));
 	}
 
 

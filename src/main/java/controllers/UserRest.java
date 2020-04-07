@@ -24,7 +24,7 @@ import dao.UserDao;
 import dto.SelectGrpDto;
 import dto.SimpleDto;
 import entities.User;
-import services.LoginService;
+import services.JwtService;
 import services.UserService;
 
 @RestController
@@ -34,7 +34,7 @@ public class UserRest {
 	@Autowired
 	private UserService userService;
 	@Autowired
-	private LoginService loginService;
+	private JwtService loginService;
 	@Autowired
 	private UserDao userDao;
 	@Autowired

@@ -75,11 +75,13 @@ public class DiversRest {
 	}
 	
 	@GetMapping(value = "/acheteurs")
-	public List<SimpleDto> getAcheteurs(HttpServletRequest request) {
+	public List<SimpleDto> getAcheteurs(HttpServletRequest request) throws Exception {
 		
 		if(request.getParameter("q") != null)
 			return diversDao.getAcheteursByName(request.getParameter("q"));
 		
+//		if(true)
+//		throw new Exception("HICHAM");
 		return diversDao.getAcheteurs();
 	}
 	

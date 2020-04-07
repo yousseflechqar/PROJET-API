@@ -1,9 +1,11 @@
 package security;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -16,20 +18,19 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import beans.LoginBean;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import services.LoginService;
+import entities.User;
+import services.JwtService;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
 	private @Autowired Environment env;
-	private @Autowired LoginService loginService;
+	private @Autowired JwtService jwtService;
 //	private AuthenticationManager authenticationManager;
 
 	
@@ -63,17 +64,23 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 		
 		UserPrincipal principal = (UserPrincipal) authResult.getPrincipal();
+		User userEntity = principal.getUserEntity();
+		
+		Stream<String> roles = principal.getAuthorities()
+				.stream().map(GrantedAuthority::getAuthority);
+				
+		String rolesString =roles.collect(Collectors.joining(","));
 		
 		response.setHeader(
 			env.getProperty("security.token.header-string"), 
-			env.getProperty("security.token.prefix") + loginService.generateToken(principal.getUsername())
+			env.getProperty("security.token.prefix") + jwtService.generateToken(userEntity.getLogin(), userEntity.getId(), rolesString)
 		);
 		
 		Map<String, Object> userInfo = new HashMap<String, Object>();
-		userInfo.put("id", principal.getUserEntity().getId());
-		userInfo.put("nom", principal.getUserEntity().getNom());
-		userInfo.put("prenom", principal.getUserEntity().getPrenom());
-		userInfo.put("roles", principal.getUserEntity().getRoles());
+		userInfo.put("id", userEntity.getId());
+		userInfo.put("nom", userEntity.getNom());
+		userInfo.put("prenom", userEntity.getPrenom());
+		userInfo.put("roles", rolesString);
 		
 		
 		HttpUtils.constructJsonResponse(response, new ObjectMapper().writeValueAsString(userInfo), 200);
