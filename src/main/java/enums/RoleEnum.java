@@ -1,11 +1,17 @@
-package security;
+package enums;
 
-public enum PermissionEnum {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+
+public enum RoleEnum {
 	
-
+	
 	CHARGE_SUIVI("ROLE_CHARGE_SUIVI", 1), 
 	ADMIN("ROLE_ADMIN", 2), 
-	CHEF_DIV("ROLE_CHEF_DIV", 3), 
+	SUPERVISOR_DIV("ROLE_SUPERVISOR_DIV", 3), 
 	GUEST("ROLE_GUEST", 4), 
 	VIP_GUEST("ROLE_VIP_GUEST", 5), 
 	USER("ROLE_USER", 6);
@@ -13,7 +19,7 @@ public enum PermissionEnum {
 	private final String key;
 	private final Integer value;
 	
-	PermissionEnum(String key, Integer value) {
+	RoleEnum(String key, Integer value) {
 	    this.key = key;
 	    this.value = value;
 	}
@@ -24,5 +30,7 @@ public enum PermissionEnum {
 	public Integer getValue() {
 	    return value;
 	}
+
+	
 
 }

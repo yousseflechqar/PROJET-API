@@ -3,46 +3,26 @@ package controllers;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-
-import beans.ApiValues;
-import beans.AttachmentBean;
 import beans.MarcheAttachs;
 import beans.MarcheBean;
 import dao.DiversDao;
 import dao.GenericDao;
 import dao.MarcheDao;
 import dao.UserDao;
-import dto.ProjetEditDto;
-import dto.SimpleDto;
-import dto.UserSession;
 import entities.Marches;
-import entities.Projet;
-import entities.UserType;
-import enums.UserRole;
-import exceptions.ForbiddenException;
-import helpers.Helpers;
 import services.MarcheService;
 
 @RestController
@@ -79,11 +59,11 @@ public class MarcheRest {
 	public Map<String, Object> getMarchesData(HttpServletRequest request, HttpSession session) {
 		
 		Map<String, Object> map = new HashMap<String, Object>();
-		UserSession userSession = (UserSession) session.getAttribute("user");
+
 
 		if(request.getParameter("edit") != null) {
 			Integer idMarche = Integer.valueOf(request.getParameter("edit"));
-			Helpers.checkProjetEditSecurity(userSession, userDao.getChargeSuiviByMarche(idMarche));
+//			Helpers.checkProjetEditSecurity(userSession, userDao.getChargeSuiviByMarche(idMarche));
 			map.put("marcheData", marcheService.getMarcheForEdit(idMarche));
 		}
 

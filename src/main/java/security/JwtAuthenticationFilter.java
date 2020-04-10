@@ -66,24 +66,31 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		UserPrincipal principal = (UserPrincipal) authResult.getPrincipal();
 		User userEntity = principal.getUserEntity();
 		
-		Stream<String> roles = principal.getAuthorities()
-				.stream().map(GrantedAuthority::getAuthority);
+		String rolesForJwtClaim = principal.getAuthorities()
+				.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
+		List<String> rolesForResponse = principal.getAuthorities()
+				.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 				
-		String rolesString =roles.collect(Collectors.joining(","));
+		String token = jwtService.generateToken(userEntity.getLogin(), userEntity.getId(), rolesForJwtClaim);
 		
 		response.setHeader(
-			env.getProperty("security.token.header-string"), 
-			env.getProperty("security.token.prefix") + jwtService.generateToken(userEntity.getLogin(), userEntity.getId(), rolesString)
+				env.getProperty("security.token.header-string"), 
+				env.getProperty("security.token.prefix") + token 
 		);
 		
 		Map<String, Object> userInfo = new HashMap<String, Object>();
 		userInfo.put("id", userEntity.getId());
+		userInfo.put("login", userEntity.getLogin());
+		userInfo.put("email", userEntity.getEmail());
 		userInfo.put("nom", userEntity.getNom());
 		userInfo.put("prenom", userEntity.getPrenom());
-		userInfo.put("roles", rolesString);
+		
+		String prefix = env.getProperty("security.role.prefix");
+		userInfo.put("roles", rolesForResponse.stream().filter(r -> r.startsWith(prefix)).collect(Collectors.toList()));
+		userInfo.put("permissions", rolesForResponse.stream().filter(r -> !r.startsWith(prefix)).collect(Collectors.toList()));
 		
 		
-		HttpUtils.constructJsonResponse(response, new ObjectMapper().writeValueAsString(userInfo), 200);
+		HttpUtils.jsonResponse(response, userInfo);
 	    		
 
 

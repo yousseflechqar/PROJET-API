@@ -57,7 +57,7 @@ public class User implements java.io.Serializable {
 	@JoinColumn(name = "division")
 	private Division division;
 	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE })
 	@JoinTable(
 		name="users_roles",
 		joinColumns = @JoinColumn(name="user", referencedColumnName = "id"),

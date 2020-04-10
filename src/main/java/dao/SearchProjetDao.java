@@ -232,7 +232,7 @@ public class SearchProjetDao {
 				
 				.select(
 						new QProjetDto(
-								prj.id, prj.intitule, 
+								prj.id, prj.intitule, chargeSuiv.id,
 								new CaseBuilder()
 									.when(defaultMarche.dateReceptionProvisoire.isNotNull()).then(100)
 							     		.otherwise(currentTaux.taux),

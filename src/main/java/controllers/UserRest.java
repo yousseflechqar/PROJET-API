@@ -46,10 +46,10 @@ public class UserRest {
 //		return loginService.login(bean, request, session);
 //	}
 	
-	@RequestMapping(value="/logout") 
-	public void logout(HttpServletRequest request) {
-		request.getSession().invalidate();
-	}
+//	@RequestMapping(value="/logout") 
+//	public void logout(HttpServletRequest request) {
+//		request.getSession().invalidate();
+//	}
 	
 	@PostMapping(value = "/users")
 	public Integer saveUser(@RequestBody UserBean bean) {
@@ -66,7 +66,6 @@ public class UserRest {
 			map.put("userInfos", userService.getUserForEdit(Integer.valueOf(request.getParameter("user"))));
 		}
 		map.put("roles", userDao.getListRoles());
-		map.put("userTypes", userDao.getUserTypes());
 		map.put("divisions", userDao.getDivisions());
 	
 		
@@ -87,14 +86,14 @@ public class UserRest {
 	
 //	@GetMapping(value = "/chargesSuivi")
 	public Collection<SelectGrpDto<SimpleDto>> getChargesSuivi() {
-		return userService.getChargesSuivi2();
+		return userService.getChargesSuivi();
 	}
 
 	@GetMapping(value = "/roles")
 	public List<SimpleDto> getListRoles() { return userDao.getListRoles(); }
 	
-	@GetMapping(value = "/userTypes")
-	public List<SimpleDto> getUserTypes() { return userDao.getUserTypes(); }
+	@GetMapping(value = "/permissions")
+	public List<SimpleDto> getUserTypes() { return userDao.getPermissions(); }
 	
 
 	

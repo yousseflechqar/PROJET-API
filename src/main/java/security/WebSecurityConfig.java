@@ -16,15 +16,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 import config.SpringApplicationContext;
+import dao.UserDao;
+import exceptions.ForbiddenException;
+import exceptions.UnauthorizedException;
 import services.UserService;
+import services.interfaces.IUserService;
 
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true, mode = AdviceMode.PROXY)
+//@EnableGlobalMethodSecurity(prePostEnabled = true)
+//@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true, mode = AdviceMode.PROXY)
 @PropertySource("classpath:security.properties")
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	private @Autowired UserService userDetailsService;
-	private @Autowired Environment environment;
+	private @Autowired UserDao userDetailsService;
+
 
 	// @formatter:off
 	@Override
@@ -41,10 +46,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 			.exceptionHandling()
 				.authenticationEntryPoint((request, response, exception) -> {
-					HttpUtils.constructJsonResponse(response, exception.getMessage(), 401);
+					HttpUtils.jsonExceptionResponse(response, exception, 401);
 				})	
 				.accessDeniedHandler((request, response, exception) -> {
-					HttpUtils.constructJsonResponse(response, exception.getMessage(), 403);
+					HttpUtils.jsonExceptionResponse(response, exception, 403);
 				})
 			;
 
@@ -72,7 +77,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //		});
 
 		filter.setAuthenticationFailureHandler((request, response, exception) -> {
-			HttpUtils.constructJsonResponse(response, exception.getMessage(), 401);
+			HttpUtils.jsonExceptionResponse(response, exception, 401);
 		});
 
 		return filter;

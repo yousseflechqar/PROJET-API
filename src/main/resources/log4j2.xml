@@ -17,30 +17,39 @@
 
 		
 
-		<logger name="org.springframework"  level="ALL" additivity="false">
+		<logger name="org.springframework"  level="OFF" additivity="false">
 		    <appender-ref ref="CONSOLE"/>
 		</logger>
 		
-		<logger name="javax.servlet"  level="ALL" additivity="false">
+		<logger name="org.hibernate"  level="OFF"   additivity="false">
 		    <appender-ref ref="CONSOLE"/>
 		</logger>
 		
-		<logger name="org.springframework.security"  level="ALL" additivity="false">
+		<logger name="javax.servlet"  level="OFF" additivity="false">
 		    <appender-ref ref="CONSOLE"/>
 		</logger>
 		
-		<logger name="org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver"  level="ALL"   additivity="false">
+		<logger name="org.springframework.security"  level="OFF" additivity="false">
 		    <appender-ref ref="CONSOLE"/>
 		</logger>
 		
-		<logger name="org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver"  level="ALL"   additivity="false">
+		<logger name="org.springframework.core.env"  level="OFF"   additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		<logger name="org.springframework.jndi"  level="OFF"   additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		
+		<logger name="org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver"  level="OFF"   additivity="false">
+		    <appender-ref ref="CONSOLE"/>
+		</logger>
+		
+		<logger name="org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver"  level="OFF"   additivity="false">
 		    <appender-ref ref="CONSOLE"/>
 		</logger>
 		
 
-		<logger name="org.hibernate"  level="OFF"   additivity="false">
-		    <appender-ref ref="CONSOLE"/>
-		</logger>
+
 		
 
 		<logger name="org.hibernate.SQL"  level="OFF"  additivity="false">

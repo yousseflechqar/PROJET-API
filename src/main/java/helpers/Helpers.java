@@ -16,15 +16,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import dto.UserSession;
-import enums.UserRole;
+import enums.RoleEnum;
 import exceptions.ForbiddenException;
-import exceptions.OsIntegrityException;
 import exceptions.UnknowAttachment;
 
 public class Helpers {
@@ -157,30 +156,24 @@ public class Helpers {
 	}
 	
 	
-	static public boolean checkProjetEditSecurity(UserSession userSession, Integer chargeSuiviID) {
+//	static public void checkProjetEditSecurity(Integer currentUser, Integer chargeSuiviID) {
+//
+//		if( ! RoleEnum.accessEditProject() && ! chargeSuiviID.equals(currentUser) ) {
+//			System.out.println("@ForbiddenException");
+//			throw new ForbiddenException("Vous n'avez pas le droit de modifier ce projet");
+//		}
+//	}
 
-		
-		if( userSession.userType.equals(enums.UserType.administrateur.type())
-				|| Stream.of(UserRole.controler_projet, UserRole.valider_projet).anyMatch(
-						authRole -> userSession.roles.stream().anyMatch(userRole -> userRole.equals(authRole.role)))
-				|| chargeSuiviID.equals(userSession.id)
-		) {
-			return true;
-		}
-		
-		System.out.println("@ForbiddenException");
-		throw new ForbiddenException();
-	}
 	
-	static public boolean canUserAssign(UserSession userSession) {
-		
-		
-		if( userSession.userType.equals(enums.UserType.administrateur.type()) ||
-			Stream.of(UserRole.controler_projet, UserRole.valider_projet, UserRole.affecter_projet).anyMatch(
-						authRole -> userSession.roles.stream().anyMatch(userRole -> userRole.equals(authRole.role)))
-		) { return true; }
-		
-		return false;
-	}
+//	static public boolean canUserAssign(UserSession userSession) {
+//		
+//		
+//		if( userSession.userType.equals(enums.UserType.administrateur.type()) ||
+//			Stream.of(UserRole.controler_projet, UserRole.valider_projet, UserRole.affecter_projet).anyMatch(
+//						authRole -> userSession.roles.stream().anyMatch(userRole -> userRole.equals(authRole.role)))
+//		) { return true; }
+//		
+//		return false;
+//	}
 
 }

@@ -55,8 +55,8 @@ public class PersistenceConfig {
         Properties properties = new Properties();
         properties.put("hibernate.dialect", CustomMySQLDialect.class);
         properties.put("hibernate.show_sql", true);
-        properties.put("hibernate.format_sql", true);
-        properties.put("hibernate.generate_statistics", true);
+//        properties.put("hibernate.format_sql", true);
+//        properties.put("hibernate.generate_statistics", true);
         return properties;        
     }
     

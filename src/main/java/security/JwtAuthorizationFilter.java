@@ -14,12 +14,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import exceptions.UnauthorizedException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import services.JwtService;
 
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
@@ -38,29 +44,36 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 
-		String prefix = env.getProperty("security.token.prefix");
-		String token = request.getHeader(env.getProperty("security.token.header-string"));
+		System.out.println("URI : " +  request.getRequestURI() + " => " + request.getMethod());
 		
-		if(token != null && token.startsWith(prefix)) {
+		try {
 			
-			Claims claims = jwtService.resolveClaimsFromToken(token);
-			UsernamePasswordAuthenticationToken authentication = null;
+			String prefix = env.getProperty("security.token.prefix");
+			String token = request.getHeader(env.getProperty("security.token.header-string"));
 			
-			if( claims.getSubject() != null ) {
+			if(token != null && token.startsWith(prefix)) {
 				
-				final Collection<GrantedAuthority> authorities =
-		                	Arrays.stream(claims.get("permissions").toString().split(","))
-		                        .map(SimpleGrantedAuthority::new)
-		                        	.collect(Collectors.toList());
+				UsernamePasswordAuthenticationToken authentication = null;
+				Claims claims = jwtService.resolveClaimsFromToken(token);
 				
-				authentication = new UsernamePasswordAuthenticationToken(
-						Integer.parseInt(claims.getSubject()), null, authorities);
+				if( claims.getSubject() != null && claims.get("permissions") != null ) {
+					
+					final Collection<GrantedAuthority> authorities = Arrays.stream(claims.get("permissions").toString().split(","))
+							.map(SimpleGrantedAuthority::new)
+							.collect(Collectors.toList());
+					
+					authentication = new UsernamePasswordAuthenticationToken( Integer.parseInt(claims.getSubject()), null, authorities );
+				}
+				
+				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
 			
-			SecurityContextHolder.getContext().setAuthentication(authentication);
+			chain.doFilter(request, response);
+			
+		} catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException exception) {
+			HttpUtils.jsonExceptionResponse(response, exception, 401);
+//			throw new UnauthorizedException(exception.getMessage());
 		}
-		
-		chain.doFilter(request, response);
 		
 	}
 

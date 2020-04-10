@@ -1,6 +1,5 @@
 package services;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import beans.UserBean;
@@ -25,13 +25,12 @@ import dto.SimpleDto;
 import entities.Division;
 import entities.Role;
 import entities.User;
-import entities.UserRoles;
-import entities.UserType;
 import security.UserPrincipal;
+import services.interfaces.IUserService;
 
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService {
 
 	
 	@PersistenceContext
@@ -40,6 +39,7 @@ public class UserService implements UserDetailsService {
 	private UserDao userDao;
 	@Autowired
 	private GenericDao<User, Integer> gUserDao;
+	private @Autowired PasswordEncoder bCryptPasswordEncoder;
 
 	
 	@Transactional(rollbackOn = Exception.class)
@@ -50,7 +50,9 @@ public class UserService implements UserDetailsService {
 		User user = ( isNewUser ) ? new User() : userDao.getUserForEdit(bean.id) ;
 		
 		user.setLogin(bean.login);
-		user.setPassword(bean.password);
+		if(isNewUser) {			
+			user.setPassword(bCryptPasswordEncoder.encode(bean.password));
+		}
 		user.setNom(bean.nom);
 		user.setPrenom(bean.prenom);
 		user.setTelephone(bean.phone);
@@ -66,14 +68,20 @@ public class UserService implements UserDetailsService {
 			user.setDateCreation(new Date());
 			gUserDao.persist(user);
 		} else {
-			user.getRoles().clear();
+			user.getRoles().clear();;
 		}
 		
-		entityManager.flush();
+//		entityManager.flush();
 		
+		/*
+		 * @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE) in entities.User.roles
+		 */
 		bean.roles.forEach( role -> {
 			user.getRoles().add(new Role(role));
+//			user.getRoles().add(entityManager.merge(new Role(role)));
 		});
+		
+	
 		
 		return user.getId();
 	}
@@ -83,8 +91,11 @@ public class UserService implements UserDetailsService {
 		
 		User user = userDao.getUserForEdit(idUser);
 		
+		/**
+		 * Setting the password to ""
+		 */
 		UserBean dto = new UserBean(
-				user.getId(), user.getLogin(), user.getPassword(), user.getNom(), user.getPrenom(), user.getEmail(), user.getTelephone(),
+				user.getId(), user.getLogin(), "", user.getNom(), user.getPrenom(), user.getEmail(), user.getTelephone(),
 				user.isEnabled(), user.getDivision()
 		);
 		
@@ -96,27 +107,27 @@ public class UserService implements UserDetailsService {
 	} 
 	
 	
-	public Map<String, List<SimpleDto>> getChargesSuivi() {
-		
-		List<User> chargesSuivi = userDao.getChargesSuivi();
-		
-		Map<String, List<SimpleDto>> usersDivisionMap = new LinkedHashMap<String, List<SimpleDto>>();
-		
-		
-		chargesSuivi.forEach( cs -> {
-			String nomDiv = cs.getDivision().getNom();
-			if( !usersDivisionMap.containsKey(nomDiv) ) {
-				usersDivisionMap.put(nomDiv, new ArrayList<SimpleDto>());
-			}
-			
-			usersDivisionMap.get(nomDiv).add(new SimpleDto(cs.getId(), cs.getNom() + " " + cs.getPrenom()));
-		});
-		
-		return usersDivisionMap;
-	}
+//	public Map<String, List<SimpleDto>> getChargesSuivi() {
+//		
+//		List<User> chargesSuivi = userDao.getChargesSuivi();
+//		
+//		Map<String, List<SimpleDto>> usersDivisionMap = new LinkedHashMap<String, List<SimpleDto>>();
+//		
+//		
+//		chargesSuivi.forEach( cs -> {
+//			String nomDiv = cs.getDivision().getNom();
+//			if( !usersDivisionMap.containsKey(nomDiv) ) {
+//				usersDivisionMap.put(nomDiv, new ArrayList<SimpleDto>());
+//			}
+//			
+//			usersDivisionMap.get(nomDiv).add(new SimpleDto(cs.getId(), cs.getNom() + " " + cs.getPrenom()));
+//		});
+//		
+//		return usersDivisionMap;
+//	}
 	
 //	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Collection<SelectGrpDto<SimpleDto>> getChargesSuivi2() {
+	public Collection<SelectGrpDto<SimpleDto>> getChargesSuivi() {
 		
 		List<User> chargesSuivi = userDao.getChargesSuiviWithDivision();
 		
@@ -137,11 +148,7 @@ public class UserService implements UserDetailsService {
 	}
 
 
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-		return new UserPrincipal(userDao.fetchUserByLogin(username));
-	}
 
 
 }

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import beans.ParentChildBean;
 import beans.ProgrammeBean;
 import beans.ProjetBean;
 import beans.ProjetSearchBean;
+import dao.DiversDao;
 import dao.GenericDao;
 import dao.ProjetDao;
 import dao.SearchProjetDao;
@@ -35,7 +37,6 @@ import dto.SimpleDto;
 import dto.TreeDto;
 import dto.TreePathDto;
 import dto.TreeProgrammeDto;
-import dto.UserSession;
 import entities.Acheteur;
 import entities.Commune;
 import entities.Fraction;
@@ -62,13 +63,22 @@ public class ProjetService {
 	private GenericDao<Projet, Integer> genericProjetDao;
 	@Autowired
 	private GenericDao<ProjetMaitreOuvrage, Integer> gProjetMaitreOuvrageDao;
+	@Autowired
+	private DiversService diversService;
+	@Autowired
+	private DiversDao diversDao;
+	@Autowired
+	private UserService userService;
 	
 	
 	
 	@Transactional(rollbackOn = Exception.class)
-	public Integer saveProjet(ProjetBean bean, UserSession userSession) {
+	public Integer saveProjet(ProjetBean bean, Integer currentUserID) {
 		
-		Projet projet = bean.idProjet != null ? genericProjetDao.find(bean.idProjet, Projet.class) : new Projet();
+		
+		boolean editMode = bean.idProjet != null;
+		
+		Projet projet = editMode ? genericProjetDao.find(bean.idProjet, Projet.class) : new Projet();
 		
 		projet.setIntitule(bean.intitule);
 		projet.setMontant(bean.montant);
@@ -76,14 +86,14 @@ public class ProjetService {
 		projet.setSecteur(new Secteur(bean.secteur));
 		projet.setSrcFinancement(new SrcFinancement(bean.srcFinancement));
 		projet.setAnneeProjet(bean.anneeProjet);
-		projet.setChargeSuivi(new User(bean.chargeSuivi != null ? bean.chargeSuivi : userSession.id));
+		projet.setChargeSuivi(new User(bean.chargeSuivi != null ? bean.chargeSuivi : currentUserID));
 		
 //		projet.setPrdts(bean.prdts);
 
 		
 		if(bean.idProjet == null) {
 			projet.setDateSaisie(new Date());
-			projet.setUserSaisie(new User(userSession.id));
+			projet.setUserSaisie(new User(currentUserID));
 			genericProjetDao.persist(projet);
 		} else {
 			projet.setDateLastModif(new Date());
@@ -152,7 +162,38 @@ public class ProjetService {
 	}
 	
 	
-	public ProjetEditDto getProjetForEdit(Integer idProjet) {
+	public Map<String, Object> projetLoadingForEdit(Integer idProjet) {
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		
+		if(idProjet != null) {
+
+			
+			ProjetEditDto proj = prepareProjetForEdit(idProjet);
+			map.put("projetData", proj);
+			
+			if(proj.srcFinancement != null && proj.srcFinancement.equals(enums.SrcFinancement.INDH.val())) {
+				map.put("indhProgrammes", diversService.getParentProgrammesWithPhases());
+			}
+		}
+		
+		
+		
+		map.put("secteurs", diversDao.getSecteurs());
+//		map.put("localisations", diversService.getCommunesWithFractions());
+		map.put("srcFinancements", diversDao.getSrcFinancements());
+		
+//		if( Helpers.canUserAssign(userSession)) {			
+			map.put("chargesSuivi", userService.getChargesSuivi());
+//		}
+		
+
+		
+		return map;
+	}
+	
+	public ProjetEditDto prepareProjetForEdit(Integer idProjet) {
 		
 		Projet projet = projetDao.getProjetForEdit(idProjet);
 		

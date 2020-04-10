@@ -17,11 +17,12 @@ import dto.SimpleDto;
 import entities.Division;
 import entities.Role;
 import entities.User;
+import enums.RoleEnum;
 import security.UserPrincipal;
 
 
 @Repository
-public class UserDao {
+public class UserDao implements UserDetailsService {
 
 	
 	@PersistenceContext
@@ -56,11 +57,10 @@ public class UserDao {
 
 	public User getUserForEdit(Integer idUser) {
 		try {
-			return (User) entityManager.createQuery(""
+			return entityManager.createQuery(""
 					+ "SELECT u FROM User u "
-						+ "LEFT JOIN FETCH u.userRoles "
-					+ "WHERE u.id = :idUser"
-					)
+						+ "LEFT JOIN FETCH u.roles "
+					+ "WHERE u.id = :idUser", User.class)
 					.setParameter("idUser", idUser)
 					.getSingleResult();
 		}
@@ -102,7 +102,9 @@ public class UserDao {
 		return entityManager.createQuery("SELECT new dto.SimpleDto(r.id, r.label) FROM Role r", SimpleDto.class).getResultList();
 	}
 	
-
+	public List<SimpleDto> getPermissions() {
+		return entityManager.createQuery("SELECT new dto.SimpleDto(p.id, p.label) FROM Permission p", SimpleDto.class).getResultList();
+	}
 	
 
 	public List<SimpleDto> getDivisions() {
@@ -116,15 +118,16 @@ public class UserDao {
 	
 	public List<User> getChargesSuiviWithDivision() {
 		return entityManager.createQuery("SELECT u FROM User u "
-				+ "LEFT JOIN FETCH u.division "
-				+ "WHERE u.chargeSuivi = 1", User.class).getResultList();
+				+ " JOIN u.roles r "
+				+ " LEFT JOIN FETCH u.division "
+				+ "WHERE r.id = :CHARGE_SUIVI", User.class)
+				.setParameter("CHARGE_SUIVI", RoleEnum.CHARGE_SUIVI.getValue())
+				.getResultList();
 	}
 
 
 
-	public List<SimpleDto> getUserTypes() {
-		return entityManager.createQuery("SELECT new dto.SimpleDto(ut.id, ut.label) FROM UserType ut", SimpleDto.class).getResultList();
-	}
+
 
 
 
@@ -149,6 +152,13 @@ public class UserDao {
 		
 	}
 
+
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+		return new UserPrincipal(fetchUserByLogin(username));
+	}
 
 
 }
