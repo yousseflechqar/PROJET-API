@@ -1,15 +1,15 @@
 package exceptions;
 
-public class AppException {
+public class AppExceptionModel {
 
 
 	public int code;
 	public String message;
 	
 	
-	public AppException() {}
+	public AppExceptionModel() {}
 	
-	public AppException(int code, String message) {
+	public AppExceptionModel(int code, String message) {
 		this.code = code;
 		this.message = message;
 	}

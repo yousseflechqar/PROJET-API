@@ -1,4 +1,4 @@
-package security;
+package security.filters;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -26,6 +26,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import security.utils.HttpUtils;
 import services.JwtService;
 
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {

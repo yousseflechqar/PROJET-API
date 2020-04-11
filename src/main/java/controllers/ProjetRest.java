@@ -18,10 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import annotations.CurrentUser;
-import annotations.DeleteProjectAuth;
-import annotations.EditProjectAuth;
-import annotations.SaveEditedProjectAuth;
 import beans.ProjetBean;
 import beans.ProjetSearchBean;
 import dao.DiversDao;
@@ -34,6 +30,10 @@ import dto.PageResult;
 import dto.ProjetEditDto;
 import entities.Projet;
 import helpers.Helpers;
+import security.annotations.CurrentUser;
+import security.annotations.DeleteProjectAuth;
+import security.annotations.EditProjectAuth;
+import security.annotations.SaveEditedProjectAuth;
 import services.DiversService;
 import services.MarcheService;
 import services.ProjetSearch;
@@ -47,8 +47,6 @@ public class ProjetRest {
 	@Autowired
 	private GenericDao<Projet, Integer> gProjetDao;
 	@Autowired
-	private ProjetDao projetDao;
-	@Autowired
 	private MarcheDao marcheDao;
 	@Autowired
 	private ProjetService projetService;
@@ -57,19 +55,19 @@ public class ProjetRest {
 	@Autowired
 	private MarcheService marcheService;
 	@Autowired
-	private UserDao userDao;
-	@Autowired
 	private DiversDao diversDao;
-	@Autowired
-	private DiversService diversService;
-	@Autowired
-	private UserService userService;
 
 
-	
+
+	/**
+	 * saving or updating project
+	 * @param currentUser
+	 * @param bean
+	 * @return
+	 */
 	@PostMapping(value = "/projets")
 	@EditProjectAuth
-	public Integer saveProjet(@CurrentUser Integer currentUser, @RequestBody ProjetBean bean) {
+	public Integer saveNewProjet(@CurrentUser Integer currentUser, @RequestBody ProjetBean bean) {
 		
 		return projetService.saveProjet(bean, currentUser);
 	}
@@ -83,7 +81,11 @@ public class ProjetRest {
 	}
 	
 	
-	
+	/**
+	 * loading prject data for new or edit page
+	 * @param idProjet
+	 * @return
+	 */
 	
 	@GetMapping(value = "/projets/loading/{idProjet}")
 	@SaveEditedProjectAuth
@@ -92,6 +94,17 @@ public class ProjetRest {
 		return projetService.projetLoadingForEdit(idProjet);
 	}
 	
+	@GetMapping(value = "/projets/loading")
+	@EditProjectAuth
+	public Map<String, Object> loadingProjetNew() {
+		
+		return projetService.projetLoadingForEdit(null);
+	}
+	
+	/**
+	 * deleting the project
+	 * @param idProjet
+	 */
 
 	@DeleteMapping(value = "/projets/{idProjet}")
 	@DeleteProjectAuth
@@ -100,12 +113,6 @@ public class ProjetRest {
 		gProjetDao.delete(Projet.class, idProjet);
 	}
 	
-	@GetMapping(value = "/projets/loading")
-	@EditProjectAuth
-	public Map<String, Object> loadingProjetNew() {
-		
-		return projetService.projetLoadingForEdit(null);
-	}
 	
 	
 	@GetMapping(value = "/projets/detail/{idProjet}") 

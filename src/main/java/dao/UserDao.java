@@ -18,7 +18,7 @@ import entities.Division;
 import entities.Role;
 import entities.User;
 import enums.RoleEnum;
-import security.UserPrincipal;
+import security.models.UserPrincipal;
 
 
 @Repository
@@ -47,10 +47,10 @@ public class UserDao implements UserDetailsService {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
+
 	public List<UserBean> getListUsers(){
 		
-		return entityManager.createQuery("SELECT new beans.UserBean(u.id, u.nom, u.prenom) FROM User u")
+		return entityManager.createQuery("SELECT new beans.UserBean(u.id, u.nom, u.prenom) FROM User u", UserBean.class)
 				.getResultList();
 	}
 

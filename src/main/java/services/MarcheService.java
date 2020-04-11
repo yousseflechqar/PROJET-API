@@ -39,6 +39,7 @@ import beans.MarcheBean;
 import beans.MarcheBean.DecomptesBean;
 import beans.MarcheBean.OsBean;
 import beans.MarcheBean.TauxBean;
+import dao.DiversDao;
 import dao.GenericDao;
 import dao.MarcheDao;
 import dto.SimpleDto;
@@ -64,16 +65,16 @@ public class MarcheService {
 	private EntityManager entityManager;
 	@Autowired
 	private MarcheDao marcheDao;
-//	@Autowired
-//	private GenericDao<Projet, Integer> gProjetDao;
 	@Autowired
 	private GenericDao<Marches, Integer> gMarchesDao;
+	@Autowired
+	private DiversDao diversDao;
 
 	
 	@Transactional(rollbackOn = Exception.class)
-	public Integer saveMarche(MarcheBean bean, MarcheAttachs attachs) throws IOException, ParseException {
+	public Integer saveMarche(MarcheBean bean, MarcheAttachs attachs, Integer currentUser) throws IOException, ParseException {
 		
-		Map<String, Integer> idsMap = persistMarche(bean, attachs);
+		Map<String, Integer> idsMap = persistMarche(bean, attachs, currentUser);
 		
 		Integer idProjet = idsMap.get("idProjet");
 		Integer idMarche = idsMap.get("idMarche");
@@ -88,13 +89,16 @@ public class MarcheService {
 
 		boolean isTravaux = bean.marcheType.value.equals(MarcheTypeEnum.travaux.value);
 
-		if( isTravaux && ! marcheDao.getDefaultMarche(idProjet).equals(idMarche) ) {
+		if( isTravaux 
+//				&& ! idMarche.equals(marcheDao.getDefaultMarche(idProjet)) 
+				) {
 			marcheDao.setDefaultMarche(idProjet, idMarche);
 		}
 	}
 	
 	@Transactional(rollbackOn = Exception.class)
-	public Map<String, Integer> persistMarche(MarcheBean bean, MarcheAttachs attachs) throws IOException, ParseException {
+	public Map<String, Integer> persistMarche(MarcheBean bean, MarcheAttachs attachs, Integer currentUser) 
+			throws IOException, ParseException {
 
 
 		boolean editMode = bean.idMarche != null ;
@@ -583,6 +587,18 @@ public class MarcheService {
 		});
 		
 		return marcheDto;
+	}
+
+	public Map<String, Object> marcheLoadingForEdit(Integer idMarche) {
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		if(idMarche != null) {
+			map.put("marcheData", getMarcheForEdit(idMarche));
+		}
+		map.put("marcheTypes", diversDao.getMarcheTypes());
+		map.put("marcheEtats", diversDao.getMarcheEtats());
+		map.put("osTypes", diversDao.getOsTypes());
+		return map;
 	}
 
 

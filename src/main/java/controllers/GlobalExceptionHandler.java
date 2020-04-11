@@ -16,20 +16,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import exceptions.AppException;
+import exceptions.AppExceptionModel;
 import exceptions.ForbiddenException;
 import exceptions.UnauthorizedException;
 
 @ControllerAdvice
-public class ExceptionControllerAdvice  {
+public class GlobalExceptionHandler  {
 	
     @ExceptionHandler(ForbiddenException.class)
     @ResponseBody
     @ResponseStatus( HttpStatus.FORBIDDEN )
-    public AppException handleForbiddenException(ForbiddenException ex) {
+    public AppExceptionModel handleForbiddenException(ForbiddenException ex) {
 
     	ex.printStackTrace();
-        return new AppException(403, ex.getMessage());
+        return new AppExceptionModel(403, ex.getMessage());
     }
     
     

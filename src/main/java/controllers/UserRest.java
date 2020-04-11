@@ -24,6 +24,10 @@ import dao.UserDao;
 import dto.SelectGrpDto;
 import dto.SimpleDto;
 import entities.User;
+import security.annotations.DeleteUserAuth;
+import security.annotations.EditProjectAuth;
+import security.annotations.EditUserAuth;
+import security.annotations.ViewUserAuth;
 import services.JwtService;
 import services.UserService;
 
@@ -52,12 +56,14 @@ public class UserRest {
 //	}
 	
 	@PostMapping(value = "/users")
+	@EditUserAuth
 	public Integer saveUser(@RequestBody UserBean bean) {
 		
 		return userService.saveUser(bean);
 	}
 	
 	@GetMapping(value = "/users/loading")
+	@EditUserAuth
 	public Map<String, Object> userLoading(HttpServletRequest request) {
 		
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -73,11 +79,13 @@ public class UserRest {
 	}
 	
 	@GetMapping(value = "/users")
+	@ViewUserAuth
 	public List<UserBean> getListUsers() {
 		return userDao.getListUsers();
 	}
 	
 	@DeleteMapping(value = "/users/{idUser}")
+	@DeleteUserAuth
 	public void deleteUser(@PathVariable Integer idUser) {
 		
 		gUserDao.delete(User.class, idUser);
@@ -85,19 +93,22 @@ public class UserRest {
 	
 	
 //	@GetMapping(value = "/chargesSuivi")
-	public Collection<SelectGrpDto<SimpleDto>> getChargesSuivi() {
-		return userService.getChargesSuivi();
-	}
+//	public Collection<SelectGrpDto<SimpleDto>> getChargesSuivi() {
+//		return userService.getChargesSuivi();
+//	}
 
 	@GetMapping(value = "/roles")
+	@ViewUserAuth
 	public List<SimpleDto> getListRoles() { return userDao.getListRoles(); }
 	
 	@GetMapping(value = "/permissions")
+	@ViewUserAuth
 	public List<SimpleDto> getUserTypes() { return userDao.getPermissions(); }
 	
 
 	
 	@GetMapping(value = "/divisions")
+	@ViewUserAuth
 	public List<SimpleDto> getDivisions() { return userDao.getDivisions(); }
 	
 	

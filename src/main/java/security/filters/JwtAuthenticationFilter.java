@@ -1,4 +1,4 @@
-package security;
+package security.filters;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -25,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import beans.LoginBean;
 import entities.User;
+import security.models.UserPrincipal;
+import security.utils.HttpUtils;
 import services.JwtService;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {

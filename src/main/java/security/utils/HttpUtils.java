@@ -1,4 +1,4 @@
-package security;
+package security.utils;
 
 import java.io.IOException;
 
@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import exceptions.AppException;
+import exceptions.AppExceptionModel;
 
 public class HttpUtils {
 	
@@ -20,7 +20,7 @@ public class HttpUtils {
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		response.getWriter().write(new ObjectMapper().writeValueAsString(new AppException(status, exception.getLocalizedMessage())));
+		response.getWriter().write(new ObjectMapper().writeValueAsString(new AppExceptionModel(status, exception.getLocalizedMessage())));
 		response.setStatus(status);
 	    return response;
 	}

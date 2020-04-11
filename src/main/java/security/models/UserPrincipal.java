@@ -1,4 +1,4 @@
-package security;
+package security.models;
 
 
 
@@ -35,7 +35,8 @@ public class UserPrincipal implements UserDetails {
 		
 		Set<GrantedAuthority> grantedAuthorities = new HashSet<GrantedAuthority>();
 		
-		Environment env = (Environment)(SpringApplicationContext.getBean(Environment.class));
+//		Environment env = (Environment)(SpringApplicationContext.getBean(Environment.class));
+		Environment env = SpringApplicationContext.getBean(Environment.class);
 		
 		userEntity.getRoles().forEach((role) -> {
 			

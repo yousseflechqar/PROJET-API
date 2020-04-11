@@ -1,4 +1,4 @@
-package annotations;
+package security.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -11,5 +11,5 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@PreAuthorize("@securityUtils.deleteProjectPermissionsChecks()")
-public @interface DeleteProjectAuth {}
+@PreAuthorize("@securityUtils.saveEditedProjectChecks(authentication.principal, #idProjet)")
+public @interface SaveEditedProjectAuth {}

@@ -51,6 +51,7 @@ import entities.Secteur;
 import entities.SrcFinancement;
 import entities.User;
 import enums.ContributionEnum;
+import security.utils.SecurityUtils;
 
 @Service
 public class ProjetService {
@@ -181,12 +182,12 @@ public class ProjetService {
 		
 		
 		map.put("secteurs", diversDao.getSecteurs());
-//		map.put("localisations", diversService.getCommunesWithFractions());
+		map.put("localisations", diversService.getCommunesWithFractions());
 		map.put("srcFinancements", diversDao.getSrcFinancements());
 		
-//		if( Helpers.canUserAssign(userSession)) {			
+		if( SecurityUtils.canAssignProject()) {			
 			map.put("chargesSuivi", userService.getChargesSuivi());
-//		}
+		}
 		
 
 		

@@ -25,7 +25,7 @@ import dto.SimpleDto;
 import entities.Division;
 import entities.Role;
 import entities.User;
-import security.UserPrincipal;
+import security.models.UserPrincipal;
 import services.interfaces.IUserService;
 
 
